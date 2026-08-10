@@ -5,7 +5,7 @@ import {
   type HostConfigEntry,
   type HostTarget,
 } from "./hosts.ts";
-import { projectPath } from "./paths.ts";
+import { defaultConfigPath } from "./paths.ts";
 
 export type { DiscoveryConfig, HostConfigEntry };
 
@@ -44,7 +44,7 @@ function emptyConfig(): AppConfig {
 const CONFIG_PATH =
   process.env.OLLANET_CONFIG ??
   process.env.OLLAMA_CONFIG ??
-  projectPath("config.json");
+  defaultConfigPath();
 
 export async function loadConfig(): Promise<AppConfig> {
   try {

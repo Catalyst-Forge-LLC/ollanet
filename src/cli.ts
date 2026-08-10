@@ -26,9 +26,10 @@ Examples:
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
   ollanet chats
 
-Config: config.json (or OLLANET_CONFIG)
+Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
+        (override with OLLANET_CONFIG)
 Hosts:  config.hosts, OLLANET_HOSTS, optional Tailscale + --lan
-Chats:  responses/ (or OLLANET_RESPONSES_DIR)
+Chats:  ~/.ollanet/responses or ./responses (override with OLLANET_RESPONSES_DIR)
 `;
 
 async function main(): Promise<void> {

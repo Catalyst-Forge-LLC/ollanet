@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { projectPath } from "./paths.ts";
+import { defaultResponsesDir } from "./paths.ts";
 
 export type ChatRole = "system" | "user" | "assistant";
 
@@ -33,7 +33,7 @@ export interface ChatTranscript {
 const RESPONSES_DIR =
   process.env.OLLANET_RESPONSES_DIR ??
   process.env.OLLAMA_RESPONSES_DIR ??
-  projectPath("responses");
+  defaultResponsesDir();
 
 export function responsesDir(): string {
   return RESPONSES_DIR;

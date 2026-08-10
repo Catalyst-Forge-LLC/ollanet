@@ -30,27 +30,44 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 ## Requirements
 
 - Node.js 20+
-- [pnpm](https://pnpm.io)
 - One or more [Ollama](https://ollama.com) servers reachable on port `11434` (or a custom port)
 
 Tailscale is optional. If the `tailscale` CLI is present, peers are included automatically.
 
 ## Install
 
+Run without installing:
+
 ```bash
-cd ollanet
-pnpm install
-pnpm link --global   # optional: put `ollanet` on your PATH
+npx ollanet scan                                  # from npm (once published)
+npx github:Catalyst-Forge-LLC/ollanet scan        # straight from GitHub
 ```
 
-Without a global link:
+Or install globally:
 
 ```bash
+npm install -g ollanet
+ollanet scan
+```
+
+When installed this way, config lives at `~/.ollanet/config.json` and chats are
+saved to `~/.ollanet/responses/`.
+
+### From a checkout (development)
+
+```bash
+cd ollanet
+pnpm install         # also builds dist/ via the prepare hook
+pnpm link --global   # optional: put `ollanet` on your PATH
+
+# Or without a global link:
 pnpm ollanet -- help
 pnpm scan
 pnpm prompt -- localhost "hello"
 pnpm chats
 ```
+
+A checkout uses the repo-local `config.json` and `responses/` instead of `~/.ollanet/`.
 
 ## Quick start
 
@@ -130,7 +147,8 @@ ollanet combines several sources (deduped by `ip:port`):
 
 ## Configuration
 
-Edit `config.json` (or point `OLLANET_CONFIG` at another file):
+Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or point
+`OLLANET_CONFIG` at another file:
 
 ```json
 {
@@ -185,7 +203,8 @@ Edit `config.json` (or point `OLLANET_CONFIG` at another file):
 Each saved chat is a JSON file:
 
 ```text
-responses/<hash>.json
+~/.ollanet/responses/<hash>.json   # installed
+responses/<hash>.json              # checkout
 ```
 
 Fields include `id`, `topic`, `machine`, `model`, `system`, `created_at`, `updated_at`, and a `messages[]` array (`role`, `content`, `timestamp`, plus assistant `stats`).
@@ -196,15 +215,16 @@ The first turn asks the model for a short topic title (falls back to the prompt 
 
 ```text
 ollanet/
-  bin/ollanet.mjs     # CLI entry
   src/
-    cli.ts            # subcommand router
+    cli.ts            # subcommand router (CLI entry)
     hosts.ts          # discovery + host resolution
     scan.ts
     prompt.ts
     chats.ts
     chat-store.ts
     config.ts
+    paths.ts          # checkout vs installed path resolution
+  dist/               # compiled output (published to npm)
   config.json
   responses/          # gitignored chat history
 ```
@@ -212,9 +232,10 @@ ollanet/
 ## Development
 
 ```bash
-pnpm install
+pnpm install          # builds dist/ via prepare
 pnpm typecheck
-pnpm ollanet -- scan
+pnpm ollanet -- scan  # runs from source via tsx
+pnpm build            # compile dist/ manually
 ```
 
 ## License

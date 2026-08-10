@@ -1,20 +1,19 @@
 {
   "name": "ollanet",
   "version": "0.1.0",
-  "private": true,
   "description": "Chat with Ollama servers on any reachable network — scan hosts, prompt models, continue chats by hash",
   "type": "module",
   "bin": {
-    "ollanet": "./bin/ollanet.mjs"
+    "ollanet": "./dist/cli.js"
   },
   "files": [
-    "bin",
-    "src",
-    "config.json",
+    "dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "tsc -p tsconfig.build.json",
     "ollanet": "tsx src/cli.ts",
     "scan": "tsx src/cli.ts scan",
     "prompt": "tsx src/cli.ts prompt",
@@ -31,17 +30,23 @@
     "tailscale",
     "network"
   ],
-  "author": "",
+  "author": "Catalyst Forge LLC",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Catalyst-Forge-LLC/ollanet.git"
+  },
+  "homepage": "https://github.com/Catalyst-Forge-LLC/ollanet#readme",
+  "bugs": {
+    "url": "https://github.com/Catalyst-Forge-LLC/ollanet/issues"
+  },
   "engines": {
     "node": ">=20"
   },
   "packageManager": "pnpm@8.14.1",
-  "dependencies": {
-    "tsx": "^4.23.12"
-  },
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
     "typescript": "^5.8.3"
   }
 }
