@@ -47,7 +47,7 @@ npx --allow-git=all github:Catalyst-Forge-LLC/ollanet scan        # straight fro
 > GitHub form (npm ≤11 doesn't need it). Note that npx runs a one-off command —
 > it does not put `ollanet` on your PATH.
 
-Or install globally:
+Or install globally, which puts the `ollanet` command on your PATH:
 
 ```bash
 npm install -g ollanet                                            # from npm (once published)
