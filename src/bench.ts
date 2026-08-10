@@ -30,6 +30,7 @@ import {
 import {
   contextLengthForModel,
   isCompletionCapable,
+  isVisionCapable,
   ollamaChat,
   ollamaShow,
   ollamaTags,
@@ -42,6 +43,8 @@ import {
   waitUntilUnloaded,
   type OllamaModelInfo,
 } from "./ollama-chat.ts";
+
+const MODEL_COL = 34;
 
 const BENCH_TIMEOUT_MS = envInt("OLLAMA_BENCH_TIMEOUT_MS", 60_000);
 const UNLOAD_WAIT_MS = envInt("OLLAMA_BENCH_UNLOAD_WAIT_MS", 60_000);
@@ -101,6 +104,8 @@ function usage(): never {
 
 Options:
   --all                 Every completion-capable model from /api/tags
+                        (skips vision models; use --include-vision)
+  --include-vision      With --all, also bench vision-capable models
   --suite quick|full    Prompt suite (default quick)
   --runs <n>            Throughput repeats (default 3)
   --warmup / --no-warmup
@@ -174,6 +179,7 @@ function parseArgs(argv: string[]) {
   let suite: SuiteName = "quick";
   let runs = 3;
   let all = false;
+  let includeVision = false;
   let warmup = true;
   let coldLoad = false;
   let json = false;
@@ -191,6 +197,10 @@ function parseArgs(argv: string[]) {
     if (arg === "--" || arg === "--help" || arg === "-h") usage();
     if (arg === "--all") {
       all = true;
+      continue;
+    }
+    if (arg === "--include-vision") {
+      includeVision = true;
       continue;
     }
     if (arg === "--json") {
@@ -302,6 +312,7 @@ function parseArgs(argv: string[]) {
     machine,
     models,
     all,
+    includeVision,
     suite,
     runs,
     warmup,
@@ -537,8 +548,17 @@ function printTable(
   lines.push("");
 
   const header = coldLoad
-    ? pad("Model", 22) + pad("tok/s (med)", 12) + pad("spread", 12) + pad("load", 8) + pad("pass", 8) + "notes"
-    : pad("Model", 22) + pad("tok/s (med)", 12) + pad("spread", 12) + pad("pass", 8) + "notes";
+    ? pad("Model", MODEL_COL) +
+      pad("tok/s (med)", 12) +
+      pad("spread", 12) +
+      pad("load", 8) +
+      pad("pass", 8) +
+      "notes"
+    : pad("Model", MODEL_COL) +
+      pad("tok/s (med)", 12) +
+      pad("spread", 12) +
+      pad("pass", 8) +
+      "notes";
   lines.push(header);
 
   const sorted = [...models].sort((a, b) => {
@@ -579,16 +599,34 @@ function printTable(
         ? `${(m.summary.load_ms / 1000).toFixed(1)}s`
         : "—";
     const row = coldLoad
-      ? pad(m.name, 22) + pad(tok, 12) + pad(spread, 12) + pad(load, 8) + pad(pass, 8) + notes.join("; ")
-      : pad(m.name, 22) + pad(tok, 12) + pad(spread, 12) + pad(pass, 8) + notes.join("; ");
+      ? pad(m.name, MODEL_COL) +
+        pad(tok, 12) +
+        pad(spread, 12) +
+        pad(load, 8) +
+        pad(pass, 8) +
+        notes.join("; ")
+      : pad(m.name, MODEL_COL) +
+        pad(tok, 12) +
+        pad(spread, 12) +
+        pad(pass, 8) +
+        notes.join("; ");
     lines.push(row);
   }
 
   if (skipped.length > 0) {
     lines.push("");
-    lines.push(
-      `Skipped ${skipped.length} non-completion model(s): ${skipped.map((s) => s.name).join(", ")}`,
-    );
+    const byReason = (reason: string) => skipped.filter((s) => s.reason === reason);
+    const embed = byReason("non-completion");
+    const vision = byReason("vision");
+    if (embed.length) {
+      lines.push(`Skipped ${embed.length} non-completion model(s): ${embed.map((s) => s.name).join(", ")}`);
+    }
+    if (vision.length) {
+      lines.push(
+        `Skipped ${vision.length} vision model(s): ${vision.map((s) => s.name).join(", ")}` +
+          " (text suite; pass --include-vision to bench)",
+      );
+    }
   }
 
   process.stdout.write(`${lines.join("\n")}\n`);
@@ -625,8 +663,16 @@ export async function main(): Promise<void> {
   if (parsed.all) {
     for (const t of tags) {
       const caps = await fetchCapabilities(baseUrl, t.name);
-      if (isCompletionCapable(caps)) selected.push(t.name);
-      else skipped.push({ name: t.name, reason: "non-completion", capabilities: caps ?? [] });
+      if (!isCompletionCapable(caps)) {
+        skipped.push({ name: t.name, reason: "non-completion", capabilities: caps ?? [] });
+        continue;
+      }
+      // Text-only suite: vision models (moondream, etc.) usually early-stop / fail checks.
+      if (!parsed.includeVision && isVisionCapable(caps)) {
+        skipped.push({ name: t.name, reason: "vision", capabilities: caps ?? [] });
+        continue;
+      }
+      selected.push(t.name);
     }
   } else if (parsed.models.length > 0) {
     for (const q of parsed.models) {
@@ -704,9 +750,17 @@ export async function main(): Promise<void> {
       suiteCases.filter((c) => c.role === "throughput").length * parsed.runs);
 
   if (!parsed.json) {
+    const skipBits = [
+      skipped.filter((s) => s.reason === "non-completion").length
+        ? `${skipped.filter((s) => s.reason === "non-completion").length} embedding/other`
+        : "",
+      skipped.filter((s) => s.reason === "vision").length
+        ? `${skipped.filter((s) => s.reason === "vision").length} vision`
+        : "",
+    ].filter(Boolean);
     console.error(
       `Bench: ${selected.length} completion model(s)` +
-        (skipped.length ? ` (skipped ${skipped.length} embedding/other)` : "") +
+        (skipBits.length ? ` (skipped ${skipBits.join(", ")})` : "") +
         ` × suite=${parsed.suite} × runs=${parsed.runs}`,
     );
     console.error(

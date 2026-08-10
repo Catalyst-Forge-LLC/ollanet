@@ -96,6 +96,42 @@ describe("bench", () => {
     await sandbox.cleanup();
   });
 
+  it("skips vision models under --all unless --include-vision", async () => {
+    const mock = await startMock({
+      models: ["fake:1b", "moondream:latest"],
+      capabilities: {
+        "fake:1b": ["completion"],
+        "moondream:latest": ["completion", "vision"],
+      },
+      reply: "OK",
+      doneReason: "length",
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+
+    const res = await runCli(["bench", "mockhost", "--all", "--runs", "1", "--no-warmup", "--json"], {
+      sandbox,
+      env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" },
+    });
+    assert.equal(res.code, 0, res.stderr);
+    let payload = JSON.parse(res.stdout);
+    assert.deepEqual(
+      payload.models.map((m) => m.name),
+      ["fake:1b"],
+    );
+    assert.equal(payload.skipped_models.find((s) => s.name === "moondream:latest")?.reason, "vision");
+
+    const res2 = await runCli(
+      ["bench", "mockhost", "--all", "--include-vision", "--runs", "1", "--no-warmup", "--json"],
+      { sandbox, env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" } },
+    );
+    assert.equal(res2.code, 0, res2.stderr);
+    payload = JSON.parse(res2.stdout);
+    assert.ok(payload.models.some((m) => m.name === "moondream:latest"));
+
+    await mock.close();
+    await sandbox.cleanup();
+  });
+
   it("treats omitted capabilities as completion-capable", async () => {
     const mock = await startMock({
       models: ["legacy:1b"],

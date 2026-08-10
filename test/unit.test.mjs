@@ -13,7 +13,11 @@ import {
   resolveHost,
   shortName,
 } from "../dist/hosts.js";
-import { isCompletionCapable, shouldWarnNoThinking } from "../dist/ollama-chat.js";
+import {
+  isCompletionCapable,
+  isVisionCapable,
+  shouldWarnNoThinking,
+} from "../dist/ollama-chat.js";
 import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store.js";
 import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
 
@@ -220,5 +224,12 @@ describe("capability helpers", () => {
     assert.equal(shouldWarnNoThinking([]), false);
     assert.equal(shouldWarnNoThinking(["completion", "thinking"]), false);
     assert.equal(shouldWarnNoThinking(["completion"]), true);
+  });
+
+  it("detects vision only when capabilities explicitly include it", () => {
+    assert.equal(isVisionCapable(undefined), false);
+    assert.equal(isVisionCapable([]), false);
+    assert.equal(isVisionCapable(["completion"]), false);
+    assert.equal(isVisionCapable(["completion", "vision"]), true);
   });
 });

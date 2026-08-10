@@ -286,6 +286,16 @@ export function isCompletionCapable(capabilities: string[] | undefined | null): 
   return capabilities.includes("completion");
 }
 
+/**
+ * Vision-capable models (moondream, llava, …) often fail a text-only suite.
+ * Only true when capabilities are present and include vision — absent/empty → false
+ * (don't skip unknown older servers).
+ */
+export function isVisionCapable(capabilities: string[] | undefined | null): boolean {
+  if (capabilities == null || capabilities.length === 0) return false;
+  return capabilities.includes("vision");
+}
+
 /** True when capabilities are known and lack thinking (absent/empty → no warning). */
 export function shouldWarnNoThinking(capabilities: string[] | undefined | null): boolean {
   if (capabilities == null || capabilities.length === 0) return false;
