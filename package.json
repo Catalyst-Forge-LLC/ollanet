@@ -23,7 +23,10 @@
     "start": "tsx src/cli.ts scan",
     "typecheck": "tsc --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
-    "test:only": "node --test test/*.test.mjs"
+    "test:only": "node --test test/*.test.mjs",
+    "site:dev": "pnpm --dir site dev",
+    "site:build": "pnpm --dir site build",
+    "site:deploy": "pnpm --dir site deploy"
   },
   "keywords": [
     "ollama",
@@ -42,7 +45,7 @@
     "type": "git",
     "url": "git+https://github.com/Catalyst-Forge-LLC/ollanet.git"
   },
-  "homepage": "https://github.com/Catalyst-Forge-LLC/ollanet#readme",
+  "homepage": "https://ollanet.dev",
   "bugs": {
     "url": "https://github.com/Catalyst-Forge-LLC/ollanet/issues"
   },

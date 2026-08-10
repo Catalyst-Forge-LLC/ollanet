@@ -1,0 +1,16 @@
+{
+	// Cloudflare Pages project for ollanet.dev
+	// Deploy after build:  pnpm build && pnpm exec wrangler pages deploy build --project-name=ollanet
+	// Or connect the GitHub repo in the dashboard with:
+	//   Root directory: site
+	//   Build command:  pnpm install && pnpm build
+	//   Output directory: build
+	// After Downpress is public, switch package.json to a git pin (see site README).
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "ollanet",
+	"compatibility_date": "2026-08-10",
+	"pages_build_output_dir": "build",
+	"observability": {
+		"enabled": true
+	}
+}

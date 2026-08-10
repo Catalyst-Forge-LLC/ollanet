@@ -8,6 +8,8 @@ Chat with **Ollama** servers on **any network you can reach** — LAN, localhost
 
 Scan for models, fire prompts, and continue conversations later by a short hash. No browser UI required.
 
+**Site:** [ollanet.dev](https://ollanet.dev) — Downpress + Cloudflare Pages (`site/`).
+
 ## Origin
 
 This started as a personal little script. I had Ollama running on a laptop on my Tailscale network and wanted an easy way to discover it, poke at the models, and actually talk to them from another machine — without babysitting IPs or opening a browser. One scan/prompt tool later, chats by hash showed up, LAN discovery crept in, and the thing grew into **ollanet**: a tiny CLI for using Ollama over whatever network you already have.
