@@ -169,6 +169,91 @@ function printResults(
   );
 }
 
+export interface ScanOptions {
+  includeOffline?: boolean;
+  lanScan?: boolean;
+}
+
+export interface ScannedServer {
+  hostname: string;
+  dnsName: string;
+  ip: string;
+  port: number;
+  os: string;
+  source: string;
+  self: boolean;
+  endpoint: string;
+  models: Array<{
+    name: string;
+    size?: number;
+    modified_at?: string;
+    parameter_size?: string;
+    quantization_level?: string;
+    family?: string;
+  }>;
+}
+
+export interface ScanPayload {
+  network: string;
+  sources: string[];
+  port: number;
+  scanned: number;
+  servers: ScannedServer[];
+}
+
+function toPayload(
+  results: ScanResult[],
+  networkLabel: string,
+  sources: string[],
+): ScanPayload {
+  return {
+    network: networkLabel,
+    sources,
+    port: OLLAMA_PORT,
+    scanned: results.length,
+    servers: results
+      .filter((r) => r.ok)
+      .map((r) => ({
+        hostname: r.host.hostname,
+        dnsName: r.host.dnsName,
+        ip: r.host.ip,
+        port: r.host.port,
+        os: r.host.os,
+        source: r.host.source,
+        self: r.host.isSelf,
+        endpoint: `http://${r.host.ip}:${r.host.port}`,
+        models: r.models.map((m) => ({
+          name: m.name,
+          size: m.size,
+          modified_at: m.modified_at,
+          parameter_size: m.details?.parameter_size,
+          quantization_level: m.details?.quantization_level,
+          family: m.details?.family,
+        })),
+      })),
+  };
+}
+
+/** Programmatic scan used by CLI `--json` and the MCP server. */
+export async function scanNetwork(options: ScanOptions = {}): Promise<ScanPayload> {
+  const config = await loadConfig();
+  const { hosts, sources, networkLabel } = await discoverHosts({
+    hosts: config.hosts,
+    discovery: config.discovery,
+    includeOffline: options.includeOffline ?? false,
+    lanScan: options.lanScan ?? false,
+  });
+
+  if (hosts.length === 0) {
+    throw new Error(
+      "No hosts to scan. Add config.hosts, set OLLANET_HOSTS, or enable Tailscale/LAN discovery.",
+    );
+  }
+
+  const results = await mapPool(hosts, CONCURRENCY, scanHost);
+  return toPayload(results, networkLabel, sources);
+}
+
 export async function main(): Promise<void> {
   const includeOffline = process.argv.includes("--all");
   const jsonOut = process.argv.includes("--json");
@@ -183,7 +268,9 @@ export async function main(): Promise<void> {
   });
 
   if (hosts.length === 0) {
-    console.error("No hosts to scan. Add config.hosts, set OLLANET_HOSTS, or enable Tailscale/LAN discovery.");
+    console.error(
+      "No hosts to scan. Add config.hosts, set OLLANET_HOSTS, or enable Tailscale/LAN discovery.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -191,38 +278,7 @@ export async function main(): Promise<void> {
   const results = await mapPool(hosts, CONCURRENCY, scanHost);
 
   if (jsonOut) {
-    console.log(
-      JSON.stringify(
-        {
-          network: networkLabel,
-          sources,
-          port: OLLAMA_PORT,
-          scanned: results.length,
-          servers: results
-            .filter((r) => r.ok)
-            .map((r) => ({
-              hostname: r.host.hostname,
-              dnsName: r.host.dnsName,
-              ip: r.host.ip,
-              port: r.host.port,
-              os: r.host.os,
-              source: r.host.source,
-              self: r.host.isSelf,
-              endpoint: `http://${r.host.ip}:${r.host.port}`,
-              models: r.models.map((m) => ({
-                name: m.name,
-                size: m.size,
-                modified_at: m.modified_at,
-                parameter_size: m.details?.parameter_size,
-                quantization_level: m.details?.quantization_level,
-                family: m.details?.family,
-              })),
-            })),
-        },
-        null,
-        2,
-      ),
-    );
+    console.log(JSON.stringify(toPayload(results, networkLabel, sources), null, 2));
     return;
   }
 

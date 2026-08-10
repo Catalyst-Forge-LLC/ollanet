@@ -18,6 +18,7 @@ Usage:
   ollanet prompt --chat <hash> <prompt...>
   ollanet chats [--json] [--id <hash>]
   ollanet bench <machine|ip> [model...] [--all] [options]
+  ollanet mcp
 
 Examples:
   ollanet scan
@@ -28,6 +29,7 @@ Examples:
   ollanet chats
   ollanet bench localhost --all
   ollanet bench localhost llama3.2:1b --runs 3
+  ollanet mcp                  # stdio MCP server for agents
 
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
         (override with OLLANET_CONFIG)
@@ -82,6 +84,11 @@ async function main(): Promise<void> {
     case "bench":
     case "benchmark": {
       const { main: run } = await import("./bench.ts");
+      await run();
+      return;
+    }
+    case "mcp": {
+      const { main: run } = await import("./mcp.ts");
       await run();
       return;
     }

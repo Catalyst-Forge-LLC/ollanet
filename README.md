@@ -30,16 +30,17 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)
+- **MCP** — `ollanet mcp` exposes scan/prompt/chats as Model Context Protocol tools for agents
 
 ## Use cases
 
 The core idea: turn “I have to remember which IP has which models loaded” into a discoverable, stateful, network-native primitive. That unlocks more than interactive chat:
 
-**For agents and automation** — everything below works today with existing flags:
+**For agents and automation** — prefer `ollanet mcp` (stdio MCP). The same flows also work via CLI flags:
 
-- **Live model inventory / routing** — `ollanet scan --json` gives an agent (or script) a machine-readable list of reachable hosts and their models. Route each sub-task to the best host: the big-VRAM box for reasoning, the laptop for quick lookups.
-- **Conversations that survive machines** — chats are stored by short hash with full history. Start a long thread on the GPU box, continue it from a laptop later with `ollanet prompt --chat <hash> …`, or hand the hash between agents.
-- **A “talk to any Ollama on my network” tool** — wrap `prompt … --json --no-stream` as a tool call in any agent framework; no hard-coded endpoints.
+- **Live model inventory / routing** — `ollanet_scan` (or `scan --json`) lists reachable hosts and models. Route each sub-task to the best host: the big-VRAM box for reasoning, the laptop for quick lookups.
+- **Conversations that survive machines** — chats are stored by short hash with full history. Start a long thread on the GPU box, continue it later with `ollanet_prompt` + `chat_id` (or `--chat <hash>`).
+- **A “talk to any Ollama on my network” tool** — `ollanet_prompt` / `prompt … --json --no-stream`; no hard-coded endpoints.
 - **Fleet health and speed checks** — periodic `ollanet bench <host> --json` builds a record of which model on which machine is currently fastest (or has silently gone offline). Saved results live in `benchmarks/`.
 - **The Finetuna loop** — [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) shapes a GPU-tuned named variant on the host; ollanet discovers and uses it from anywhere on the network.
 
@@ -128,6 +129,7 @@ ollanet chats --id a1b2c3d4e5f6
 | `ollanet prompt …` | Send a prompt / continue a chat |
 | `ollanet chats` | List or inspect saved transcripts |
 | `ollanet bench …` | Benchmark models for tok/s + lightweight quality checks |
+| `ollanet mcp` | Stdio [MCP](https://modelcontextprotocol.io) server for agents |
 
 ### `scan` options
 
@@ -164,6 +166,36 @@ Machine can be a discovered name, hostname, FQDN, or IP (`192.168.1.50`, `host:1
 
 - `--json` — list summary JSON
 - `--id <hash>` — show one chat (full JSON with `--json`)
+
+### `mcp`
+
+```bash
+ollanet mcp
+```
+
+Runs a **stdio MCP server** (no extra npm deps). Cursor / Claude Desktop / any MCP host can spawn it and call:
+
+| Tool | What it does |
+|---|---|
+| `ollanet_scan` | Discover hosts + models (`lan`, `all` optional) |
+| `ollanet_prompt` | Prompt a host or continue with `chat_id` |
+| `ollanet_list_chats` | Summarize saved transcripts |
+| `ollanet_get_chat` | Load one chat (full history) |
+
+Example Cursor MCP config (`~/.cursor/mcp.json` or project `.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "ollanet": {
+      "command": "npx",
+      "args": ["-y", "ollanet", "mcp"]
+    }
+  }
+}
+```
+
+Or, from a checkout: `"command": "pnpm"`, `"args": ["ollanet", "--", "mcp"]` (with `cwd` set to the repo). Uses the same config/chats dirs as the CLI (`~/.ollanet/` when installed).
 
 ### `bench`
 

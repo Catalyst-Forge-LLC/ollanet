@@ -1,7 +1,7 @@
 {
   "name": "ollanet",
-  "version": "0.2.2",
-  "description": "Chat with Ollama servers on any reachable network — scan hosts, prompt models, continue chats by hash",
+  "version": "0.3.0",
+  "description": "Chat with Ollama servers on any reachable network — scan hosts, prompt models, continue chats by hash, MCP for agents",
   "type": "module",
   "bin": {
     "ollanet": "./dist/cli.js"
@@ -19,6 +19,7 @@
     "prompt": "tsx src/cli.ts prompt",
     "chats": "tsx src/cli.ts chats",
     "bench": "tsx src/cli.ts bench",
+    "mcp": "tsx src/cli.ts mcp",
     "start": "tsx src/cli.ts scan",
     "typecheck": "tsc --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
@@ -31,7 +32,9 @@
     "chat",
     "lan",
     "tailscale",
-    "network"
+    "network",
+    "mcp",
+    "model-context-protocol"
   ],
   "author": "Catalyst Forge LLC",
   "license": "MIT",

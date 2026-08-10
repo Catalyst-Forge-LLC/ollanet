@@ -361,12 +361,36 @@ function formatDuration(ns: number | undefined): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-export async function main(): Promise<void> {
-  const parsed = parseArgs(process.argv.slice(2));
-  const { stream, json, save } = parsed;
-  let promptParts = parsed.promptParts;
+export interface PromptRunOptions {
+  machine?: string;
+  model?: string;
+  prompt: string;
+  chatId?: string;
+  save?: boolean;
+  settings?: GenerateSettings;
+  /** When false, never write the reply to stdout (MCP / programmatic). Default true for CLI. */
+  writeStdout?: boolean;
+  stream?: boolean;
+  quiet?: boolean;
+}
 
-  const fromStdin = await readStdinIfPiped();
+export interface PromptRunResult {
+  chat_id: string | null;
+  topic: string;
+  content: string;
+  thinking: string | null;
+  machine: string;
+  model: string;
+  ollama: Record<string, unknown>;
+}
+
+/** Programmatic prompt used by CLI `--json` and the MCP server. */
+export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult> {
+  const save = opts.save !== false;
+  const stream = opts.stream !== false && opts.writeStdout !== false;
+  const quiet = opts.quiet === true || opts.writeStdout === false;
+  const writeStdout = opts.writeStdout !== false;
+  let promptParts = opts.prompt ? [opts.prompt] : [];
 
   const config = await loadConfig();
   const { hosts: targets } = await discoverHosts({
@@ -376,26 +400,15 @@ export async function main(): Promise<void> {
 
   let chat: ChatTranscript | undefined;
   let isNewChat = false;
-  let machineQuery = parsed.machine;
+  let machineQuery = opts.machine;
 
-  if (parsed.chatId) {
-    chat = await loadChat(parsed.chatId);
-
-    // Allow `ollanet prompt <host> --chat HASH "follow-up"` only when the
-    // leading token matches an already-discovered host (not direct-address fallback).
-    if (!machineQuery && promptParts.length >= 2) {
-      const hit = findDiscoveredHost(targets, promptParts[0]!);
-      if (hit) {
-        machineQuery = promptParts[0];
-        promptParts = promptParts.slice(1);
-      }
-    }
+  if (opts.chatId) {
+    chat = await loadChat(opts.chatId);
   }
 
   machineQuery = machineQuery ?? chat?.machine;
   if (!machineQuery) {
-    console.error("Machine is required for a new chat (or use --chat <hash>).");
-    usage();
+    throw new Error("Machine is required for a new chat (or pass chatId).");
   }
 
   const host: HostTarget = resolveHost(targets, machineQuery);
@@ -404,38 +417,33 @@ export async function main(): Promise<void> {
   }
 
   let peeledModel: string | undefined;
-  if (!parsed.chatId && !parsed.model) {
-    const peeled = await maybePeelModel(host, promptParts, fromStdin);
+  if (!opts.chatId && !opts.model) {
+    const peeled = await maybePeelModel(host, promptParts, "");
     peeledModel = peeled.model;
     promptParts = peeled.promptParts;
   }
 
-  const promptText = [promptParts.join(" ").trim(), fromStdin].filter(Boolean).join("\n\n").trim();
+  const promptText = promptParts.join(" ").trim();
   if (!promptText) {
-    console.error("No prompt provided (pass args and/or pipe stdin).");
-    usage();
+    throw new Error("No prompt provided.");
   }
 
   const model =
-    parsed.model ??
-    peeledModel ??
-    chat?.model ??
-    defaultModelForHost(config, host);
+    opts.model ?? peeledModel ?? chat?.model ?? defaultModelForHost(config, host);
   if (!model) {
     throw new Error(
       `No model specified for "${shortName(host)}" and no default in ${configPath()}.\n` +
-        `Pass a model, use --model <name>, or add it under defaultModels.`,
+        `Pass a model or add it under defaultModels.`,
     );
   }
 
   const settings = mergeSettings(
-    // Thinking models otherwise spend the whole num_predict budget on hidden reasoning.
     { think: false },
     config.defaults,
     machineSettingsForHost(config, host),
     settingsFromEnv(),
     chat?.system ? { system: chat.system } : undefined,
-    parsed.settings,
+    opts.settings,
   );
 
   if (!chat && save) {
@@ -447,7 +455,6 @@ export async function main(): Promise<void> {
     });
     isNewChat = true;
   } else if (!chat) {
-    // --no-save one-shot: ephemeral transcript for the API call only
     chat = createChat({
       machine: shortName(host),
       model,
@@ -455,8 +462,8 @@ export async function main(): Promise<void> {
     });
     isNewChat = true;
   } else {
-    if (parsed.settings.system && !chat.system) {
-      chat.system = parsed.settings.system;
+    if (opts.settings?.system && !chat.system) {
+      chat.system = opts.settings.system;
     }
     chat.model = model;
     chat.machine = shortName(host);
@@ -465,10 +472,10 @@ export async function main(): Promise<void> {
   appendMessage(chat, { role: "user", content: promptText });
 
   const baseUrl = ollamaBaseUrl(host);
-  if (!json) {
-    const src = parsed.model ? "explicit" : chat && !isNewChat ? "chat" : "default";
+  if (!quiet) {
+    const src = opts.model ? "explicit" : chat && !isNewChat ? "chat" : "default";
     const extras = settingsSummary(settings);
-    const chatTag = parsed.chatId ? `  chat=${chat.id}` : "";
+    const chatTag = opts.chatId ? `  chat=${chat.id}` : "";
     console.error(
       `→ ${shortName(host)} (${host.ip})  model=${model}  [${src}]${chatTag}${extras ? `  ${extras}` : ""}`,
     );
@@ -478,8 +485,8 @@ export async function main(): Promise<void> {
     baseUrl,
     model,
     messages: toApiMessages(chat),
-    stream: json ? false : stream,
-    writeStdout: !json,
+    stream: writeStdout ? stream : false,
+    writeStdout,
     timeoutMs: PROMPT_TIMEOUT_MS,
     settings,
   });
@@ -509,38 +516,116 @@ export async function main(): Promise<void> {
 
   if (save) {
     const file = await saveChat(chat);
-    if (!json) {
+    if (!quiet) {
       console.error(`chat ${chat.id}  topic: ${chat.topic}`);
       console.error(`saved ${file}`);
       console.error(`continue: ollanet prompt --chat ${chat.id} "your follow-up"`);
     }
   }
 
-  if (json) {
-    console.log(
-      JSON.stringify(
-        {
-          chat_id: save ? chat.id : null,
-          topic: chat.topic,
-          content,
-          thinking: thinking || null,
-          ollama: chunk,
-        },
-        null,
-        2,
-      ),
-    );
-    return;
+  return {
+    chat_id: save ? chat.id : null,
+    topic: chat.topic,
+    content,
+    thinking: thinking || null,
+    machine: shortName(host),
+    model,
+    ollama: chunk as Record<string, unknown>,
+  };
+}
+
+export async function main(): Promise<void> {
+  const parsed = parseArgs(process.argv.slice(2));
+  const { stream, json, save } = parsed;
+  let promptParts = parsed.promptParts;
+
+  const fromStdin = await readStdinIfPiped();
+
+  const config = await loadConfig();
+  const { hosts: targets } = await discoverHosts({
+    hosts: config.hosts,
+    discovery: config.discovery,
+  });
+
+  let machineQuery = parsed.machine;
+
+  if (parsed.chatId) {
+    // Allow `ollanet prompt <host> --chat HASH "follow-up"` only when the
+    // leading token matches an already-discovered host (not direct-address fallback).
+    if (!machineQuery && promptParts.length >= 2) {
+      const hit = findDiscoveredHost(targets, promptParts[0]!);
+      if (hit) {
+        machineQuery = promptParts[0];
+        promptParts = promptParts.slice(1);
+      }
+    }
   }
 
-  const stats = [
-    chunk.eval_count != null ? `${chunk.eval_count} tokens` : "",
-    chunk.eval_duration
-      ? `${((chunk.eval_count ?? 0) / (chunk.eval_duration / 1e9)).toFixed(1)} tok/s`
-      : "",
-    chunk.total_duration ? formatDuration(chunk.total_duration) : "",
-  ].filter(Boolean);
-  if (stats.length > 0) {
-    console.error(`(${stats.join(" · ")})`);
+  let peeledModel: string | undefined;
+  if (!parsed.chatId && !parsed.model) {
+    if (!machineQuery) {
+      console.error("Machine is required for a new chat (or use --chat <hash>).");
+      usage();
+    }
+    const host = resolveHost(targets, machineQuery);
+    const peeled = await maybePeelModel(host, promptParts, fromStdin);
+    peeledModel = peeled.model;
+    promptParts = peeled.promptParts;
+  }
+
+  const promptText = [promptParts.join(" ").trim(), fromStdin].filter(Boolean).join("\n\n").trim();
+  if (!promptText) {
+    console.error("No prompt provided (pass args and/or pipe stdin).");
+    usage();
+  }
+
+  try {
+    const result = await runPrompt({
+      machine: machineQuery,
+      model: parsed.model ?? peeledModel,
+      prompt: promptText,
+      chatId: parsed.chatId,
+      save,
+      settings: parsed.settings,
+      writeStdout: !json,
+      stream: json ? false : stream,
+      quiet: json,
+    });
+
+    if (json) {
+      console.log(
+        JSON.stringify(
+          {
+            chat_id: result.chat_id,
+            topic: result.topic,
+            content: result.content,
+            thinking: result.thinking,
+            ollama: result.ollama,
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
+
+    const chunk = result.ollama;
+    const stats = [
+      chunk.eval_count != null ? `${chunk.eval_count} tokens` : "",
+      chunk.eval_duration
+        ? `${((Number(chunk.eval_count) || 0) / (Number(chunk.eval_duration) / 1e9)).toFixed(1)} tok/s`
+        : "",
+      chunk.total_duration ? formatDuration(Number(chunk.total_duration)) : "",
+    ].filter(Boolean);
+    if (stats.length > 0) {
+      console.error(`(${stats.join(" · ")})`);
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.startsWith("Machine is required") || message.startsWith("No prompt")) {
+      console.error(message);
+      usage();
+    }
+    throw err;
   }
 }
