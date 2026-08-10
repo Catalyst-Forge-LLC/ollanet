@@ -9,15 +9,16 @@ export default defineDownpressConfig({
 	url: 'https://ollanet.dev',
 	author: 'Catalyst Forge LLC',
 	logo: '/logo.png',
+	homePage: 'about',
 	topics: [
 		{ label: 'Guides', tag: 'guides' },
 		{ label: 'Release notes', tag: 'releases' },
 		{ label: 'Agents', tag: 'agents' }
 	],
 	nav: [
-		{ label: 'Posts', href: '/' },
+		{ label: 'Home', href: '/' },
+		{ label: 'Posts', href: '/writing' },
 		{ label: 'Install', href: '/install' },
-		{ label: 'About', href: '/about' },
 		{ label: 'GitHub', href: 'https://github.com/Catalyst-Forge-LLC/ollanet' }
 	]
 });
