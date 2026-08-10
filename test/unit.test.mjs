@@ -13,6 +13,7 @@ import {
   resolveHost,
   shortName,
 } from "../dist/hosts.js";
+import { isCompletionCapable, shouldWarnNoThinking } from "../dist/ollama-chat.js";
 import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store.js";
 import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
 
@@ -202,5 +203,22 @@ describe("topic helpers", () => {
     assert.equal(cleanTopic('"Ferret Haiku"', "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("Title: Ferret Haiku", "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("   ", "fb"), "fb");
+  });
+});
+
+describe("capability helpers", () => {
+  it("treats missing or empty capabilities as completion-capable", () => {
+    assert.equal(isCompletionCapable(undefined), true);
+    assert.equal(isCompletionCapable(null), true);
+    assert.equal(isCompletionCapable([]), true);
+    assert.equal(isCompletionCapable(["completion"]), true);
+    assert.equal(isCompletionCapable(["embedding"]), false);
+  });
+
+  it("only warns about --think when thinking is known-absent", () => {
+    assert.equal(shouldWarnNoThinking(undefined), false);
+    assert.equal(shouldWarnNoThinking([]), false);
+    assert.equal(shouldWarnNoThinking(["completion", "thinking"]), false);
+    assert.equal(shouldWarnNoThinking(["completion"]), true);
   });
 });

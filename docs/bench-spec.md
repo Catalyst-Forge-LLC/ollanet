@@ -82,7 +82,8 @@ If neither `[model...]` nor `--all` is given: use `defaultModels[host]` if set, 
 
 Before benchmarking a model, call `POST /api/show` and read `capabilities` (e.g. `completion`, `embedding`, `tools`, `vision`, `thinking`, …).
 
-- **`--all`:** include only models whose capabilities contain `completion`.  
+- **`--all`:** include models that are completion-capable.  
+  **`capabilities` is omitempty** — if the key is missing or the array is empty, treat as completion-capable and proceed. Only skip when a **present, non-empty** array lacks `completion`.  
 - **Skipped models:** report separately, not as failed rows:
 
 ```text
@@ -91,9 +92,9 @@ Skipped 2 non-completion models: nomic-embed-text, all-minilm
 
 - Persist skipped names under `skipped_models[]` in the JSON.  
 - One `/api/show` per candidate is fine for v1.  
-- Bonus: if `--think` is set and capabilities lack `thinking`, **warn before the call** (and optionally skip think for that model) instead of surfacing Ollama’s 400.
+- Bonus: if `--think` is set and a **present** capabilities array lacks `thinking`, **warn before the call**. Absent/empty capabilities → do not warn, do not block.
 
-Mock harness: configurable `capabilities` per model so the filter is testable without a GPU.
+Mock harness: configurable `capabilities` per model (including omit-key) so the filter is testable without a GPU.
 
 ---
 
@@ -205,7 +206,7 @@ Store both. Finetuna before/after compares **one field**; mismatch → refuse th
 | `ping` | check | `Reply with exactly: OK` | Take the **last whitespace-delimited token**, lowercase, strip wrapping punctuation; equals `ok`. So `OK.`, `Sure — OK`, and `ok` pass; measures instruction-following. |
 | `math` | check | `What is 17 * 19? Reply with only the number.` | Take the **last non-empty line**, extract all integers from it; pass if `323` is **among them**. (Avoids failing on `323 (i.e., 17×19)` where “last integer” is `19`.) |
 | `haiku` | live | `Write a haiku about ferrets.` | Non-empty, ≥3 lines — **liveness only**. |
-| `throughput` | throughput | Fixed filler prompt that invites long generation | No content check; `num_predict` pinned; `--runs` repeats; record `done_reason`. |
+| `throughput` | throughput | Enumerative prompt that resists EOS (e.g. count 1…400, one integer per line) | No content check; `num_predict` pinned; `--runs` repeats; record `done_reason`. Must hit `done_reason=length` with `eval_count === num_predict` on small and large models — if not, the prompt is wrong. |
 
 ### `full` — quick +
 
@@ -242,7 +243,7 @@ Concurrency: **serial only**.
 | `parameter_size` / `quantization_level` / `size` | tags details |
 | `capabilities` | `/api/show` |
 
-Once per run / host: `ollama_version` (`/api/version`); `size_vram` from `/api/ps` while loaded (best-effort).
+Once per run / host: `ollama_version` (`/api/version`). Per model while loaded (after timed cases, before unload): `size_vram` and `context_length` from `/api/ps` — so a Finetuna diff can show same `comparability_key`, new digest, context 4096→32768, tok/s change.
 
 ---
 
@@ -355,6 +356,7 @@ After first model (optional): `Typical remaining ≈ …` based on observed pace
       "quantization_level": "Q4_K_M",
       "capabilities": ["completion"],
       "size_vram": 123456789,
+      "context_length": 8192,
       "cold_load": null,
       "summary": {
         "tok_s_median": 98.4,
@@ -439,16 +441,18 @@ src/bench-store.ts    # Persist under benchmarks/
 
 1. Default run: `--runs 3` on throughput only; checks once; median + spread; digests + `suite_revision` + `comparability_key` saved.  
 2. `cases[].attempts[]` retained; throughput length === `--runs`; check length === 1; med/min/max recomputable; early-stop attempts excluded from median and flagged.  
-3. `--all` benches only `completion` models; skipped embeddings listed in output + JSON — not failed rows. Mock covers this.  
-4. `--think` on a non-thinking model warns (capabilities) rather than only dumping a raw 400.  
+3. `--all` benches only known non-completion exclusions; omitted/empty `capabilities` still benches. Mock covers omit-key.  
+4. `--think` warns only when capabilities are present and lack `thinking`.  
 5. Cold-load + warmup: probe before warmup; mock asserts `load_ms` === probe non-zero value, not post-warmup zeros; ps-first skip when already unloaded.  
 6. Multi-model unload + `/api/ps` poll; non-localhost preflight unload warning.  
 7. Preflight shows counts + timeout + worst-case ceiling (not a fake “ETA”); optional typical estimate after first model.  
 8. `ping` accepts `Sure — OK`; `math` accepts `323 (i.e., 17×19)`.  
-9. Changing `--num-predict` changes `comparability_key` even if `suite_revision` matches.  
+9. Changing `--num-predict` changes `comparability_key` even if `suite_revision` matches; warn if `--num-predict` &lt; 64.  
 10. `--judge` requires `--judge-model`; self-judge flagged; parse fail omits score.  
-11. Sort by pass_rate then tok/s; `live` excluded from pass_rate.  
-12. `pnpm test` + typecheck clean; zero new runtime deps; `ollamaChat` extract before bench code.
+11. Sort by pass_rate then tok/s; null tok/s sinks below defined values; `live` excluded from pass_rate.  
+12. JSON records `context_length` (+ `size_vram`) from `/api/ps` while loaded.  
+13. Manual GPU: on ~1B and ~12B, all three throughput attempts report `done_reason === "length"` and `eval_count === 256` (prompt must resist EOS).  
+14. `pnpm test` + typecheck clean; zero new runtime deps; `ollamaChat` extract before bench code.
 
 ---
 

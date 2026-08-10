@@ -96,6 +96,56 @@ describe("bench", () => {
     await sandbox.cleanup();
   });
 
+  it("treats omitted capabilities as completion-capable", async () => {
+    const mock = await startMock({
+      models: ["legacy:1b"],
+      // null → /api/show omits the capabilities key entirely
+      capabilities: { "legacy:1b": null },
+      reply: "OK",
+      doneReason: "length",
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+
+    const res = await runCli(["bench", "mockhost", "--all", "--runs", "1", "--no-warmup", "--json"], {
+      sandbox,
+      env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" },
+    });
+
+    assert.equal(res.code, 0, res.stderr);
+    const payload = JSON.parse(res.stdout);
+    assert.deepEqual(
+      payload.models.map((m) => m.name),
+      ["legacy:1b"],
+    );
+    assert.equal(payload.skipped_models.length, 0);
+
+    await mock.close();
+    await sandbox.cleanup();
+  });
+
+  it("records context_length from /api/ps while the model is loaded", async () => {
+    const mock = await startMock({
+      models: ["fake:1b"],
+      capabilities: { "fake:1b": ["completion"] },
+      reply: "OK",
+      doneReason: "length",
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+
+    const res = await runCli(["bench", "mockhost", "fake:1b", "--runs", "1", "--no-warmup", "--json"], {
+      sandbox,
+      env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" },
+    });
+
+    assert.equal(res.code, 0, res.stderr);
+    const payload = JSON.parse(res.stdout);
+    assert.equal(payload.models[0].context_length, 8192);
+    assert.equal(payload.models[0].size_vram, 123456789);
+
+    await mock.close();
+    await sandbox.cleanup();
+  });
+
   it("flags early-stop throughput attempts and excludes them from median", async () => {
     let call = 0;
     const mock = await startMock({

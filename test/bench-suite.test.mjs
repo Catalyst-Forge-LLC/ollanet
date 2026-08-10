@@ -51,4 +51,9 @@ describe("bench checkers", () => {
     assert.equal(median([4, 1, 2, 3]), 2.5);
     assert.equal(median([]), undefined);
   });
+
+  it("throughput prompt is enumerative so models hit the num_predict cap", () => {
+    assert.match(cases.throughput.prompt, /Count from 1/i);
+    assert.doesNotMatch(cases.throughput.prompt, /Explain how/i);
+  });
 });

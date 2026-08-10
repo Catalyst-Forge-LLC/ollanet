@@ -233,6 +233,7 @@ export interface PsModel {
   name?: string;
   model?: string;
   size_vram?: number;
+  context_length?: number;
   digest?: string;
 }
 
@@ -257,13 +258,38 @@ export function psHasModel(models: PsModel[], name: string): boolean {
   });
 }
 
-export function vramForModel(models: PsModel[], name: string): number | undefined {
+function findPsModel(models: PsModel[], name: string): PsModel | undefined {
   const key = modelKey(name);
-  const hit = models.find((m) => {
+  return models.find((m) => {
     const n = (m.name ?? m.model ?? "").toLowerCase();
     return n === key || n.startsWith(`${key}:`) || key.startsWith(`${n}:`);
   });
-  return hit?.size_vram;
+}
+
+export function vramForModel(models: PsModel[], name: string): number | undefined {
+  return findPsModel(models, name)?.size_vram;
+}
+
+export function contextLengthForModel(
+  models: PsModel[],
+  name: string,
+): number | undefined {
+  return findPsModel(models, name)?.context_length;
+}
+
+/**
+ * Capability filter: omitempty / empty means "unknown → treat as completion".
+ * Only skip when a non-empty capabilities array is present and lacks completion.
+ */
+export function isCompletionCapable(capabilities: string[] | undefined | null): boolean {
+  if (capabilities == null || capabilities.length === 0) return true;
+  return capabilities.includes("completion");
+}
+
+/** True when capabilities are known and lack thinking (absent/empty → no warning). */
+export function shouldWarnNoThinking(capabilities: string[] | undefined | null): boolean {
+  if (capabilities == null || capabilities.length === 0) return false;
+  return !capabilities.includes("thinking");
 }
 
 /** Poll /api/ps until model is absent (or timeout). Returns elapsed ms. */

@@ -106,9 +106,11 @@ const QUICK_CASES: BenchCase[] = [
   {
     id: "throughput",
     role: "throughput",
+    // Enumerative on purpose: at temperature 0, prose prompts often EOS well
+    // before num_predict. Counting resists early stop so done_reason=length.
     prompt:
-      "Explain how a computer loads a program into memory and starts running it. " +
-      "Write a detailed answer with several paragraphs.",
+      "Count from 1 to 400. Write one integer per line and nothing else. " +
+      "Do not stop early. Do not write words.",
     // num_predict pinned by runner
   },
 ];

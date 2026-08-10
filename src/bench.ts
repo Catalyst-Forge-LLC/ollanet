@@ -28,6 +28,8 @@ import {
   type HostTarget,
 } from "./hosts.ts";
 import {
+  contextLengthForModel,
+  isCompletionCapable,
   ollamaChat,
   ollamaShow,
   ollamaTags,
@@ -35,6 +37,7 @@ import {
   ollamaVersion,
   ollamaPs,
   psHasModel,
+  shouldWarnNoThinking,
   vramForModel,
   waitUntilUnloaded,
   type OllamaModelInfo,
@@ -67,8 +70,11 @@ interface ModelResult {
   digest?: string;
   parameter_size?: string;
   quantization_level?: string;
+  /** Omitted / empty from /api/show means unknown (treated as completion-capable). */
   capabilities?: string[];
   size_vram?: number;
+  /** From /api/ps while loaded — actual context in effect for this run. */
+  context_length?: number;
   cold_load: {
     load_ms: number;
     ollama?: Record<string, unknown>;
@@ -138,14 +144,6 @@ function isLoopback(host: HostTarget): boolean {
     host.ip === "::1" ||
     shortName(host).toLowerCase() === "localhost"
   );
-}
-
-function modelNameMatches(available: string[], candidate: string): boolean {
-  const c = candidate.toLowerCase();
-  return available.some((name) => {
-    const n = name.toLowerCase();
-    return n === c || n.startsWith(`${c}:`) || c.startsWith(`${n}:`);
-  });
 }
 
 function resolveModelName(tags: OllamaModelInfo[], query: string): string | undefined {
@@ -294,6 +292,11 @@ function parseArgs(argv: string[]) {
     console.error("--judge requires --judge-model <name> (no default).");
     process.exit(1);
   }
+  if (throughputNumPredict < 64) {
+    console.error(
+      `Warning: --num-predict ${throughputNumPredict} is very short; tok/s will be mostly overhead. Prefer ≥64 (default 256).`,
+    );
+  }
 
   return {
     machine,
@@ -314,16 +317,22 @@ function parseArgs(argv: string[]) {
   };
 }
 
-async function ensureCapabilities(
+/**
+ * Raw capabilities from /api/show. `undefined` = key absent / show failed
+ * (omitempty) → treat as completion-capable. Empty array is also permissive.
+ */
+async function fetchCapabilities(
   baseUrl: string,
   name: string,
-): Promise<string[]> {
+): Promise<string[] | undefined> {
   try {
     const shown = await ollamaShow(baseUrl, name, Math.min(BENCH_TIMEOUT_MS, 10_000));
-    return shown.capabilities ?? ["completion"];
+    if (!shown || !("capabilities" in shown) || shown.capabilities == null) {
+      return undefined;
+    }
+    return shown.capabilities;
   } catch {
-    // Older servers may lack /api/show — assume completion.
-    return ["completion"];
+    return undefined;
   }
 }
 
@@ -533,11 +542,20 @@ function printTable(
   lines.push(header);
 
   const sorted = [...models].sort((a, b) => {
-    const pa = a.summary.pass_rate ?? -1;
-    const pb = b.summary.pass_rate ?? -1;
-    if (pb !== pa) return pb - pa;
-    const ta = a.summary.tok_s_median ?? -1;
-    const tb = b.summary.tok_s_median ?? -1;
+    const pa = a.summary.pass_rate;
+    const pb = b.summary.pass_rate;
+    if (pa == null && pb == null) {
+      /* both unknown */
+    } else if (pa == null) return 1;
+    else if (pb == null) return -1;
+    else if (pb !== pa) return pb - pa;
+
+    // Unavailable tok/s sinks below any defined median (including 0).
+    const ta = a.summary.tok_s_median;
+    const tb = b.summary.tok_s_median;
+    if (ta == null && tb == null) return 0;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
     return tb - ta;
   });
 
@@ -606,9 +624,9 @@ export async function main(): Promise<void> {
 
   if (parsed.all) {
     for (const t of tags) {
-      const caps = await ensureCapabilities(baseUrl, t.name);
-      if (caps.includes("completion")) selected.push(t.name);
-      else skipped.push({ name: t.name, reason: "non-completion", capabilities: caps });
+      const caps = await fetchCapabilities(baseUrl, t.name);
+      if (isCompletionCapable(caps)) selected.push(t.name);
+      else skipped.push({ name: t.name, reason: "non-completion", capabilities: caps ?? [] });
     }
   } else if (parsed.models.length > 0) {
     for (const q of parsed.models) {
@@ -617,9 +635,11 @@ export async function main(): Promise<void> {
         console.error(`Unknown model "${q}". Available: ${tagNames.join(", ")}`);
         process.exit(1);
       }
-      const caps = await ensureCapabilities(baseUrl, resolved);
-      if (!caps.includes("completion")) {
-        console.error(`Model "${resolved}" is not completion-capable (${caps.join(", ") || "none"}).`);
+      const caps = await fetchCapabilities(baseUrl, resolved);
+      if (!isCompletionCapable(caps)) {
+        console.error(
+          `Model "${resolved}" is not completion-capable (${(caps ?? []).join(", ") || "none"}).`,
+        );
         process.exit(1);
       }
       selected.push(resolved);
@@ -632,17 +652,13 @@ export async function main(): Promise<void> {
       );
       process.exit(1);
     }
-    const resolved = resolveModelName(tags, def) ?? def;
-    if (!modelNameMatches(tagNames, resolved) && !tagNames.includes(resolved)) {
-      // allow default even if tags race; still try
-    }
     const name = resolveModelName(tags, def);
     if (!name) {
       console.error(`Default model "${def}" not found on host. Available: ${tagNames.join(", ")}`);
       process.exit(1);
     }
-    const caps = await ensureCapabilities(baseUrl, name);
-    if (!caps.includes("completion")) {
+    const caps = await fetchCapabilities(baseUrl, name);
+    if (!isCompletionCapable(caps)) {
       console.error(`Default model "${name}" is not completion-capable.`);
       process.exit(1);
     }
@@ -709,8 +725,8 @@ export async function main(): Promise<void> {
 
   if (parsed.settings.think === true) {
     for (const name of selected) {
-      const caps = await ensureCapabilities(baseUrl, name);
-      if (!caps.includes("thinking")) {
+      const caps = await fetchCapabilities(baseUrl, name);
+      if (shouldWarnNoThinking(caps)) {
         console.error(`Warning: ${name} has no thinking capability; --think may 400.`);
       }
     }
@@ -723,7 +739,7 @@ export async function main(): Promise<void> {
   for (let mi = 0; mi < selected.length; mi += 1) {
     const model = selected[mi]!;
     const info = tags.find((t) => t.name === model);
-    const caps = await ensureCapabilities(baseUrl, model);
+    const caps = await fetchCapabilities(baseUrl, model);
     const selfJudge = Boolean(judgeModel && judgeModel === model);
 
     if (!parsed.json) {
@@ -784,6 +800,7 @@ export async function main(): Promise<void> {
       if (parsed.failFast && modelError) break;
     }
 
+    // Capture VRAM + context while still loaded (after timed cases, before unload).
     const ps = await ollamaPs(baseUrl, 5000);
     const summary = summarizeModel(cases, cold, selfJudge);
     if (cold && !cold.error && cold.load_ms > 0) {
@@ -799,8 +816,9 @@ export async function main(): Promise<void> {
       digest: info?.digest,
       parameter_size: info?.details?.parameter_size,
       quantization_level: info?.details?.quantization_level,
-      capabilities: caps,
+      ...(caps ? { capabilities: caps } : {}),
       size_vram: vramForModel(ps, model),
+      context_length: contextLengthForModel(ps, model),
       cold_load: cold,
       summary,
       error: modelError,

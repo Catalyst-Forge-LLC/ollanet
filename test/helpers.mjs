@@ -69,6 +69,7 @@ export async function startMock(opts = {}) {
       name,
       model: name,
       size_vram: 123456789,
+      context_length: 8192,
       digest: `sha256:digest-${name.replace(/[^a-z0-9]+/gi, "")}`,
     }));
   };
@@ -125,8 +126,16 @@ export async function startMock(opts = {}) {
 
       if (req.url === "/api/show") {
         const name = typeof body?.model === "string" ? body.model : "";
-        const caps = capabilities[name] ?? ["completion"];
         res.setHeader("Content-Type", "application/json");
+        // capabilities[name] === null → omit key (omitempty / older servers)
+        // undefined → default ["completion"]
+        if (Object.prototype.hasOwnProperty.call(capabilities, name) && capabilities[name] === null) {
+          res.end(JSON.stringify({ modelfile: "", parameters: "", template: "" }));
+          return;
+        }
+        const caps = Object.prototype.hasOwnProperty.call(capabilities, name)
+          ? capabilities[name]
+          : ["completion"];
         res.end(JSON.stringify({ capabilities: caps, modelfile: "", parameters: "", template: "" }));
         return;
       }
