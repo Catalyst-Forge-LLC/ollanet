@@ -8,6 +8,17 @@ Scan for models, fire prompts, and continue conversations later by a short hash.
 
 This started as a selfish little script. I had Ollama running on a laptop on my Tailscale network and wanted an easy way to discover it, poke at the models, and actually talk to them from another machine — without babysitting IPs or opening a browser. One scan/prompt tool later, chats by hash showed up, LAN discovery crept in, and the thing grew into **ollanet**: a tiny CLI for using Ollama over whatever network you already have.
 
+## Related: Finetuna
+
+**ollanet** is the client-side / network tool. On the machine that *runs* Ollama, use **[Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna)** to turn a stock model into a GPU-tuned, named variant (context, batch, Modelfile, auto-tune).
+
+Typical loop:
+
+1. On the host: `finetuna` → create something like `gemma4-ctx32k`
+2. From anywhere on the network: `ollanet scan` → `ollanet prompt that-host gemma4-ctx32k "…"`
+
+They share the same Ollama API; Finetuna shapes the models, ollanet finds and chats with them.
+
 ## Features
 
 - **Discover** Ollama hosts from localhost, `config.hosts`, `OLLANET_HOSTS`, optional Tailscale, and optional LAN scan
