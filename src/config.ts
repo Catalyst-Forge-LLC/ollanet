@@ -14,6 +14,8 @@ export interface GenerateSettings {
   temperature?: number;
   num_predict?: number;
   num_ctx?: number;
+  /** Ollama `options.seed` (-1 = random). */
+  seed?: number;
   keep_alive?: string | number;
   /** `"json"` or a JSON-schema object */
   format?: "json" | Record<string, unknown>;
@@ -138,6 +140,9 @@ export function normalizeSettings(input: unknown): GenerateSettings {
   const numCtx = asFiniteNumber(src.num_ctx ?? src.numCtx);
   if (numCtx != null) out.num_ctx = Math.trunc(numCtx);
 
+  const seed = asFiniteNumber(src.seed);
+  if (seed != null) out.seed = Math.trunc(seed);
+
   const keepAlive = src.keep_alive ?? src.keepAlive;
   if (typeof keepAlive === "string" && keepAlive.trim()) {
     out.keep_alive = keepAlive.trim();
@@ -241,6 +246,7 @@ export function mergeSettings(...layers: Array<GenerateSettings | undefined>): G
     if (layer.temperature != null) out.temperature = layer.temperature;
     if (layer.num_predict != null) out.num_predict = layer.num_predict;
     if (layer.num_ctx != null) out.num_ctx = layer.num_ctx;
+    if (layer.seed != null) out.seed = layer.seed;
     if (layer.keep_alive != null) out.keep_alive = layer.keep_alive;
     if (layer.format !== undefined) out.format = layer.format;
     if (layer.system != null) out.system = layer.system;

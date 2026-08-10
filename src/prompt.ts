@@ -44,21 +44,10 @@ import {
   shortName,
   type HostTarget,
 } from "./hosts.ts";
+import { ollamaChat } from "./ollama-chat.ts";
 
 /** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
 const PROMPT_TIMEOUT_MS = envInt("OLLAMA_PROMPT_TIMEOUT_MS", 600_000);
-
-interface ChatChunk {
-  model?: string;
-  message?: { role?: string; content?: string; thinking?: string };
-  done?: boolean;
-  error?: string;
-  total_duration?: number;
-  load_duration?: number;
-  prompt_eval_count?: number;
-  eval_count?: number;
-  eval_duration?: number;
-}
 
 function usage(): never {
   console.error(`Usage:
@@ -329,166 +318,6 @@ async function readStdinIfPiped(): Promise<string> {
   return Buffer.concat(chunks).toString("utf8").trim();
 }
 
-function buildOptions(settings: GenerateSettings): Record<string, unknown> {
-  const options: Record<string, unknown> = {};
-  if (settings.temperature != null) options.temperature = settings.temperature;
-  if (settings.num_predict != null) options.num_predict = settings.num_predict;
-  if (settings.num_ctx != null) options.num_ctx = settings.num_ctx;
-  return options;
-}
-
-async function runChat(opts: {
-  baseUrl: string;
-  model: string;
-  messages: Array<{ role: string; content: string }>;
-  stream: boolean;
-  settings: GenerateSettings;
-  writeStdout: boolean;
-}): Promise<{ content: string; thinking: string; chunk: ChatChunk }> {
-  const url = `${opts.baseUrl}/api/chat`;
-  // Default think:false — thinking models otherwise burn num_predict on hidden reasoning.
-  const think = opts.settings.think === true;
-  const body: Record<string, unknown> = {
-    model: opts.model,
-    messages: opts.messages,
-    stream: opts.stream,
-    think,
-  };
-
-  if (opts.settings.keep_alive != null) body.keep_alive = opts.settings.keep_alive;
-  if (opts.settings.format !== undefined) body.format = opts.settings.format;
-
-  const options = buildOptions(opts.settings);
-  if (Object.keys(options).length > 0) body.options = options;
-
-  const controller = new AbortController();
-  const timer =
-    PROMPT_TIMEOUT_MS > 0 ? setTimeout(() => controller.abort(), PROMPT_TIMEOUT_MS) : undefined;
-
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-  } catch (err) {
-    if (timer) clearTimeout(timer);
-    const name = err instanceof Error ? err.name : "";
-    if (name === "AbortError") {
-      throw new Error(`Prompt timed out after ${PROMPT_TIMEOUT_MS}ms (${url})`);
-    }
-    throw err;
-  }
-
-  if (!res.ok) {
-    if (timer) clearTimeout(timer);
-    const text = await res.text().catch(() => "");
-    throw new Error(`Ollama HTTP ${res.status} ${res.statusText}${text ? `: ${text}` : ""}`);
-  }
-
-  const parseChunk = (raw: string): ChatChunk => {
-    try {
-      return JSON.parse(raw) as ChatChunk;
-    } catch {
-      throw new Error(
-        `Non-JSON response from ${url} (is something else on this port?): ${raw.slice(0, 120)}`,
-      );
-    }
-  };
-
-  try {
-    if (!opts.stream) {
-      const chunk = parseChunk(await res.text());
-      if (chunk.error) throw new Error(chunk.error);
-      const content = chunk.message?.content ?? "";
-      const thinking = chunk.message?.thinking ?? "";
-      if (opts.writeStdout) {
-        if (think && thinking) {
-          process.stderr.write(`${thinking}\n---\n`);
-        }
-        const visible = content || thinking;
-        if (visible) process.stdout.write(`${visible}\n`);
-      }
-      return { content: content || thinking, thinking, chunk };
-    }
-
-    if (!res.body) throw new Error("No response body from Ollama");
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let last: ChatChunk = {};
-    let content = "";
-    let thinking = "";
-    let thinkingHeader = false;
-
-    const handleChunk = (chunk: ChatChunk): void => {
-      if (chunk.error) throw new Error(chunk.error);
-      const thinkPiece = chunk.message?.thinking ?? "";
-      const contentPiece = chunk.message?.content ?? "";
-      if (thinkPiece) {
-        thinking += thinkPiece;
-        if (opts.writeStdout && think) {
-          if (!thinkingHeader) {
-            process.stderr.write("[thinking]\n");
-            thinkingHeader = true;
-          }
-          process.stderr.write(thinkPiece);
-        }
-      }
-      if (contentPiece) {
-        content += contentPiece;
-        if (opts.writeStdout) {
-          if (thinkingHeader) {
-            process.stderr.write("\n---\n");
-            thinkingHeader = false;
-          }
-          process.stdout.write(contentPiece);
-        }
-      }
-      last = chunk;
-    };
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) continue;
-        handleChunk(parseChunk(trimmed));
-      }
-    }
-
-    const trailing = buffer.trim();
-    if (trailing) {
-      handleChunk(parseChunk(trailing));
-    }
-
-    // If the model only emitted thinking (budget exhausted), surface it on stdout.
-    if (opts.writeStdout && !content && thinking) {
-      if (think) process.stderr.write("\n---\n");
-      process.stdout.write(`${thinking}\n`);
-    } else if (opts.writeStdout && content.length > 0 && !content.endsWith("\n")) {
-      process.stdout.write("\n");
-    }
-
-    return { content: content || thinking, thinking, chunk: last };
-  } catch (err) {
-    const name = err instanceof Error ? err.name : "";
-    if (name === "AbortError") {
-      throw new Error(`Prompt timed out after ${PROMPT_TIMEOUT_MS}ms (${url})`);
-    }
-    throw err;
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-}
-
 async function generateTopic(opts: {
   baseUrl: string;
   model: string;
@@ -497,11 +326,12 @@ async function generateTopic(opts: {
 }): Promise<string> {
   const fallback = topicFromPrompt(opts.prompt);
   try {
-    const { content } = await runChat({
+    const { content } = await ollamaChat({
       baseUrl: opts.baseUrl,
       model: opts.model,
       stream: false,
       writeStdout: false,
+      timeoutMs: PROMPT_TIMEOUT_MS,
       settings: mergeSettings(opts.settings, {
         temperature: 0.2,
         num_predict: 24,
@@ -644,12 +474,13 @@ export async function main(): Promise<void> {
     );
   }
 
-  const { content, thinking, chunk } = await runChat({
+  const { content, thinking, chunk } = await ollamaChat({
     baseUrl,
     model,
     messages: toApiMessages(chat),
     stream: json ? false : stream,
     writeStdout: !json,
+    timeoutMs: PROMPT_TIMEOUT_MS,
     settings,
   });
 
