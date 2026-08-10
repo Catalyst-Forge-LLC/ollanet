@@ -8,6 +8,8 @@ export type ChatRole = "system" | "user" | "assistant";
 export interface ChatMessage {
   role: ChatRole;
   content: string;
+  /** Present for thinking models when reasoning was returned separately. */
+  thinking?: string;
   timestamp: string;
   machine?: string;
   model?: string;

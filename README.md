@@ -127,6 +127,7 @@ ollanet prompt --chat <hash> <prompt...>
 | `--num-ctx <n>` | Context window |
 | `--keep-alive <value>` | Keep model loaded (`5m`, `0`, `-1`, …) |
 | `--format json\|<schema>` | JSON mode / schema |
+| `--think` / `--no-think` | Enable/disable model thinking (default **off** so replies aren’t empty on qwen3-style models) |
 | `--no-stream` | Buffer the full reply |
 | `--no-save` | Do not write a transcript |
 | `--json` | Emit JSON (includes chat id when saved) |

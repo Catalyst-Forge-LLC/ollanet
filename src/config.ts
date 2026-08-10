@@ -18,6 +18,11 @@ export interface GenerateSettings {
   /** `"json"` or a JSON-schema object */
   format?: "json" | Record<string, unknown>;
   system?: string;
+  /**
+   * Ollama "thinking" models (e.g. qwen3). When false/omitted, requests send
+   * `think: false` so tokens go to the visible reply instead of hidden reasoning.
+   */
+  think?: boolean;
 }
 
 export interface AppConfig {
@@ -147,6 +152,14 @@ export function normalizeSettings(input: unknown): GenerateSettings {
     out.system = src.system;
   }
 
+  const think = src.think;
+  if (typeof think === "boolean") out.think = think;
+  else if (typeof think === "string") {
+    const v = think.trim().toLowerCase();
+    if (["1", "true", "yes", "on"].includes(v)) out.think = true;
+    if (["0", "false", "no", "off"].includes(v)) out.think = false;
+  }
+
   return out;
 }
 
@@ -231,6 +244,7 @@ export function mergeSettings(...layers: Array<GenerateSettings | undefined>): G
     if (layer.keep_alive != null) out.keep_alive = layer.keep_alive;
     if (layer.format !== undefined) out.format = layer.format;
     if (layer.system != null) out.system = layer.system;
+    if (layer.think != null) out.think = layer.think;
   }
   return out;
 }
@@ -243,6 +257,7 @@ export function settingsFromEnv(): GenerateSettings {
     keep_alive: process.env.OLLAMA_KEEP_ALIVE,
     format: process.env.OLLAMA_FORMAT,
     system: process.env.OLLAMA_SYSTEM,
+    think: process.env.OLLANET_THINK ?? process.env.OLLAMA_THINK,
   });
 }
 
@@ -255,6 +270,8 @@ export function settingsSummary(settings: GenerateSettings): string {
   if (settings.format !== undefined) {
     parts.push(settings.format === "json" ? "format=json" : "format=<schema>");
   }
+  if (settings.think === true) parts.push("think=on");
+  if (settings.think === false) parts.push("think=off");
   return parts.join(" ");
 }
 

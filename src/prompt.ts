@@ -45,7 +45,7 @@ import {
 
 interface ChatChunk {
   model?: string;
-  message?: { role?: string; content?: string };
+  message?: { role?: string; content?: string; thinking?: string };
   done?: boolean;
   error?: string;
   total_duration?: number;
@@ -84,6 +84,8 @@ Options:
   --num-ctx <n>          Context window size
   --keep-alive <value>   Keep model loaded (e.g. 5m, 0, -1)
   --format <json|schema> Force JSON mode or a JSON schema string
+  --think                Enable model thinking (qwen3 etc.); streams to stderr
+  --no-think             Disable thinking (default) so tokens go to the reply
   --no-stream            Wait for the full response
   --json                 Emit final response JSON (implies --no-stream)`);
   process.exit(1);
@@ -146,6 +148,14 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--no-save") {
       save = false;
+      continue;
+    }
+    if (arg === "--think") {
+      settings.think = true;
+      continue;
+    }
+    if (arg === "--no-think") {
+      settings.think = false;
       continue;
     }
 
@@ -248,12 +258,15 @@ async function runChat(opts: {
   stream: boolean;
   settings: GenerateSettings;
   writeStdout: boolean;
-}): Promise<{ content: string; chunk: ChatChunk }> {
+}): Promise<{ content: string; thinking: string; chunk: ChatChunk }> {
   const url = `${opts.baseUrl}/api/chat`;
+  // Default think:false — thinking models otherwise burn num_predict on hidden reasoning.
+  const think = opts.settings.think === true;
   const body: Record<string, unknown> = {
     model: opts.model,
     messages: opts.messages,
     stream: opts.stream,
+    think,
   };
 
   if (opts.settings.keep_alive != null) body.keep_alive = opts.settings.keep_alive;
@@ -277,8 +290,15 @@ async function runChat(opts: {
     const chunk = (await res.json()) as ChatChunk;
     if (chunk.error) throw new Error(chunk.error);
     const content = chunk.message?.content ?? "";
-    if (opts.writeStdout) process.stdout.write(`${content}\n`);
-    return { content, chunk };
+    const thinking = chunk.message?.thinking ?? "";
+    if (opts.writeStdout) {
+      if (think && thinking) {
+        process.stderr.write(`${thinking}\n---\n`);
+      }
+      const visible = content || thinking;
+      if (visible) process.stdout.write(`${visible}\n`);
+    }
+    return { content: content || thinking, thinking, chunk };
   }
 
   if (!res.body) throw new Error("No response body from Ollama");
@@ -288,6 +308,35 @@ async function runChat(opts: {
   let buffer = "";
   let last: ChatChunk = {};
   let content = "";
+  let thinking = "";
+  let thinkingHeader = false;
+
+  const handleChunk = (chunk: ChatChunk): void => {
+    if (chunk.error) throw new Error(chunk.error);
+    const thinkPiece = chunk.message?.thinking ?? "";
+    const contentPiece = chunk.message?.content ?? "";
+    if (thinkPiece) {
+      thinking += thinkPiece;
+      if (opts.writeStdout && think) {
+        if (!thinkingHeader) {
+          process.stderr.write("[thinking]\n");
+          thinkingHeader = true;
+        }
+        process.stderr.write(thinkPiece);
+      }
+    }
+    if (contentPiece) {
+      content += contentPiece;
+      if (opts.writeStdout) {
+        if (thinkingHeader) {
+          process.stderr.write("\n---\n");
+          thinkingHeader = false;
+        }
+        process.stdout.write(contentPiece);
+      }
+    }
+    last = chunk;
+  };
 
   while (true) {
     const { done, value } = await reader.read();
@@ -298,33 +347,24 @@ async function runChat(opts: {
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
-      const chunk = JSON.parse(trimmed) as ChatChunk;
-      if (chunk.error) throw new Error(chunk.error);
-      const piece = chunk.message?.content ?? "";
-      if (piece) {
-        content += piece;
-        if (opts.writeStdout) process.stdout.write(piece);
-      }
-      last = chunk;
+      handleChunk(JSON.parse(trimmed) as ChatChunk);
     }
   }
 
   const trailing = buffer.trim();
   if (trailing) {
-    const chunk = JSON.parse(trailing) as ChatChunk;
-    if (chunk.error) throw new Error(chunk.error);
-    const piece = chunk.message?.content ?? "";
-    if (piece) {
-      content += piece;
-      if (opts.writeStdout) process.stdout.write(piece);
-    }
-    last = chunk;
+    handleChunk(JSON.parse(trailing) as ChatChunk);
   }
 
-  if (opts.writeStdout && content.length > 0 && !content.endsWith("\n")) {
+  // If the model only emitted thinking (budget exhausted), surface it on stdout.
+  if (opts.writeStdout && !content && thinking) {
+    if (think) process.stderr.write("\n---\n");
+    process.stdout.write(`${thinking}\n`);
+  } else if (opts.writeStdout && content.length > 0 && !content.endsWith("\n")) {
     process.stdout.write("\n");
   }
-  return { content, chunk: last };
+
+  return { content: content || thinking, thinking, chunk: last };
 }
 
 async function generateTopic(opts: {
@@ -343,6 +383,7 @@ async function generateTopic(opts: {
       settings: mergeSettings(opts.settings, {
         temperature: 0.2,
         num_predict: 24,
+        think: false,
         // keep_alive 0 so topic pass doesn't pin the model longer than needed
         keep_alive: 0,
       }),
@@ -435,6 +476,8 @@ export async function main(): Promise<void> {
   }
 
   const settings = mergeSettings(
+    // Thinking models otherwise spend the whole num_predict budget on hidden reasoning.
+    { think: false },
     config.defaults,
     machineSettingsForHost(config, host),
     settingsFromEnv(),
@@ -478,7 +521,7 @@ export async function main(): Promise<void> {
     );
   }
 
-  const { content, chunk } = await runChat({
+  const { content, thinking, chunk } = await runChat({
     baseUrl,
     model,
     messages: toApiMessages(chat),
@@ -490,6 +533,7 @@ export async function main(): Promise<void> {
   appendMessage(chat, {
     role: "assistant",
     content,
+    ...(thinking ? { thinking } : {}),
     machine: shortName(host),
     model,
     stats: {
@@ -525,6 +569,7 @@ export async function main(): Promise<void> {
           chat_id: save ? chat.id : null,
           topic: chat.topic,
           content,
+          thinking: thinking || null,
           ollama: chunk,
         },
         null,
