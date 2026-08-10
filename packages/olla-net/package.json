@@ -1,0 +1,34 @@
+{
+  "name": "olla-net",
+  "version": "0.0.1",
+  "description": "Name hold for the hyphenated spelling — install and use `ollanet` instead",
+  "type": "module",
+  "license": "MIT",
+  "author": "Catalyst Forge LLC",
+  "bin": {
+    "olla-net": "./olla-net.js"
+  },
+  "files": [
+    "olla-net.js",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Catalyst-Forge-LLC/ollanet.git",
+    "directory": "packages/olla-net"
+  },
+  "homepage": "https://www.npmjs.com/package/ollanet",
+  "bugs": {
+    "url": "https://github.com/Catalyst-Forge-LLC/ollanet/issues"
+  },
+  "keywords": [
+    "ollanet",
+    "ollama"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

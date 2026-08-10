@@ -1,0 +1,48 @@
+# Trusted publishing (OIDC) → npm. No NPM_TOKEN required.
+# Configure on npmjs.com once the workflow file exists on the default branch:
+#   Package → Settings → Trusted Publisher → GitHub Actions
+#   Org/user: Catalyst-Forge-LLC
+#   Repository: ollanet
+#   Workflow filename: publish.yml
+#   Environment: npm  (optional but recommended — matches `environment:` below)
+#   Allowed actions: npm publish
+#
+# Docs: https://docs.npmjs.com/trusted-publishers/
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.14.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Ensure npm CLI supports OIDC trusted publishing
+        run: npm install -g npm@latest && npm --version
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test
+
+      # OIDC auth + provenance are automatic with trusted publishing (npm ≥ 11.5.1).
+      # Do not set NODE_AUTH_TOKEN here — a token makes npm skip OIDC.
+      - run: npm publish --access public
