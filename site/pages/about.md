@@ -1,18 +1,25 @@
 ---
-title: Ollama over your network
+title: Ollama over your network.
 description: Discover Ollama hosts, prompt models, continue chats by hash, and hand the mesh to agents over MCP.
 order: 1
 ---
 
-**ollanet** is a small CLI for using [Ollama](https://ollama.com) wherever you can reach it — localhost, LAN, Tailscale, VPN, or a raw IP. No browser UI required.
+AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** is the small CLI that finds Ollama hosts, talks to them, and keeps conversations alive across machines — including as MCP tools for your agents.
+
+<div class="cta-row">
+  <a class="cta cta-primary" href="/install">Install ollanet →</a>
+  <a class="cta cta-secondary" href="https://github.com/Catalyst-Forge-LLC/ollanet">View on GitHub</a>
+</div>
+
+<p class="kicker">npm · npx · Node 20+ · zero runtime deps</p>
 
 ## What you get
 
-- **Discover** hosts from config, env, Tailscale, and optional LAN scan
-- **Prompt** any machine by name or IP, with streaming replies
-- **Continue** conversations later with a short chat hash — across devices
-- **Bench** models for tok/s and light quality checks
-- **MCP** — `ollanet mcp` exposes scan/prompt/chats to agents over stdio
+- **Discover** — config, env, Tailscale, optional LAN scan; JSON for routers and agents
+- **Prompt** — any host by name or IP, streaming replies, sane defaults per machine
+- **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
+- **Bench** — tok/s + light quality checks across your fleet
+- **MCP** — `ollanet mcp` exposes scan / prompt / chats over stdio
 
 ## Quick start
 
@@ -22,15 +29,18 @@ ollanet scan
 ollanet prompt localhost "What is MagicDNS?"
 ```
 
-More detail on the [install](/install) page. Source and full flag reference: [GitHub](https://github.com/Catalyst-Forge-LLC/ollanet).
+Full flags and config live on the [install](/install) page.
 
 ## The Finetuna loop
 
-On the machine that *runs* Ollama, use **[Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna)** to shape a GPU-tuned named variant. ollanet discovers and uses it from anywhere on the network.
+<div class="mesh-panel">
+  <p>On the machine that <em>runs</em> Ollama, <a href="https://github.com/Catalyst-Forge-LLC/finetuna"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. ollanet discovers it from anywhere on the network and starts the session.</p>
+  <p>Host tunes the model. Network finds and uses it. Same API, closed loop.</p>
+</div>
 
 ## For agents
 
-Point your MCP host at:
+Point your MCP host at the stdio server — then route work to whatever’s alive on the mesh:
 
 ```json
 {
@@ -45,4 +55,9 @@ Point your MCP host at:
 
 Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_list_chats`, `ollanet_get_chat`.
 
-Built by [Catalyst Forge LLC](https://github.com/Catalyst-Forge-LLC).
+<div class="cta-row">
+  <a class="cta cta-primary" href="/install">Get started →</a>
+  <a class="cta cta-secondary" href="/writing">Read the posts</a>
+</div>
+
+Built by [Catalyst Forge LLC](https://www.catalystforge.com).

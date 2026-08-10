@@ -4,8 +4,8 @@ export default defineDownpressConfig({
 	title: 'ollanet',
 	description:
 		'Chat with Ollama servers on any network you can reach — LAN, Tailscale, VPN, or a raw IP. Discover hosts, prompt models, continue chats by hash, and expose them to agents over MCP.',
-	tagline: 'Ollama over your network.',
-	lede: 'Discover hosts. Prompt models. Hand agents the mesh.',
+	tagline: 'Find the models. Talk to them. Keep the thread.',
+	lede: 'CLI · MCP · your network',
 	url: 'https://ollanet.dev',
 	author: 'Catalyst Forge LLC',
 	logo: '/logo.png',
