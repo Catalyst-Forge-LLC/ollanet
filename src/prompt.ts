@@ -580,7 +580,7 @@ export async function main(): Promise<void> {
     promptParts = peeled.promptParts;
   }
 
-  const promptText = [...promptParts, fromStdin].filter(Boolean).join("\n\n").trim();
+  const promptText = [promptParts.join(" ").trim(), fromStdin].filter(Boolean).join("\n\n").trim();
   if (!promptText) {
     console.error("No prompt provided (pass args and/or pipe stdin).");
     usage();

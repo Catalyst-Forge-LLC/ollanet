@@ -175,7 +175,8 @@ Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or poi
   "defaults": {
     "temperature": 0.7,
     "num_predict": 512,
-    "keep_alive": "5m"
+    "keep_alive": "5m",
+    "think": false
   },
   "machineDefaults": {
     "studio": { "num_ctx": 16384 }
@@ -201,6 +202,7 @@ Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or poi
 | `OLLAMA_KEEP_ALIVE` | Default keep-alive |
 | `OLLAMA_FORMAT` | Default format (`json` or schema JSON) |
 | `OLLAMA_SYSTEM` | Default system prompt |
+| `OLLANET_THINK` / `OLLAMA_THINK` | Enable thinking (`true`/`false`; default off) |
 | `OLLAMA_TIMEOUT_MS` | HTTP scan/probe timeout |
 | `OLLAMA_PROMPT_TIMEOUT_MS` | Prompt/chat HTTP timeout (default `600000`; `0` = none) |
 | `OLLAMA_CONCURRENCY` | Scan concurrency |
