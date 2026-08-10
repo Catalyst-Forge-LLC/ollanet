@@ -1,0 +1,206 @@
+/**
+ * Unit tests for the pure helpers. These run against dist/, so `npm run build`
+ * (or `npm test`, which builds first) must have run.
+ */
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import {
+  discoverHosts,
+  envInt,
+  findDiscoveredHost,
+  ollamaBaseUrl,
+  resolveHost,
+  shortName,
+} from "../dist/hosts.js";
+import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store.js";
+import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
+
+/** Minimal HostTarget literal for resolution tests. */
+function host(partial) {
+  return {
+    hostname: partial.hostname,
+    dnsName: partial.dnsName ?? "",
+    ip: partial.ip,
+    online: true,
+    os: "linux",
+    isSelf: false,
+    source: "config",
+    port: partial.port ?? 11434,
+  };
+}
+
+const TARGETS = [
+  host({ hostname: "studio", dnsName: "studio.tail1234.ts.net", ip: "100.64.0.2" }),
+  host({ hostname: "localhost", dnsName: "localhost", ip: "127.0.0.1" }),
+];
+
+describe("normalizeChatId", () => {
+  it("accepts a hex hash and strips a .json suffix", () => {
+    assert.equal(normalizeChatId("A1B2C3D4E5F6"), "a1b2c3d4e5f6");
+    assert.equal(normalizeChatId("a1b2c3d4e5f6.json"), "a1b2c3d4e5f6");
+  });
+
+  it("rejects path traversal and other non-hex input", () => {
+    for (const bad of ["../../../etc/passwd", "a1b2/../../x", "not-hex", "", "abc"]) {
+      assert.throws(() => normalizeChatId(bad), /Invalid chat id/);
+    }
+  });
+});
+
+describe("ollamaBaseUrl", () => {
+  it("leaves IPv4 bare and brackets IPv6", () => {
+    assert.equal(ollamaBaseUrl(host({ hostname: "h", ip: "192.168.1.50" })), "http://192.168.1.50:11434");
+    assert.equal(ollamaBaseUrl(host({ hostname: "h", ip: "::1" })), "http://[::1]:11434");
+  });
+
+  it("honours a non-default port", () => {
+    assert.equal(
+      ollamaBaseUrl(host({ hostname: "h", ip: "10.0.0.1", port: 9999 })),
+      "http://10.0.0.1:9999",
+    );
+  });
+});
+
+describe("resolveHost", () => {
+  it("matches by short name, full DNS name, and IP", () => {
+    assert.equal(resolveHost(TARGETS, "studio").ip, "100.64.0.2");
+    assert.equal(resolveHost(TARGETS, "studio.tail1234.ts.net").ip, "100.64.0.2");
+    assert.equal(resolveHost(TARGETS, "127.0.0.1").hostname, "localhost");
+  });
+
+  it("accepts direct addresses that were never discovered", () => {
+    assert.equal(resolveHost(TARGETS, "192.168.1.50").ip, "192.168.1.50");
+    assert.equal(resolveHost(TARGETS, "box.local").ip, "box.local");
+  });
+
+  // Regression: a dotless hostname with a port used to fall through unparsed and
+  // produce http://[myhost:11434]:11434.
+  it("splits host:port for dotless hostnames", () => {
+    const h = resolveHost(TARGETS, "myhost:11500");
+    assert.equal(h.ip, "myhost");
+    assert.equal(h.port, 11500);
+    assert.equal(ollamaBaseUrl(h), "http://myhost:11500");
+  });
+
+  it("splits host:port for IPv4 and bracketed IPv6", () => {
+    assert.equal(ollamaBaseUrl(resolveHost(TARGETS, "10.1.2.3:1234")), "http://10.1.2.3:1234");
+    assert.equal(ollamaBaseUrl(resolveHost(TARGETS, "[::1]:1234")), "http://[::1]:1234");
+  });
+
+  // Regression: bare words used to be treated as direct addresses, so typos
+  // became confusing connection failures instead of a helpful error.
+  it("rejects a bare-word typo with a list of known hosts", () => {
+    assert.throws(() => resolveHost(TARGETS, "studioo"), /Unknown machine/);
+    assert.throws(() => resolveHost(TARGETS, "studioo"), /studio/);
+  });
+
+  it("rejects an empty query", () => {
+    assert.throws(() => resolveHost(TARGETS, "   "), /empty/);
+  });
+});
+
+describe("findDiscoveredHost", () => {
+  it("finds discovered hosts only, with no direct-address fallback", () => {
+    assert.equal(findDiscoveredHost(TARGETS, "studio")?.ip, "100.64.0.2");
+    assert.equal(findDiscoveredHost(TARGETS, "explain"), undefined);
+    assert.equal(findDiscoveredHost(TARGETS, "192.168.1.50"), undefined);
+  });
+});
+
+describe("shortName", () => {
+  it("prefers the first label of the DNS name", () => {
+    assert.equal(shortName(TARGETS[0]), "studio");
+    assert.equal(shortName(host({ hostname: "raw", ip: "1.2.3.4" })), "raw");
+  });
+
+  // Regression: config { name, host: "192.168.1.50" } used to set dnsName to the IP,
+  // so shortName() returned "192" instead of the configured name.
+  it("uses the configured name when host is an IPv4 literal", async () => {
+    const { hosts } = await discoverHosts({
+      hosts: [{ name: "studio", host: "192.168.1.50", port: 11434 }],
+      discovery: { localhost: false, tailscale: false, lan: false },
+    });
+    assert.equal(hosts.length, 1);
+    assert.equal(shortName(hosts[0]), "studio");
+    assert.equal(hosts[0].dnsName, "");
+  });
+});
+
+describe("envInt", () => {
+  it("falls back when unset or empty", () => {
+    delete process.env.OLLANET_TEST_INT;
+    assert.equal(envInt("OLLANET_TEST_INT", 42), 42);
+    process.env.OLLANET_TEST_INT = "  ";
+    assert.equal(envInt("OLLANET_TEST_INT", 42), 42);
+  });
+
+  it("parses and truncates valid numbers", () => {
+    process.env.OLLANET_TEST_INT = "7";
+    assert.equal(envInt("OLLANET_TEST_INT", 42), 7);
+    process.env.OLLANET_TEST_INT = "7.9";
+    assert.equal(envInt("OLLANET_TEST_INT", 42), 7);
+    delete process.env.OLLANET_TEST_INT;
+  });
+
+  // Regression: these used to become NaN and fail silently.
+  it("throws on non-numeric values instead of yielding NaN", () => {
+    process.env.OLLANET_TEST_INT = "abc";
+    assert.throws(() => envInt("OLLANET_TEST_INT", 42), /Invalid OLLANET_TEST_INT/);
+    delete process.env.OLLANET_TEST_INT;
+  });
+});
+
+describe("mergeSettings", () => {
+  it("applies later layers over earlier ones", () => {
+    const merged = mergeSettings(
+      { temperature: 0.7, num_predict: 512 },
+      { temperature: 0.2 },
+      undefined,
+      { num_ctx: 4096 },
+    );
+    assert.deepEqual(merged, { temperature: 0.2, num_predict: 512, num_ctx: 4096 });
+  });
+
+  // think:false is meaningful, so it must survive a null-ish check.
+  it("preserves an explicit think:false", () => {
+    assert.equal(mergeSettings({ think: false }).think, false);
+    assert.equal(mergeSettings({ think: false }, { think: true }).think, true);
+    assert.equal(mergeSettings({ think: true }, {}).think, true);
+  });
+
+  it("preserves keep_alive:0, which is falsy but meaningful", () => {
+    assert.equal(mergeSettings({ keep_alive: "5m" }, { keep_alive: 0 }).keep_alive, 0);
+  });
+});
+
+describe("normalizeSettings", () => {
+  it("coerces string booleans for think", () => {
+    assert.equal(normalizeSettings({ think: "true" }).think, true);
+    assert.equal(normalizeSettings({ think: "off" }).think, false);
+    assert.equal(normalizeSettings({ think: "maybe" }).think, undefined);
+    assert.equal(normalizeSettings({}).think, undefined);
+  });
+});
+
+describe("parseFormat", () => {
+  it("accepts json and a schema string, ignoring junk", () => {
+    assert.equal(parseFormat("json"), "json");
+    assert.deepEqual(parseFormat('{"type":"object"}'), { type: "object" });
+    assert.equal(parseFormat(""), undefined);
+  });
+});
+
+describe("topic helpers", () => {
+  it("collapses whitespace and truncates long prompts", () => {
+    assert.equal(topicFromPrompt("  hello   world \n"), "hello world");
+    assert.equal(topicFromPrompt(""), "Untitled chat");
+    assert.ok(topicFromPrompt("x".repeat(200)).length <= 72);
+  });
+
+  it("strips quotes and Title: prefixes from model output", () => {
+    assert.equal(cleanTopic('"Ferret Haiku"', "fb"), "Ferret Haiku");
+    assert.equal(cleanTopic("Title: Ferret Haiku", "fb"), "Ferret Haiku");
+    assert.equal(cleanTopic("   ", "fb"), "fb");
+  });
+});

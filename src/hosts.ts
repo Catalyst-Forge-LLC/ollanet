@@ -189,7 +189,9 @@ function parseHostEntry(entry: HostConfigEntry): HostTarget | null {
   const name = (entry.name ?? address).trim();
   return makeHost({
     hostname: name,
-    dnsName: address.includes(".") ? address : "",
+    // An IPv4 literal is not a DNS name; treating it as one makes shortName()
+    // return the first octet ("192") instead of the configured name.
+    dnsName: !/^\d{1,3}(\.\d{1,3}){3}$/.test(address) && address.includes(".") ? address : "",
     ip: address,
     source: "config",
     online: true,

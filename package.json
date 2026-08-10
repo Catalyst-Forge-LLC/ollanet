@@ -19,7 +19,9 @@
     "prompt": "tsx src/cli.ts prompt",
     "chats": "tsx src/cli.ts chats",
     "start": "tsx src/cli.ts scan",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
+    "test:only": "node --test test/*.test.mjs"
   },
   "keywords": [
     "ollama",

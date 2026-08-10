@@ -243,9 +243,13 @@ ollanet/
 ```bash
 pnpm install          # builds dist/ via prepare
 pnpm typecheck
+pnpm test             # build dist/, then run node:test suite
 pnpm ollanet -- scan  # runs from source via tsx
 pnpm build            # compile dist/ manually
 ```
+
+Tests use Node’s built-in test runner against `dist/` (what gets published), with an
+in-process mock Ollama server — no real models or Tailscale required.
 
 ## License
 
