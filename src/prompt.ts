@@ -3,7 +3,7 @@
  * Run a prompt / continue a chat against an Ollama server on the network.
  *
  * New chat (saved by default):
- *   ollanet prompt mycroftone "What is Tailscale?"
+ *   ollanet prompt localhost "What is Tailscale?"
  *   ollanet prompt 192.168.1.50 "Hello"
  *
  * Continue:
@@ -37,11 +37,16 @@ import {
 } from "./config.ts";
 import {
   discoverHosts,
+  envInt,
+  findDiscoveredHost,
   ollamaBaseUrl,
   resolveHost,
   shortName,
   type HostTarget,
 } from "./hosts.ts";
+
+/** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
+const PROMPT_TIMEOUT_MS = envInt("OLLAMA_PROMPT_TIMEOUT_MS", 600_000);
 
 interface ChatChunk {
   model?: string;
@@ -62,9 +67,9 @@ function usage(): never {
   ollanet prompt <machine> --chat <hash> <prompt...>
 
 Examples:
-  ollanet prompt mycroftone "Explain MagicDNS"
+  ollanet prompt localhost "Explain MagicDNS"
   ollanet prompt --chat a1b2c3d4e5f6 "Give an example"
-  ollanet prompt mycroftone --temperature 0.2 --num-predict 64 "2+2?"
+  ollanet prompt localhost --temperature 0.2 --num-predict 64 "2+2?"
   ollanet chats
 
 Each reply is saved under responses/<hash>.json and the hash is printed so you
@@ -91,8 +96,68 @@ Options:
   process.exit(1);
 }
 
+/**
+ * Heuristic for an optional positional model token.
+ * Rejects whitespace (so quoted prompts with ":" stay prompts) and URL schemes.
+ * Confirmed against the host's /api/tags before peeling.
+ */
 function looksLikeModel(value: string): boolean {
-  return value.includes(":") || value.includes("/");
+  const v = value.trim();
+  if (!v || /\s/.test(v)) return false;
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) return false;
+  return /^[a-z0-9][a-z0-9._-]*([/:@][a-z0-9._-]+)+$/i.test(v);
+}
+
+function modelNameMatches(available: string[], candidate: string): boolean {
+  const c = candidate.toLowerCase();
+  return available.some((name) => {
+    const n = name.toLowerCase();
+    return n === c || n.startsWith(`${c}:`) || c.startsWith(`${n}:`);
+  });
+}
+
+async function listModelNames(host: HostTarget): Promise<string[] | null> {
+  const url = `${ollamaBaseUrl(host)}/api/tags`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Math.min(PROMPT_TIMEOUT_MS || 2500, 5000));
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { models?: Array<{ name?: string }> };
+    return (body.models ?? []).map((m) => m.name).filter((n): n is string => Boolean(n));
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Peel a leading model token only when it looks like one and exists on the host. */
+async function maybePeelModel(
+  host: HostTarget,
+  promptParts: string[],
+  fromStdin: string,
+): Promise<{ model?: string; promptParts: string[] }> {
+  if (promptParts.length === 0) return { promptParts };
+  const candidate = promptParts[0]!;
+  if (!looksLikeModel(candidate)) return { promptParts };
+
+  const names = await listModelNames(host);
+  if (names) {
+    if (modelNameMatches(names, candidate)) {
+      return { model: candidate, promptParts: promptParts.slice(1) };
+    }
+    return { promptParts };
+  }
+
+  // Tags unavailable: only peel when something remains for the prompt body.
+  if (promptParts.length > 1 || fromStdin) {
+    return { model: candidate, promptParts: promptParts.slice(1) };
+  }
+  return { promptParts };
 }
 
 function takeValue(args: string[], flag: string): string {
@@ -213,19 +278,15 @@ function parseArgs(argv: string[]): {
   }
 
   let machine = machineFlag;
-  let model = modelFlag;
+  const model = modelFlag;
   let promptParts = positional;
 
   if (!chatId) {
-    // New chat: <machine> [model] <prompt...>
+    // New chat: <machine> [model] <prompt...> — model is peeled later against /api/tags.
     if (!machine) {
       if (positional.length < 1) usage();
       machine = positional[0];
       promptParts = positional.slice(1);
-    }
-    if (!model && promptParts.length > 0 && looksLikeModel(promptParts[0]!)) {
-      model = promptParts[0];
-      promptParts = promptParts.slice(1);
     }
   }
   // Continue (--chat): all positionals are the prompt. Optional machine override
@@ -236,6 +297,31 @@ function parseArgs(argv: string[]): {
 
 async function readStdinIfPiped(): Promise<string> {
   if (stdinStream.isTTY) return "";
+
+  // Under npm/pnpm/CI, stdin is often a pipe that never gets EOF. Only drain it
+  // when data arrives promptly; otherwise treat as "no stdin prompt".
+  const hasData = await new Promise<boolean>((resolve) => {
+    if (stdinStream.readableLength > 0 || stdinStream.readableEnded) {
+      resolve(true);
+      return;
+    }
+    let settled = false;
+    const done = (value: boolean): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      stdinStream.off("readable", onReadable);
+      stdinStream.off("end", onEnd);
+      resolve(value);
+    };
+    const onReadable = (): void => done(true);
+    const onEnd = (): void => done(true);
+    stdinStream.once("readable", onReadable);
+    stdinStream.once("end", onEnd);
+    const timer = setTimeout(() => done(stdinStream.readableLength > 0), 25);
+  });
+  if (!hasData) return "";
+
   const chunks: Buffer[] = [];
   for await (const chunk of stdinStream) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
@@ -275,96 +361,132 @@ async function runChat(opts: {
   const options = buildOptions(opts.settings);
   if (Object.keys(options).length > 0) body.options = options;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(body),
-  });
+  const controller = new AbortController();
+  const timer =
+    PROMPT_TIMEOUT_MS > 0 ? setTimeout(() => controller.abort(), PROMPT_TIMEOUT_MS) : undefined;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (timer) clearTimeout(timer);
+    const name = err instanceof Error ? err.name : "";
+    if (name === "AbortError") {
+      throw new Error(`Prompt timed out after ${PROMPT_TIMEOUT_MS}ms (${url})`);
+    }
+    throw err;
+  }
 
   if (!res.ok) {
+    if (timer) clearTimeout(timer);
     const text = await res.text().catch(() => "");
     throw new Error(`Ollama HTTP ${res.status} ${res.statusText}${text ? `: ${text}` : ""}`);
   }
 
-  if (!opts.stream) {
-    const chunk = (await res.json()) as ChatChunk;
-    if (chunk.error) throw new Error(chunk.error);
-    const content = chunk.message?.content ?? "";
-    const thinking = chunk.message?.thinking ?? "";
-    if (opts.writeStdout) {
-      if (think && thinking) {
-        process.stderr.write(`${thinking}\n---\n`);
-      }
-      const visible = content || thinking;
-      if (visible) process.stdout.write(`${visible}\n`);
+  const parseChunk = (raw: string): ChatChunk => {
+    try {
+      return JSON.parse(raw) as ChatChunk;
+    } catch {
+      throw new Error(
+        `Non-JSON response from ${url} (is something else on this port?): ${raw.slice(0, 120)}`,
+      );
     }
-    return { content: content || thinking, thinking, chunk };
-  }
-
-  if (!res.body) throw new Error("No response body from Ollama");
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let last: ChatChunk = {};
-  let content = "";
-  let thinking = "";
-  let thinkingHeader = false;
-
-  const handleChunk = (chunk: ChatChunk): void => {
-    if (chunk.error) throw new Error(chunk.error);
-    const thinkPiece = chunk.message?.thinking ?? "";
-    const contentPiece = chunk.message?.content ?? "";
-    if (thinkPiece) {
-      thinking += thinkPiece;
-      if (opts.writeStdout && think) {
-        if (!thinkingHeader) {
-          process.stderr.write("[thinking]\n");
-          thinkingHeader = true;
-        }
-        process.stderr.write(thinkPiece);
-      }
-    }
-    if (contentPiece) {
-      content += contentPiece;
-      if (opts.writeStdout) {
-        if (thinkingHeader) {
-          process.stderr.write("\n---\n");
-          thinkingHeader = false;
-        }
-        process.stdout.write(contentPiece);
-      }
-    }
-    last = chunk;
   };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      handleChunk(JSON.parse(trimmed) as ChatChunk);
+  try {
+    if (!opts.stream) {
+      const chunk = parseChunk(await res.text());
+      if (chunk.error) throw new Error(chunk.error);
+      const content = chunk.message?.content ?? "";
+      const thinking = chunk.message?.thinking ?? "";
+      if (opts.writeStdout) {
+        if (think && thinking) {
+          process.stderr.write(`${thinking}\n---\n`);
+        }
+        const visible = content || thinking;
+        if (visible) process.stdout.write(`${visible}\n`);
+      }
+      return { content: content || thinking, thinking, chunk };
     }
-  }
 
-  const trailing = buffer.trim();
-  if (trailing) {
-    handleChunk(JSON.parse(trailing) as ChatChunk);
-  }
+    if (!res.body) throw new Error("No response body from Ollama");
 
-  // If the model only emitted thinking (budget exhausted), surface it on stdout.
-  if (opts.writeStdout && !content && thinking) {
-    if (think) process.stderr.write("\n---\n");
-    process.stdout.write(`${thinking}\n`);
-  } else if (opts.writeStdout && content.length > 0 && !content.endsWith("\n")) {
-    process.stdout.write("\n");
-  }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let last: ChatChunk = {};
+    let content = "";
+    let thinking = "";
+    let thinkingHeader = false;
 
-  return { content: content || thinking, thinking, chunk: last };
+    const handleChunk = (chunk: ChatChunk): void => {
+      if (chunk.error) throw new Error(chunk.error);
+      const thinkPiece = chunk.message?.thinking ?? "";
+      const contentPiece = chunk.message?.content ?? "";
+      if (thinkPiece) {
+        thinking += thinkPiece;
+        if (opts.writeStdout && think) {
+          if (!thinkingHeader) {
+            process.stderr.write("[thinking]\n");
+            thinkingHeader = true;
+          }
+          process.stderr.write(thinkPiece);
+        }
+      }
+      if (contentPiece) {
+        content += contentPiece;
+        if (opts.writeStdout) {
+          if (thinkingHeader) {
+            process.stderr.write("\n---\n");
+            thinkingHeader = false;
+          }
+          process.stdout.write(contentPiece);
+        }
+      }
+      last = chunk;
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        handleChunk(parseChunk(trimmed));
+      }
+    }
+
+    const trailing = buffer.trim();
+    if (trailing) {
+      handleChunk(parseChunk(trailing));
+    }
+
+    // If the model only emitted thinking (budget exhausted), surface it on stdout.
+    if (opts.writeStdout && !content && thinking) {
+      if (think) process.stderr.write("\n---\n");
+      process.stdout.write(`${thinking}\n`);
+    } else if (opts.writeStdout && content.length > 0 && !content.endsWith("\n")) {
+      process.stdout.write("\n");
+    }
+
+    return { content: content || thinking, thinking, chunk: last };
+  } catch (err) {
+    const name = err instanceof Error ? err.name : "";
+    if (name === "AbortError") {
+      throw new Error(`Prompt timed out after ${PROMPT_TIMEOUT_MS}ms (${url})`);
+    }
+    throw err;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 async function generateTopic(opts: {
@@ -384,8 +506,7 @@ async function generateTopic(opts: {
         temperature: 0.2,
         num_predict: 24,
         think: false,
-        // keep_alive 0 so topic pass doesn't pin the model longer than needed
-        keep_alive: 0,
+        // Inherit caller's keep_alive — do not force-unload the model after topic gen.
       }),
       messages: [
         {
@@ -412,15 +533,10 @@ function formatDuration(ns: number | undefined): string {
 
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
-  const { promptParts, stream, json, save } = parsed;
+  const { stream, json, save } = parsed;
+  let promptParts = parsed.promptParts;
 
-  const fromArgs = promptParts.join(" ").trim();
   const fromStdin = await readStdinIfPiped();
-  const prompt = [fromArgs, fromStdin].filter(Boolean).join("\n\n").trim();
-  if (!prompt) {
-    console.error("No prompt provided (pass args and/or pipe stdin).");
-    usage();
-  }
 
   const config = await loadConfig();
   const { hosts: targets } = await discoverHosts({
@@ -431,20 +547,17 @@ export async function main(): Promise<void> {
   let chat: ChatTranscript | undefined;
   let isNewChat = false;
   let machineQuery = parsed.machine;
-  let promptText = prompt;
 
   if (parsed.chatId) {
     chat = await loadChat(parsed.chatId);
 
-    // Allow `ollanet prompt mycroftone --chat HASH "follow-up"` by peeling a
-    // leading positional that matches a discovered host.
+    // Allow `ollanet prompt <host> --chat HASH "follow-up"` only when the
+    // leading token matches an already-discovered host (not direct-address fallback).
     if (!machineQuery && promptParts.length >= 2) {
-      try {
-        resolveHost(targets, promptParts[0]!);
+      const hit = findDiscoveredHost(targets, promptParts[0]!);
+      if (hit) {
         machineQuery = promptParts[0];
-        promptText = [...promptParts.slice(1), fromStdin].filter(Boolean).join("\n\n").trim();
-      } catch {
-        // first token is part of the prompt
+        promptParts = promptParts.slice(1);
       }
     }
   }
@@ -454,18 +567,28 @@ export async function main(): Promise<void> {
     console.error("Machine is required for a new chat (or use --chat <hash>).");
     usage();
   }
-  if (!promptText) {
-    console.error("No prompt provided (pass args and/or pipe stdin).");
-    usage();
-  }
 
   const host: HostTarget = resolveHost(targets, machineQuery);
   if (!host.online && !host.isSelf && host.source === "tailscale") {
     throw new Error(`Machine "${shortName(host)}" appears offline.`);
   }
 
+  let peeledModel: string | undefined;
+  if (!parsed.chatId && !parsed.model) {
+    const peeled = await maybePeelModel(host, promptParts, fromStdin);
+    peeledModel = peeled.model;
+    promptParts = peeled.promptParts;
+  }
+
+  const promptText = [...promptParts, fromStdin].filter(Boolean).join("\n\n").trim();
+  if (!promptText) {
+    console.error("No prompt provided (pass args and/or pipe stdin).");
+    usage();
+  }
+
   const model =
     parsed.model ??
+    peeledModel ??
     chat?.model ??
     defaultModelForHost(config, host);
   if (!model) {

@@ -202,6 +202,7 @@ Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or poi
 | `OLLAMA_FORMAT` | Default format (`json` or schema JSON) |
 | `OLLAMA_SYSTEM` | Default system prompt |
 | `OLLAMA_TIMEOUT_MS` | HTTP scan/probe timeout |
+| `OLLAMA_PROMPT_TIMEOUT_MS` | Prompt/chat HTTP timeout (default `600000`; `0` = none) |
 | `OLLAMA_CONCURRENCY` | Scan concurrency |
 
 ## Chat transcripts

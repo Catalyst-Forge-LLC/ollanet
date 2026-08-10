@@ -5,7 +5,18 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-export const OLLAMA_PORT = Number(process.env.OLLAMA_PORT ?? 11434);
+/** Parse a required numeric env var; invalid values throw instead of becoming NaN. */
+export function envInt(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw == null || String(raw).trim() === "") return fallback;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) {
+    throw new Error(`Invalid ${name}="${raw}" (expected a number)`);
+  }
+  return Math.trunc(n);
+}
+
+export const OLLAMA_PORT = envInt("OLLAMA_PORT", 11434);
 
 export type HostSource = "localhost" | "config" | "env" | "tailscale" | "lan" | "direct";
 
@@ -334,8 +345,8 @@ async function tcpOpen(ip: string, port: number, timeoutMs: number): Promise<boo
 }
 
 async function lanScanTargets(cidrs: string[], port: number): Promise<HostTarget[]> {
-  const timeoutMs = Number(process.env.OLLANET_LAN_TIMEOUT_MS ?? 200);
-  const concurrency = Number(process.env.OLLANET_LAN_CONCURRENCY ?? 64);
+  const timeoutMs = envInt("OLLANET_LAN_TIMEOUT_MS", 200);
+  const concurrency = Math.max(1, envInt("OLLANET_LAN_CONCURRENCY", 64));
   const ips = [...new Set(cidrs.flatMap((cidr) => cidrToIps(cidr)))];
   if (ips.length === 0) return [];
 
@@ -357,12 +368,17 @@ async function lanScanTargets(cidrs: string[], port: number): Promise<HostTarget
     );
 }
 
+/**
+ * True for IPs, FQDNs, and host:port — not bare words.
+ * Bare words must match a discovered host so typos get a helpful error.
+ */
 function looksLikeAddress(query: string): boolean {
   const q = query.trim();
-  if (!q) return false;
-  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(q)) return true;
-  if (q.includes(":") && !q.includes(" ")) return true; // hostname:port or ipv6-ish
-  if (/^[a-z0-9][a-z0-9._-]*$/i.test(q)) return true;
+  if (!q || /\s/.test(q)) return false;
+  if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(q)) return true;
+  if (/^\[[0-9a-f:]+\](:\d+)?$/i.test(q)) return true;
+  if (/^[a-z0-9][a-z0-9._-]*:\d+$/i.test(q)) return true;
+  if (q.includes(".") && /^[a-z0-9][a-z0-9.-]+$/i.test(q)) return true;
   return false;
 }
 
@@ -379,14 +395,21 @@ function parseDirectAddress(query: string): HostTarget | null {
     ip = ipv4WithPort[1]!;
     hostname = ip;
     port = Number(ipv4WithPort[2]);
-  } else if (!q.includes("://") && q.includes(".") === false && q.includes(":")) {
-    // host:port without dots (rare) — skip to avoid mangling IPv6
   } else {
+    // host:port with or without dots. Requires a single colon + numeric port so
+    // bare IPv6 (multiple colons) is left alone.
     const hostPort = q.match(/^([a-z0-9][a-z0-9._-]*):(\d+)$/i);
     if (hostPort) {
       hostname = hostPort[1]!;
       ip = hostname;
       port = Number(hostPort[2]);
+    } else {
+      const bracketed = q.match(/^\[([0-9a-f:]+)\]:(\d+)$/i);
+      if (bracketed) {
+        ip = bracketed[1]!;
+        hostname = ip;
+        port = Number(bracketed[2]);
+      }
     }
   }
 
@@ -460,6 +483,28 @@ export async function discoverHosts(opts: DiscoverOptions = {}): Promise<Discove
   return { hosts, sources, networkLabel };
 }
 
+function hostNameMatches(host: HostTarget, q: string): boolean {
+  const names = [host.hostname, host.dnsName, shortName(host), host.ip].map((n) =>
+    n.toLowerCase(),
+  );
+  return names.includes(q) || names.some((n) => n.startsWith(`${q}.`));
+}
+
+/**
+ * Match a query against already-discovered hosts only (no direct-address fallback).
+ * Used when peeling an optional leading hostname before a prompt.
+ */
+export function findDiscoveredHost(
+  targets: HostTarget[],
+  query: string,
+): HostTarget | undefined {
+  const q = query.trim().toLowerCase().replace(/\.$/, "");
+  if (!q) return undefined;
+  const matches = targets.filter((host) => hostNameMatches(host, q));
+  if (matches.length === 1) return matches[0];
+  return undefined;
+}
+
 /** Resolve a machine name against discovered hosts, or treat it as a direct address. */
 export function resolveHost(targets: HostTarget[], query: string): HostTarget {
   const q = query.trim().toLowerCase().replace(/\.$/, "");
@@ -467,12 +512,7 @@ export function resolveHost(targets: HostTarget[], query: string): HostTarget {
     throw new Error("Machine name is empty.");
   }
 
-  const matches = targets.filter((host) => {
-    const names = [host.hostname, host.dnsName, shortName(host), host.ip].map((n) =>
-      n.toLowerCase(),
-    );
-    return names.includes(q) || names.some((n) => n.startsWith(`${q}.`));
-  });
+  const matches = targets.filter((host) => hostNameMatches(host, q));
 
   if (matches.length === 1) return matches[0]!;
   if (matches.length > 1) {

@@ -9,12 +9,13 @@ import { loadConfig } from "./config.ts";
 import {
   OLLAMA_PORT,
   discoverHosts,
+  envInt,
   shortName,
   type HostTarget,
 } from "./hosts.ts";
 
-const TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS ?? 2500);
-const CONCURRENCY = Number(process.env.OLLAMA_CONCURRENCY ?? 16);
+const TIMEOUT_MS = envInt("OLLAMA_TIMEOUT_MS", 2500);
+const CONCURRENCY = Math.max(1, envInt("OLLAMA_CONCURRENCY", 16));
 
 interface OllamaModel {
   name: string;
