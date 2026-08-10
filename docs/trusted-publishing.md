@@ -1,6 +1,8 @@
 # Trusted publishing (npm OIDC)
 
-Publish `ollanet`, `olla-net`, and (companion) `finetuna` from GitHub Actions without long-lived npm tokens. Provenance attestations are generated automatically when publishing public packages from a public repo via trusted publishing.
+Publish `ollanet` and (companion) `finetuna` from GitHub Actions without long-lived npm tokens. Provenance attestations are generated automatically when publishing public packages from a public repo via trusted publishing.
+
+npm rejects unscoped names that are too similar to existing packages (e.g. `olla-net` vs `ollanet`), so we do not maintain a hyphenated name-hold package.
 
 ## One-time setup (you do this in the browser)
 
@@ -8,44 +10,25 @@ Publish `ollanet`, `olla-net`, and (companion) `finetuna` from GitHub Actions wi
 
 On each repo (`ollanet`, `finetuna`):
 
-1. Push the `.github/workflows/publish*.yml` files to the **default branch**.
-2. GitHub → **Settings → Environments → New environment** → name it exactly `npm`.
+1. Push the `.github/workflows/publish.yml` file to the **default branch**.
+2. GitHub → **Settings → Environments → New environment** → name it exactly `npm` (already created via API if you followed the earlier setup).
 3. Optional but recommended: add required reviewers so a human must approve each publish job.
 
-### 2. Claim `olla-net` (first publish only)
+### 2. Add Trusted Publisher on npmjs.com
 
-The hyphenated name is a name-hold package under `packages/olla-net`. Until it exists on the registry, trusted publishing cannot be configured for it.
+For each package — [ollanet](https://www.npmjs.com/package/ollanet), [finetuna](https://www.npmjs.com/package/finetuna) — open **Package → Settings → Trusted Publisher → GitHub Actions**:
 
-From a machine already logged into npm (`npm whoami`):
-
-```bash
-cd packages/olla-net
-npm publish --access public
-```
-
-Complete OTP / 2FA when prompted. Then optionally:
-
-```bash
-npm deprecate olla-net@"*" "Use ollanet instead: npm i -g ollanet"
-```
-
-Do **not** claim `ollamanet` (embeds the full product name).
-
-### 3. Add Trusted Publisher on npmjs.com
-
-For each package — [ollanet](https://www.npmjs.com/package/ollanet), [olla-net](https://www.npmjs.com/package/olla-net), [finetuna](https://www.npmjs.com/package/finetuna) — open **Package → Settings → Trusted Publisher → GitHub Actions**:
-
-| Field | ollanet | olla-net | finetuna |
-| --- | --- | --- | --- |
-| Organization or user | `Catalyst-Forge-LLC` | `Catalyst-Forge-LLC` | `Catalyst-Forge-LLC` |
-| Repository | `ollanet` | `ollanet` | `finetuna` |
-| Workflow filename | `publish.yml` | `publish-olla-net.yml` | `publish.yml` |
-| Environment name | `npm` | `npm` | `npm` |
-| Allowed actions | `npm publish` | `npm publish` | `npm publish` |
+| Field | ollanet | finetuna |
+| --- | --- | --- |
+| Organization or user | `Catalyst-Forge-LLC` | `Catalyst-Forge-LLC` |
+| Repository | `ollanet` | `finetuna` |
+| Workflow filename | `publish.yml` | `publish.yml` |
+| Environment name | `npm` | `npm` |
+| Allowed actions | `npm publish` | `npm publish` |
 
 Filename must match exactly (including `.yml`). npm does not validate the form until the first publish attempt.
 
-### 4. Harden publishing access (after a successful OIDC publish)
+### 3. Harden publishing access (after a successful OIDC publish)
 
 Package → **Settings → Publishing access** → **Require two-factor authentication and disallow tokens**.
 

@@ -58,7 +58,7 @@ ollanet scan
 When installed this way, config lives at `~/.ollanet/config.json` and chats are
 saved to `~/.ollanet/responses/`.
 
-Releases can publish from GitHub Actions via npm **trusted publishing** (OIDC + provenance). Setup notes: [docs/trusted-publishing.md](docs/trusted-publishing.md). The hyphenated name `olla-net` is a name-hold package only — install `ollanet`.
+Releases can publish from GitHub Actions via npm **trusted publishing** (OIDC + provenance). Setup notes: [docs/trusted-publishing.md](docs/trusted-publishing.md).
 
 ### From a checkout (development)
 
