@@ -1,6 +1,6 @@
 {
   "name": "ollanet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Chat with Ollama servers on any reachable network — scan hosts, prompt models, continue chats by hash",
   "type": "module",
   "bin": {
