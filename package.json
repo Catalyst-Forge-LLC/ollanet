@@ -18,6 +18,7 @@
     "scan": "tsx src/cli.ts scan",
     "prompt": "tsx src/cli.ts prompt",
     "chats": "tsx src/cli.ts chats",
+    "bench": "tsx src/cli.ts bench",
     "start": "tsx src/cli.ts scan",
     "typecheck": "tsc --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",

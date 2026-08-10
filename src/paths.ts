@@ -28,3 +28,8 @@ export function defaultConfigPath(): string {
 export function defaultResponsesDir(): string {
   return IS_INSTALLED ? path.join(USER_DIR, "responses") : projectPath("responses");
 }
+
+/** Default benchmark results dir (mirrors responses layout). */
+export function defaultBenchmarksDir(): string {
+  return IS_INSTALLED ? path.join(USER_DIR, "benchmarks") : projectPath("benchmarks");
+}

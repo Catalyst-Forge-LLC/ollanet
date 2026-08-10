@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import {
+  comparabilityKey,
+  getSuiteCases,
+  median,
+  suiteRevision,
+} from "../dist/bench-suite.js";
+
+describe("bench checkers", () => {
+  const cases = Object.fromEntries(getSuiteCases("full").map((c) => [c.id, c]));
+
+  it("ping accepts chatty OK replies via last-token rule", () => {
+    assert.equal(cases.ping.check("OK").ok, true);
+    assert.equal(cases.ping.check("OK.").ok, true);
+    assert.equal(cases.ping.check("Sure — OK").ok, true);
+    assert.equal(cases.ping.check("nope").ok, false);
+  });
+
+  it("math accepts the expected int among integers on the last line", () => {
+    assert.equal(cases.math.check("323").ok, true);
+    assert.equal(cases.math.check("323 (i.e., 17×19)").ok, true);
+    assert.equal(cases.math.check("I think 17 and 19 make something").ok, false);
+  });
+
+  it("suite_revision changes when prompts change identity", () => {
+    const a = suiteRevision("quick");
+    const b = suiteRevision("full");
+    assert.equal(a.length, 16);
+    assert.notEqual(a, b);
+  });
+
+  it("comparability_key includes num_predict and other pins", () => {
+    const base = {
+      suite: "quick",
+      throughputNumPredict: 256,
+      seed: 0,
+      temperature: 0,
+      think: false,
+      numCtx: null,
+    };
+    const a = comparabilityKey(base);
+    const b = comparabilityKey({ ...base, throughputNumPredict: 128 });
+    assert.notEqual(a, b);
+    assert.equal(comparabilityKey(base), a);
+  });
+
+  it("median works for odd and even lengths", () => {
+    assert.equal(median([3, 1, 2]), 2);
+    assert.equal(median([4, 1, 2, 3]), 2.5);
+    assert.equal(median([]), undefined);
+  });
+});

@@ -20,24 +20,58 @@ export const CLI = path.join(TEST_DIR, "..", "dist", "cli.js");
  *
  * @param {object} [opts]
  * @param {string[]} [opts.models]      Names returned by /api/tags.
+ * @param {Record<string, string[]>} [opts.capabilities] Per-model capabilities for /api/show.
  * @param {string}   [opts.reply]       Assistant content for /api/chat.
  * @param {string[]} [opts.thinking]    Thinking chunks to stream before the reply.
  * @param {string}   [opts.topicReply]  Content for non-streaming (topic) calls.
  * @param {string}   [opts.rawBody]     Send this literal body instead of JSON.
  * @param {number}   [opts.status]      HTTP status for /api/chat.
+ * @param {string}   [opts.doneReason]  done_reason on final chat chunk (default length).
+ * @param {number}   [opts.evalCount]   eval_count on chat responses.
+ * @param {number}   [opts.evalDuration]
+ * @param {number}   [opts.loadDuration] load_duration (ns) on chat responses.
+ * @param {string}   [opts.version]     /api/version string.
+ * @param {(req: {url: string, body: any}, ctx: object) => object|null} [opts.onChat]
+ *        Optional override returning a full JSON body for non-stream chat.
  */
 export async function startMock(opts = {}) {
   const {
     models = ["fake:1b", "qwen3:0.6b"],
+    capabilities = {},
     reply = "mock reply",
     thinking = [],
     topicReply = "Mock Topic",
     rawBody = null,
     status = 200,
+    doneReason = "length",
+    evalCount = 5,
+    evalDuration = 1e9,
+    loadDuration = 0,
+    version = "0.9.0-mock",
+    onChat = null,
   } = opts;
 
-  /** @type {Array<{url: string, body: any}>} */
+  /** @type {Array<{url: string, body: any, method: string}>} */
   const requests = [];
+  /** @type {Set<string>} */
+  const loaded = new Set();
+  /** @type {string | null} */
+  let pendingUnload = null;
+  let unloadPollsRemaining = 0;
+  const coldLoadDuration = opts.coldLoadDuration ?? 2_100_000_000;
+
+  const psModels = () => {
+    const names = new Set(loaded);
+    if (pendingUnload && unloadPollsRemaining > 0) {
+      names.add(pendingUnload);
+    }
+    return [...names].map((name) => ({
+      name,
+      model: name,
+      size_vram: 123456789,
+      digest: `sha256:digest-${name.replace(/[^a-z0-9]+/gi, "")}`,
+    }));
+  };
 
   const server = http.createServer((req, res) => {
     let raw = "";
@@ -49,11 +83,51 @@ export async function startMock(opts = {}) {
       } catch {
         body = raw;
       }
-      requests.push({ url: req.url ?? "", body });
+      requests.push({ url: req.url ?? "", body, method: req.method ?? "GET" });
 
       if (req.url === "/api/tags") {
         res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ models: models.map((name) => ({ name })) }));
+        res.end(
+          JSON.stringify({
+            models: models.map((name) => ({
+              name,
+              digest: `sha256:digest-${name.replace(/[^a-z0-9]+/gi, "")}`,
+              size: 1_000_000,
+              details: {
+                parameter_size: "1B",
+                quantization_level: "Q4_0",
+                family: "mock",
+              },
+            })),
+          }),
+        );
+        return;
+      }
+
+      if (req.url === "/api/version") {
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ version }));
+        return;
+      }
+
+      if (req.url === "/api/ps") {
+        if (pendingUnload && unloadPollsRemaining > 0) {
+          unloadPollsRemaining -= 1;
+          if (unloadPollsRemaining <= 0) {
+            loaded.delete(pendingUnload);
+            pendingUnload = null;
+          }
+        }
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ models: psModels() }));
+        return;
+      }
+
+      if (req.url === "/api/show") {
+        const name = typeof body?.model === "string" ? body.model : "";
+        const caps = capabilities[name] ?? ["completion"];
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ capabilities: caps, modelfile: "", parameters: "", template: "" }));
         return;
       }
 
@@ -71,17 +145,44 @@ export async function startMock(opts = {}) {
         return;
       }
 
+      const modelName = typeof body?.model === "string" ? body.model : "";
+      if (modelName) {
+        if (body?.keep_alive === 0 || body?.keep_alive === "0") {
+          pendingUnload = modelName;
+          if (unloadPollsRemaining <= 0) {
+            loaded.delete(modelName);
+            pendingUnload = null;
+          }
+        } else {
+          loaded.add(modelName);
+        }
+      }
+
+      if (typeof onChat === "function") {
+        const override = onChat({ url: req.url ?? "", body }, { loaded, requests });
+        if (override) {
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify(override));
+          return;
+        }
+      }
+
       res.setHeader("Content-Type", "application/x-ndjson");
 
-      // Non-streaming calls are used for the topic pass and --json/--no-stream.
       if (!body?.stream) {
+        const numPredict = body?.options?.num_predict;
+        const isColdProbe = numPredict === 1;
+        const isTopic = numPredict === 24;
+        const content = isColdProbe ? "x" : isTopic ? topicReply : reply;
         res.end(
           JSON.stringify({
-            message: { content: topicReply },
+            message: { content },
             done: true,
-            eval_count: 3,
-            eval_duration: 1e9,
-            total_duration: 1e9,
+            done_reason: doneReason,
+            eval_count: isColdProbe ? 1 : numPredict === 256 ? 256 : evalCount,
+            eval_duration: evalDuration,
+            load_duration: isColdProbe ? coldLoadDuration : loadDuration,
+            total_duration: evalDuration,
           }),
         );
         return;
@@ -94,9 +195,11 @@ export async function startMock(opts = {}) {
       res.end(
         JSON.stringify({
           done: true,
-          eval_count: 5,
-          eval_duration: 1e9,
-          total_duration: 1e9,
+          done_reason: doneReason,
+          eval_count: evalCount,
+          eval_duration: evalDuration,
+          load_duration: loadDuration,
+          total_duration: evalDuration,
         }) + "\n",
       );
     });
@@ -110,6 +213,11 @@ export async function startMock(opts = {}) {
     /** `127.0.0.1:PORT`, usable directly as an ollanet <machine> argument. */
     address: `127.0.0.1:${port}`,
     requests,
+    loaded,
+    /** Delay how many /api/ps polls still report a model after unload. */
+    setUnloadPollDelay(n) {
+      unloadPollsRemaining = n;
+    },
     /** Requests sent to /api/chat, in order. */
     chats: () => requests.filter((r) => r.url === "/api/chat").map((r) => r.body),
     close: () =>
@@ -137,6 +245,7 @@ export async function makeSandbox(config = {}) {
     dir,
     configFile,
     responsesDir: path.join(dir, "responses"),
+    benchmarksDir: path.join(dir, "benchmarks"),
     cleanup: () => rm(dir, { recursive: true, force: true }),
   };
 }
@@ -160,6 +269,7 @@ export function runCli(args, opts = {}) {
         ? {
             OLLANET_CONFIG: sandbox.configFile,
             OLLANET_RESPONSES_DIR: sandbox.responsesDir,
+            OLLANET_BENCHMARKS_DIR: sandbox.benchmarksDir,
           }
         : {}),
       // Don't let a developer's real settings leak into assertions.
@@ -180,7 +290,7 @@ export function runCli(args, opts = {}) {
   child.stdin.end();
 
   return new Promise((resolve) => {
-    const timer = setTimeout(() => child.kill("SIGKILL"), 20_000);
+    const timer = setTimeout(() => child.kill("SIGKILL"), 60_000);
     child.on("close", (code) => {
       clearTimeout(timer);
       resolve({ code, stdout, stderr });

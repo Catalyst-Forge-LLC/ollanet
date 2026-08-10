@@ -102,6 +102,7 @@ ollanet chats --id a1b2c3d4e5f6
 | `ollanet scan` | Probe known/discovered hosts for Ollama + list models |
 | `ollanet prompt …` | Send a prompt / continue a chat |
 | `ollanet chats` | List or inspect saved transcripts |
+| `ollanet bench …` | Benchmark models for tok/s + lightweight quality checks |
 
 ### `scan` options
 
@@ -138,6 +139,20 @@ Machine can be a discovered name, hostname, FQDN, or IP (`192.168.1.50`, `host:1
 
 - `--json` — list summary JSON
 - `--id <hash>` — show one chat (full JSON with `--json`)
+
+### `bench`
+
+```bash
+ollanet bench <machine|ip> [model...]
+ollanet bench <machine|ip> --all
+ollanet bench localhost gemma4:12b --runs 5 --cold-load --json
+```
+
+Runs a built-in suite (`quick` default, or `--full`) against one or more **completion**
+models: instruction checks once, throughput case repeated (`--runs`, default 3) with
+pinned `num_predict` / `seed` / `temperature`. Reports median tok/s + spread, skips
+embedding models under `--all`, and saves `benchmarks/<id>.json` (or `~/.ollanet/benchmarks/`
+when installed). See [`docs/bench-spec.md`](docs/bench-spec.md) for measurement rules.
 
 ## Discovery
 
@@ -205,6 +220,8 @@ Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or poi
 | `OLLANET_THINK` / `OLLAMA_THINK` | Enable thinking (`true`/`false`; default off) |
 | `OLLAMA_TIMEOUT_MS` | HTTP scan/probe timeout |
 | `OLLAMA_PROMPT_TIMEOUT_MS` | Prompt/chat HTTP timeout (default `600000`; `0` = none) |
+| `OLLAMA_BENCH_TIMEOUT_MS` | Per-case bench timeout (default `60000`) |
+| `OLLANET_BENCHMARKS_DIR` | Benchmark result directory |
 | `OLLAMA_CONCURRENCY` | Scan concurrency |
 
 ## Chat transcripts
@@ -233,9 +250,15 @@ ollanet/
     chat-store.ts
     config.ts
     paths.ts          # checkout vs installed path resolution
+    ollama-chat.ts    # shared /api/chat (+ tags/show/ps helpers)
+    bench.ts          # ollanet bench
+    bench-suite.ts
+    bench-store.ts
   dist/               # compiled output (published to npm)
+  docs/bench-spec.md  # bench measurement spec
   config.json
   responses/          # gitignored chat history
+  benchmarks/         # gitignored bench results
 ```
 
 ## Development

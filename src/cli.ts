@@ -17,6 +17,7 @@ Usage:
   ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet chats [--json] [--id <hash>]
+  ollanet bench <machine|ip> [model...] [--all] [options]
 
 Examples:
   ollanet scan
@@ -25,6 +26,8 @@ Examples:
   ollanet prompt 192.168.1.50 gemma4:12b "Hello"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
   ollanet chats
+  ollanet bench localhost --all
+  ollanet bench localhost llama3.2:1b --runs 3
 
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
         (override with OLLANET_CONFIG)
@@ -73,6 +76,12 @@ async function main(): Promise<void> {
     case "ls":
     case "history": {
       const { main: run } = await import("./chats.ts");
+      await run();
+      return;
+    }
+    case "bench":
+    case "benchmark": {
+      const { main: run } = await import("./bench.ts");
       await run();
       return;
     }

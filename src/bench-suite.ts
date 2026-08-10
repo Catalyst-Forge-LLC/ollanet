@@ -1,0 +1,183 @@
+/**
+ * Built-in ollanet bench suites, checkers, and revision hashes.
+ */
+import { createHash } from "node:crypto";
+
+export type CaseRole = "check" | "live" | "throughput";
+
+export interface BenchCase {
+  id: string;
+  role: CaseRole;
+  prompt: string;
+  /** Cap for this case; throughput uses settings.throughput_num_predict. */
+  num_predict?: number;
+  format?: "json";
+  check?: (content: string) => { ok: boolean; detail?: string };
+}
+
+export type SuiteName = "quick" | "full";
+
+const MATH_ANSWER = 323;
+const REASON_ANSWER = 42;
+
+function lastTokenNormalized(content: string): string {
+  const tokens = content.trim().split(/\s+/).filter(Boolean);
+  const last = tokens[tokens.length - 1] ?? "";
+  return last.toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gi, "");
+}
+
+function integersInLastLine(content: string): number[] {
+  const lines = content
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const last = lines[lines.length - 1] ?? content.trim();
+  const matches = last.match(/-?\d+/g) ?? [];
+  return matches.map((m) => Number(m)).filter((n) => Number.isFinite(n));
+}
+
+function stripCodeFences(content: string): string {
+  const trimmed = content.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  return (fenced?.[1] ?? trimmed).trim();
+}
+
+function checkPing(content: string): { ok: boolean; detail?: string } {
+  const token = lastTokenNormalized(content);
+  return token === "ok"
+    ? { ok: true, detail: token }
+    : { ok: false, detail: `last token=${JSON.stringify(token)}` };
+}
+
+function checkExpectedInt(expected: number) {
+  return (content: string): { ok: boolean; detail?: string } => {
+    const ints = integersInLastLine(content);
+    return ints.includes(expected)
+      ? { ok: true, detail: String(expected) }
+      : { ok: false, detail: `ints=${JSON.stringify(ints)}` };
+  };
+}
+
+function checkHaikuLive(content: string): { ok: boolean; detail?: string } {
+  const lines = content
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const ok = content.trim().length > 0 && lines.length >= 3;
+  return ok ? { ok: true, detail: `${lines.length} lines` } : { ok: false, detail: `${lines.length} lines` };
+}
+
+function checkJsonStructure(content: string): { ok: boolean; detail?: string } {
+  try {
+    const parsed = JSON.parse(stripCodeFences(content)) as Record<string, unknown>;
+    const animal = String(parsed.animal ?? "").toLowerCase();
+    const legs = Number(parsed.legs);
+    const ok = animal.includes("ferret") && legs === 4;
+    return ok
+      ? { ok: true }
+      : { ok: false, detail: `got animal=${JSON.stringify(parsed.animal)} legs=${JSON.stringify(parsed.legs)}` };
+  } catch (err) {
+    return { ok: false, detail: err instanceof Error ? err.message : "parse error" };
+  }
+}
+
+const QUICK_CASES: BenchCase[] = [
+  {
+    id: "ping",
+    role: "check",
+    prompt: "Reply with exactly: OK",
+    num_predict: 16,
+    check: checkPing,
+  },
+  {
+    id: "math",
+    role: "check",
+    prompt: "What is 17 * 19? Reply with only the number.",
+    num_predict: 32,
+    check: checkExpectedInt(MATH_ANSWER),
+  },
+  {
+    id: "haiku",
+    role: "live",
+    prompt: "Write a haiku about ferrets.",
+    num_predict: 64,
+    check: checkHaikuLive,
+  },
+  {
+    id: "throughput",
+    role: "throughput",
+    prompt:
+      "Explain how a computer loads a program into memory and starts running it. " +
+      "Write a detailed answer with several paragraphs.",
+    // num_predict pinned by runner
+  },
+];
+
+const FULL_EXTRA: BenchCase[] = [
+  {
+    id: "json",
+    role: "check",
+    prompt:
+      'Return a JSON object describing an animal that is a ferret and has 4 legs. ' +
+      'Use keys "animal" (string) and "legs" (number).',
+    num_predict: 64,
+    format: "json",
+    check: checkJsonStructure,
+  },
+  {
+    id: "reason",
+    role: "check",
+    prompt:
+      "A box has 10 apples. You eat 3, then buy 5 more, then give away 2 times as many as you ate. " +
+      "How many apples are left? Reply with only the final number.",
+    num_predict: 48,
+    // 10 - 3 + 5 - 6 = 6... wait: gave away 2*3=6, so 10-3+5-6=6. Spec said 42 as placeholder.
+    // Use a problem that clearly ends at 42:
+    // Actually rewrite for 42: "Start with 40. Add 7. Subtract 5. Reply with only the number." => 42
+    check: checkExpectedInt(REASON_ANSWER),
+  },
+];
+
+// Fix reason prompt to match REASON_ANSWER
+FULL_EXTRA[FULL_EXTRA.length - 1]!.prompt =
+  "Start with 40. Add 7. Subtract 5. Reply with only the final number.";
+
+export function getSuiteCases(suite: SuiteName): BenchCase[] {
+  if (suite === "full") return [...QUICK_CASES, ...FULL_EXTRA];
+  return [...QUICK_CASES];
+}
+
+export function suiteRevision(suite: SuiteName): string {
+  const cases = getSuiteCases(suite);
+  const canonical = cases.map((c) => `${c.id}\n${c.role}\n${c.prompt}`).join("\n---\n");
+  return createHash("sha256").update(canonical).digest("hex").slice(0, 16);
+}
+
+export function comparabilityKey(opts: {
+  suite: SuiteName;
+  throughputNumPredict: number;
+  seed: number;
+  temperature: number;
+  think: boolean;
+  numCtx: number | null;
+}): string {
+  const payload = [
+    suiteRevision(opts.suite),
+    `num_predict=${opts.throughputNumPredict}`,
+    `seed=${opts.seed}`,
+    `temperature=${opts.temperature}`,
+    `think=${opts.think ? 1 : 0}`,
+    `num_ctx=${opts.numCtx ?? ""}`,
+  ].join("|");
+  return createHash("sha256").update(payload).digest("hex").slice(0, 16);
+}
+
+export function median(values: number[]): number | undefined {
+  if (values.length === 0) return undefined;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return (sorted[mid - 1]! + sorted[mid]!) / 2;
+  }
+  return sorted[mid];
+}

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 responses/
+benchmarks/
 *.log
 .DS_Store
 *.tsbuildinfo
