@@ -7,3 +7,6 @@ responses/
 
 # Local agent bootstrap — keep on disk, never publish
 CHAT_RESTORE.md
+
+# Drop-zone for other-agent patches/tests — not part of the repo
+patch/
