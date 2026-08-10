@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Catalyst-Forge-LLC/ollanet/main/assets/ollanet-logo.png" alt="ollanet logo" width="360">
+</p>
+
 # ollanet
 
 Chat with **Ollama** servers on **any network you can reach** — LAN, localhost, Tailscale, VPN, or a raw IP.
@@ -26,6 +30,25 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)
+
+## Use cases
+
+The core idea: turn “I have to remember which IP has which models loaded” into a discoverable, stateful, network-native primitive. That unlocks more than interactive chat:
+
+**For agents and automation** — everything below works today with existing flags:
+
+- **Live model inventory / routing** — `ollanet scan --json` gives an agent (or script) a machine-readable list of reachable hosts and their models. Route each sub-task to the best host: the big-VRAM box for reasoning, the laptop for quick lookups.
+- **Conversations that survive machines** — chats are stored by short hash with full history. Start a long thread on the GPU box, continue it from a laptop later with `ollanet prompt --chat <hash> …`, or hand the hash between agents.
+- **A “talk to any Ollama on my network” tool** — wrap `prompt … --json --no-stream` as a tool call in any agent framework; no hard-coded endpoints.
+- **Fleet health and speed checks** — periodic `ollanet bench <host> --json` builds a record of which model on which machine is currently fastest (or has silently gone offline). Saved results live in `benchmarks/`.
+- **The Finetuna loop** — [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) shapes a GPU-tuned named variant on the host; ollanet discovers and uses it from anywhere on the network.
+
+**For humans:**
+
+- **Tailscale-native access** — prompt any machine by MagicDNS name from a laptop or phone (Termux) without babysitting IPs or opening a browser.
+- **A private model mesh** — everyone on a shared tailnet or LAN can discover and use the same Ollama hosts, no public exposure, no central UI.
+- **Multi-GPU lab** — `scan --lan` treats several machines as a pool of inference endpoints; `bench` compares the same model across hardware.
+- **Audit trail / notes** — persisted chat JSON doubles as a research log you can resume from any device.
 
 ## Requirements
 
