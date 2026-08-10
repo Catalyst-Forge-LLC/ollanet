@@ -151,8 +151,9 @@ ollanet bench localhost gemma4:12b --runs 5 --cold-load --json
 Runs a built-in suite (`quick` default, or `--suite full`) against one or more **completion**
 models: instruction checks once, throughput case repeated (`--runs`, default 3) with
 pinned `num_predict` / `seed` / `temperature`. Reports median tok/s + spread. Under `--all`,
-skips embedding models and vision-capable models (text suite; use `--include-vision` to
-include them). Saves `benchmarks/<id>.json` (or `~/.ollanet/benchmarks/` when installed).
+skips non-completion models (embeddings); multimodal `completion`+`vision` models stay in
+(early-stop / pass_rate handle text-suite failures). Use `--exclude-vision` to drop them.
+Saves `benchmarks/<id>.json` (or `~/.ollanet/benchmarks/` when installed).
 See [`docs/bench-spec.md`](docs/bench-spec.md) for measurement rules.
 
 `quick` has only two scored checks (`ping`, `math`), so `pass` is a coarse

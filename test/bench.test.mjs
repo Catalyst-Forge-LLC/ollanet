@@ -96,12 +96,13 @@ describe("bench", () => {
     await sandbox.cleanup();
   });
 
-  it("skips vision models under --all unless --include-vision", async () => {
+  it("includes vision+completion models in --all; --exclude-vision opts out", async () => {
     const mock = await startMock({
-      models: ["fake:1b", "moondream:latest"],
+      models: ["fake:1b", "gemma3:12b", "nomic-embed-text"],
       capabilities: {
         "fake:1b": ["completion"],
-        "moondream:latest": ["completion", "vision"],
+        "gemma3:12b": ["completion", "vision"],
+        "nomic-embed-text": ["embedding"],
       },
       reply: "OK",
       doneReason: "length",
@@ -115,18 +116,68 @@ describe("bench", () => {
     assert.equal(res.code, 0, res.stderr);
     let payload = JSON.parse(res.stdout);
     assert.deepEqual(
-      payload.models.map((m) => m.name),
-      ["fake:1b"],
+      payload.models.map((m) => m.name).sort(),
+      ["fake:1b", "gemma3:12b"],
     );
-    assert.equal(payload.skipped_models.find((s) => s.name === "moondream:latest")?.reason, "vision");
+    assert.equal(payload.skipped_models.length, 1);
+    assert.equal(payload.skipped_models[0].name, "nomic-embed-text");
 
     const res2 = await runCli(
-      ["bench", "mockhost", "--all", "--include-vision", "--runs", "1", "--no-warmup", "--json"],
+      ["bench", "mockhost", "--all", "--exclude-vision", "--runs", "1", "--no-warmup", "--json"],
       { sandbox, env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" } },
     );
     assert.equal(res2.code, 0, res2.stderr);
     payload = JSON.parse(res2.stdout);
-    assert.ok(payload.models.some((m) => m.name === "moondream:latest"));
+    assert.deepEqual(
+      payload.models.map((m) => m.name),
+      ["fake:1b"],
+    );
+    assert.equal(payload.skipped_models.find((s) => s.name === "gemma3:12b")?.reason, "vision");
+
+    await mock.close();
+    await sandbox.cleanup();
+  });
+
+  it("formats spread at the same precision as the median", async () => {
+    let n = 0;
+    const mock = await startMock({
+      models: ["legacy:7b"],
+      capabilities: { "legacy:7b": ["completion"] },
+      onChat: ({ body }) => {
+        if (body?.options?.num_predict === 256) {
+          n += 1;
+          const durations = [3.055e9, 3.052e9, 2.96e9]; // ~83.8, 83.9, 86.5 tok/s
+          return {
+            message: { content: "x".repeat(50) },
+            done: true,
+            done_reason: "length",
+            eval_count: 256,
+            eval_duration: durations[(n - 1) % 3],
+            load_duration: 0,
+            total_duration: durations[(n - 1) % 3],
+          };
+        }
+        return {
+          message: { content: "OK" },
+          done: true,
+          done_reason: "stop",
+          eval_count: 2,
+          eval_duration: 1e8,
+          load_duration: 0,
+          total_duration: 1e8,
+        };
+      },
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+    const res = await runCli(["bench", "mockhost", "legacy:7b", "--runs", "3", "--no-warmup"], {
+      sandbox,
+      env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" },
+    });
+    assert.equal(res.code, 0, res.stderr);
+    const row = res.stdout.split("\n").find((l) => l.startsWith("legacy:7b"));
+    assert.ok(row, res.stdout);
+    // Must not look like "83.8  84–86" (median outside displayed min).
+    assert.match(row, /83\.\d\s+83\.\d–86\.\d/);
 
     await mock.close();
     await sandbox.cleanup();

@@ -1,7 +1,7 @@
 # Spec: `ollanet bench` — model benchmarking
 
 **Status:** implemented (see `src/bench.ts` + `test/bench*.mjs`)  
-**Target release:** `0.2.0`  
+**Target release:** `0.2.0` (+ `0.2.1` display/vision-default fixes)  
 **Goal:** From one Ollama host, run a small fixed prompt suite against selected **completion** models and report **credible speed** + a lightweight **quality** signal in one table.
 
 Keep it sharp: not an eval harness, not LMSYS. Discover → prompt → compare. Primary use case: **Finetuna before/after** — did a tune move tok/s or break instruction-following?

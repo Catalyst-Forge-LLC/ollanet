@@ -106,8 +106,7 @@ function usage(): never {
 
 Options:
   --all                 Every completion-capable model from /api/tags
-                        (skips vision models; use --include-vision)
-  --include-vision      With --all, also bench vision-capable models
+  --exclude-vision      With --all, skip models that advertise vision
   --suite quick|full    Prompt suite (default quick)
   --runs <n>            Throughput repeats (default 3)
   --warmup / --no-warmup
@@ -181,7 +180,7 @@ function parseArgs(argv: string[]) {
   let suite: SuiteName = "quick";
   let runs = 3;
   let all = false;
-  let includeVision = false;
+  let excludeVision = false;
   let warmup = true;
   let coldLoad = false;
   let json = false;
@@ -201,8 +200,13 @@ function parseArgs(argv: string[]) {
       all = true;
       continue;
     }
+    if (arg === "--exclude-vision") {
+      excludeVision = true;
+      continue;
+    }
+    // Back-compat no-op: 0.2.0 defaulted to skipping vision; prefer --exclude-vision.
     if (arg === "--include-vision") {
-      includeVision = true;
+      excludeVision = false;
       continue;
     }
     if (arg === "--json") {
@@ -314,7 +318,7 @@ function parseArgs(argv: string[]) {
     machine,
     models,
     all,
-    includeVision,
+    excludeVision,
     suite,
     runs,
     warmup,
@@ -572,7 +576,8 @@ function printTable(
     else if (pb == null) return -1;
     else if (pb !== pa) return pb - pa;
 
-    // Unavailable tok/s sinks below any defined median (including 0).
+    // Unavailable tok/s (all early-stop / errors) intentionally sinks below any
+    // defined median, including 0 — same pass_rate cohort, then speed.
     const ta = a.summary.tok_s_median;
     const tb = b.summary.tok_s_median;
     if (ta == null && tb == null) return 0;
@@ -584,9 +589,10 @@ function printTable(
   for (const m of sorted) {
     const tok =
       m.summary.tok_s_median != null ? m.summary.tok_s_median.toFixed(1) : "—";
+    // Match median precision — toFixed(0) on min/max can print "83.8  84–86".
     const spread =
       m.summary.tok_s_min != null && m.summary.tok_s_max != null
-        ? `${m.summary.tok_s_min.toFixed(0)}–${m.summary.tok_s_max.toFixed(0)}`
+        ? `${m.summary.tok_s_min.toFixed(1)}–${m.summary.tok_s_max.toFixed(1)}`
         : "—";
     const pass =
       m.summary.pass_rate != null
@@ -626,7 +632,7 @@ function printTable(
     if (vision.length) {
       lines.push(
         `Skipped ${vision.length} vision model(s): ${vision.map((s) => s.name).join(", ")}` +
-          " (text suite; pass --include-vision to bench)",
+          " (--exclude-vision)",
       );
     }
   }
@@ -669,8 +675,10 @@ export async function main(): Promise<void> {
         skipped.push({ name: t.name, reason: "non-completion", capabilities: caps ?? [] });
         continue;
       }
-      // Text-only suite: vision models (moondream, etc.) usually early-stop / fail checks.
-      if (!parsed.includeVision && isVisionCapable(caps)) {
+      // Default: completion only (spec). Vision+completion models (gemma3, etc.)
+      // stay in --all; early-stop / pass_rate report text-suite failures.
+      // Opt out of vision-capable models with --exclude-vision.
+      if (parsed.excludeVision && isVisionCapable(caps)) {
         skipped.push({ name: t.name, reason: "vision", capabilities: caps ?? [] });
         continue;
       }
