@@ -16,15 +16,20 @@ Optional: edit `theme.css` next to `downpress.config.ts`.
 
 ## Deploy (Cloudflare Pages)
 
-Local / CLI (after `pnpm build`):
+**Use one pipeline only.** Dual deploys (local `pages deploy` + GitHub Workers Builds with `wrangler deploy`) overwrite each other and can surface intermittent SvelteKit `500 Internal Error` pages when asset hashes disagree mid-rollout.
+
+Until Downpress is public, deploy only from a machine with the sibling engine:
 
 ```bash
-pnpm exec wrangler pages deploy build --project-name=ollanet
+pnpm deploy
+# = pnpm build && wrangler pages deploy build --project-name=ollanet
 ```
 
-Then attach the custom domain **ollanet.dev** in the Cloudflare dashboard.
+Then attach **ollanet.dev** in the Cloudflare dashboard.
 
-### Git-connected Pages
+If you created a **Workers Builds / GitHub** app for this repo earlier, **pause or delete that build** until the dependency is CI-reachable — CI cannot resolve `"downpress": "link:../../downpress"`.
+
+### Git-connected Pages (later)
 
 | Setting | Value |
 | --- | --- |
@@ -32,10 +37,8 @@ Then attach the custom domain **ollanet.dev** in the Cloudflare dashboard.
 | Build command | `pnpm install && pnpm build` |
 | Output directory | `build` |
 
-`link:../../downpress` only works on your machine. After Downpress is on GitHub under Catalyst-Forge-LLC, switch the dependency to a **git pin** (and ensure CI can clone it — public repo, or a deploy key / access token if still private):
+Switch the dependency to a **git pin** first:
 
 ```json
 "downpress": "github:Catalyst-Forge-LLC/downpress#v0.1.0"
 ```
-
-Until then, deploy with `wrangler pages deploy` from a machine that has the sibling engine linked.
