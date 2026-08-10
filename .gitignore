@@ -4,3 +4,6 @@ responses/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Local agent bootstrap — keep on disk, never publish
+CHAT_RESTORE.md
