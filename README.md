@@ -39,14 +39,19 @@ Tailscale is optional. If the `tailscale` CLI is present, peers are included aut
 Run without installing:
 
 ```bash
-npx ollanet scan                                  # from npm (once published)
-npx github:Catalyst-Forge-LLC/ollanet scan        # straight from GitHub
+npx ollanet scan                                                  # from npm (once published)
+npx --allow-git=all github:Catalyst-Forge-LLC/ollanet scan        # straight from GitHub
 ```
+
+> npm 12+ blocks git dependencies by default, hence `--allow-git=all` for the
+> GitHub form (npm ≤11 doesn't need it). Note that npx runs a one-off command —
+> it does not put `ollanet` on your PATH.
 
 Or install globally:
 
 ```bash
-npm install -g ollanet
+npm install -g ollanet                                            # from npm (once published)
+npm install -g --allow-git=all github:Catalyst-Forge-LLC/ollanet  # from GitHub
 ollanet scan
 ```
 
