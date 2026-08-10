@@ -1,27 +1,33 @@
 #!/usr/bin/env node
 /**
- * ollanet — chat with Ollama servers across your Tailnet.
+ * ollanet — chat with Ollama servers on any reachable network.
  *
  *   ollanet scan
- *   ollanet prompt <machine> "hello"
+ *   ollanet prompt <machine-or-ip> "hello"
  *   ollanet chats
  */
 
-const HELP = `ollanet — Tailnet Ollama chat CLI
+const HELP = `ollanet — Ollama over your network
+
+Discover Ollama hosts on localhost, your LAN, Tailscale, or any IP/hostname
+you can reach — then chat with hash-addressed transcripts.
 
 Usage:
-  ollanet scan [--json] [--all]
-  ollanet prompt <machine> [model] <prompt...>
+  ollanet scan [--json] [--all] [--lan]
+  ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet chats [--json] [--id <hash>]
 
 Examples:
   ollanet scan
-  ollanet prompt mycroftone "What is Tailscale?"
+  ollanet scan --lan
+  ollanet prompt localhost "What is MagicDNS?"
+  ollanet prompt 192.168.1.50 gemma4:12b "Hello"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
   ollanet chats
 
 Config: config.json (or OLLANET_CONFIG)
+Hosts:  config.hosts, OLLANET_HOSTS, optional Tailscale + --lan
 Chats:  responses/ (or OLLANET_RESPONSES_DIR)
 `;
 

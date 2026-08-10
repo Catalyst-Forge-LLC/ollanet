@@ -2,7 +2,7 @@
   "name": "ollanet",
   "version": "0.1.0",
   "private": true,
-  "description": "Chat with Ollama servers across your Tailnet — scan peers, prompt models, continue chats by hash",
+  "description": "Chat with Ollama servers on any reachable network — scan hosts, prompt models, continue chats by hash",
   "type": "module",
   "bin": {
     "ollanet": "./bin/ollanet.mjs"
@@ -24,11 +24,12 @@
   },
   "keywords": [
     "ollama",
-    "tailscale",
-    "tailnet",
     "cli",
     "llm",
-    "chat"
+    "chat",
+    "lan",
+    "tailscale",
+    "network"
   ],
   "author": "",
   "license": "MIT",

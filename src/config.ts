@@ -1,7 +1,13 @@
 import { readFile } from "node:fs/promises";
-import type { HostTarget } from "./tailnet.ts";
-import { shortName } from "./tailnet.ts";
+import {
+  shortName,
+  type DiscoveryConfig,
+  type HostConfigEntry,
+  type HostTarget,
+} from "./hosts.ts";
 import { projectPath } from "./paths.ts";
+
+export type { DiscoveryConfig, HostConfigEntry };
 
 /** Runtime knobs sent to Ollama `/api/generate`. */
 export interface GenerateSettings {
@@ -15,11 +21,24 @@ export interface GenerateSettings {
 }
 
 export interface AppConfig {
+  /** Explicit hosts/IPs to probe (LAN, VPN, MagicDNS, etc.). */
+  hosts: HostConfigEntry[];
+  discovery: DiscoveryConfig;
   defaultModels: Record<string, string>;
   /** Global defaults applied to every prompt. */
   defaults: GenerateSettings;
   /** Per-machine overrides (keyed by short name / hostname / DNS / IP). */
   machineDefaults: Record<string, GenerateSettings & { model?: string }>;
+}
+
+function emptyConfig(): AppConfig {
+  return {
+    hosts: [],
+    discovery: {},
+    defaultModels: {},
+    defaults: {},
+    machineDefaults: {},
+  };
 }
 
 const CONFIG_PATH =
@@ -45,6 +64,8 @@ export async function loadConfig(): Promise<AppConfig> {
     };
 
     return {
+      hosts: Array.isArray(parsed.hosts) ? parsed.hosts : [],
+      discovery: normalizeDiscovery(parsed.discovery),
       defaultModels,
       defaults: normalizeSettings(parsed.defaults),
       machineDefaults,
@@ -52,12 +73,25 @@ export async function loadConfig(): Promise<AppConfig> {
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
     if (code === "ENOENT") {
-      return { defaultModels: {}, defaults: {}, machineDefaults: {} };
+      return emptyConfig();
     }
     throw new Error(
       `Failed to read config at ${CONFIG_PATH}: ${err instanceof Error ? err.message : err}`,
     );
   }
+}
+
+function normalizeDiscovery(input: unknown): DiscoveryConfig {
+  if (!input || typeof input !== "object") return {};
+  const src = input as Record<string, unknown>;
+  const out: DiscoveryConfig = {};
+  if (typeof src.localhost === "boolean") out.localhost = src.localhost;
+  if (typeof src.tailscale === "boolean") out.tailscale = src.tailscale;
+  if (typeof src.lan === "boolean") out.lan = src.lan;
+  if (Array.isArray(src.cidrs)) {
+    out.cidrs = src.cidrs.filter((c): c is string => typeof c === "string" && c.includes("/"));
+  }
+  return out;
 }
 
 function normalizeStringMap(map: Record<string, string> | undefined): Record<string, string> {

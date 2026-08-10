@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * List saved Tailnet Ollama chats.
+ * List saved ollanet chats.
  *
  * Usage:
  *   ollanet chats

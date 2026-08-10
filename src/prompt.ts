@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * Run a prompt / continue a chat against an Ollama server on the Tailnet.
+ * Run a prompt / continue a chat against an Ollama server on the network.
  *
  * New chat (saved by default):
  *   ollanet prompt mycroftone "What is Tailscale?"
+ *   ollanet prompt 192.168.1.50 "Hello"
  *
  * Continue:
  *   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
@@ -35,13 +36,12 @@ import {
   type GenerateSettings,
 } from "./config.ts";
 import {
-  collectTargets,
-  getTailscaleStatus,
+  discoverHosts,
   ollamaBaseUrl,
   resolveHost,
   shortName,
   type HostTarget,
-} from "./tailnet.ts";
+} from "./hosts.ts";
 
 interface ChatChunk {
   model?: string;
@@ -219,7 +219,7 @@ function parseArgs(argv: string[]): {
     }
   }
   // Continue (--chat): all positionals are the prompt. Optional machine override
-  // via --machine, or a leading peer name peeled in main() after Tailscale status loads.
+  // via --machine, or a leading discovered-host name peeled in main().
 
   return { machine, model, promptParts, stream, json, save, chatId, settings };
 }
@@ -381,9 +381,11 @@ export async function main(): Promise<void> {
     usage();
   }
 
-  const status = await getTailscaleStatus();
-  const targets = collectTargets(status);
   const config = await loadConfig();
+  const { hosts: targets } = await discoverHosts({
+    hosts: config.hosts,
+    discovery: config.discovery,
+  });
 
   let chat: ChatTranscript | undefined;
   let isNewChat = false;
@@ -394,7 +396,7 @@ export async function main(): Promise<void> {
     chat = await loadChat(parsed.chatId);
 
     // Allow `ollanet prompt mycroftone --chat HASH "follow-up"` by peeling a
-    // leading positional that matches a real Tailnet peer.
+    // leading positional that matches a discovered host.
     if (!machineQuery && promptParts.length >= 2) {
       try {
         resolveHost(targets, promptParts[0]!);
@@ -417,8 +419,8 @@ export async function main(): Promise<void> {
   }
 
   const host: HostTarget = resolveHost(targets, machineQuery);
-  if (!host.online && !host.isSelf) {
-    throw new Error(`Machine "${shortName(host)}" is offline on the Tailnet.`);
+  if (!host.online && !host.isSelf && host.source === "tailscale") {
+    throw new Error(`Machine "${shortName(host)}" appears offline.`);
   }
 
   const model =

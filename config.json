@@ -1,7 +1,14 @@
 {
+  "hosts": [],
+  "discovery": {
+    "localhost": true,
+    "tailscale": true,
+    "lan": false
+  },
   "defaultModels": {
     "mycroftone": "gemma4:12b",
-    "sams-macbook-pro": "qwen3.6:35b-mlx"
+    "sams-macbook-pro": "qwen3.6:35b-mlx",
+    "localhost": "llama3.2:1b"
   },
   "defaults": {
     "temperature": 0.7,
