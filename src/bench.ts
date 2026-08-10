@@ -19,6 +19,7 @@ import {
   type SuiteName,
 } from "./bench-suite.ts";
 import { benchmarksDir, newBenchId, saveBenchmark } from "./bench-store.ts";
+import { readFile } from "node:fs/promises";
 import {
   discoverHosts,
   envInt,
@@ -27,6 +28,7 @@ import {
   shortName,
   type HostTarget,
 } from "./hosts.ts";
+import { projectPath } from "./paths.ts";
 import {
   contextLengthForModel,
   isCompletionCapable,
@@ -892,11 +894,21 @@ export async function main(): Promise<void> {
     }
   }
 
+  let ollanetVersion = "0.2.0";
+  try {
+    const pkg = JSON.parse(await readFile(projectPath("package.json"), "utf8")) as {
+      version?: string;
+    };
+    if (pkg.version) ollanetVersion = pkg.version;
+  } catch {
+    // keep fallback
+  }
+
   const result = {
     id: newBenchId(),
     version: 1,
     created_at: new Date().toISOString(),
-    ollanet: "0.1.1",
+    ollanet: ollanetVersion,
     suite: parsed.suite,
     suite_revision: revision,
     comparability_key: compKey,
