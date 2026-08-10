@@ -99,13 +99,20 @@ For all quality-checked cases: `temperature: 0` and `options.seed: 0` (Ollama’
 
 ### Load column — only with `--cold-load`
 
-Default warmup leaves the model resident, so `load_duration ≈ 0` on timed cases. **Do not show a load column unless `--cold-load` was passed.**
+Default warmup leaves the model resident, so `load_duration ≈ 0` on later timed cases. **Do not show a load column unless `--cold-load` was passed.** Never populate `load_ms` from a post-warmup case — that is the stub that looks plausible and is wrong.
 
-Cold-load procedure (per model, once):
+Cold-load procedure (per model, once) — **must run before warmup**:
 
 1. Ensure model is unloaded: chat/generate with `keep_alive: 0` (or equivalent), then **poll `GET /api/ps` until the model is absent** (bounded wait, e.g. 60s).
-2. Time a 1-token (or `num_predict: 1`) request; read `load_duration` from the response.
-3. That value is the load metric. Warmup for throughput runs afterward as usual.
+2. Time a 1-token (or `num_predict: 1`) request; read `load_duration` from **that** response only.
+3. Store under `models[].cold_load` (`load_ms`, raw ollama fields, `ps_poll_ms`, timestamps) — not inside suite `cases[]`.
+4. **Then** run warmup (default on) and timed suite cases as usual.
+
+**Anti-stub checks (acceptance + tests):**
+
+- With `--cold-load` and default `--warmup`, `cold_load.load_ms` must be **> 0** on a real GPU for a model that was not already resident (manual smoke). A result of `0` / missing while the column is shown is a bug.
+- Mock test: `/api/ps` reports the model present until N polls after unload; the load probe’s canned `load_duration` is non-zero; assert the saved `load_ms` equals the probe value, **not** the warmup/timed-case `load_duration` (which the mock sets to `0`).
+- If unload+ps poll times out, record `cold_load.error` and omit the load column for that model (do not fall back to timed-case load).
 
 ### Unload between models is async
 
@@ -210,10 +217,33 @@ If digest is missing from the API response, warn and still record whatever ident
 
 ## Metrics
 
+### Stored shape: per-run attempts, not aggregates only
+
+Summaries (`tok_s_median`, spread, `pass_rate`) are **derived**. The JSON must retain every attempt so spread / pass_rate can be recomputed later (and so a bad aggregator cannot hide variance).
+
+```text
+models[].cases[] = one entry per suite case id
+  cases[].role
+  cases[].attempts[] = one object per --runs iteration (never collapsed)
+    attempt.run          1..N
+    attempt.wall_ms
+    attempt.tok_s?       throughput only
+    attempt.quality?
+    attempt.content?
+    attempt.ollama?      raw timing fields
+    attempt.error?
+  cases[].summary        optional convenience rollup for that case
+models[].summary         rollup across cases (median/min/max tok/s, pass_rate, …)
+models[].cold_load?      see cold-load section — separate from cases[]
+```
+
+Do **not** ship a format that only stores `tok_s_median` / `tok_s_min` / `tok_s_max` without `attempts[]`. Table and summary math read from `attempts[]`.
+
 ### Per attempt
 
 | Field | Source |
 |---|---|
+| `run` | 1-based index within the case |
 | `wall_ms` | Client stopwatch |
 | `total_duration` / `load_duration` / `prompt_eval_count` / `eval_count` / `eval_duration` | Ollama chat response |
 | `tok_s` | `eval_count / (eval_duration / 1e9)` when both present; only meaningful for throughput attempts with full `num_predict` |
@@ -225,9 +255,9 @@ If digest is missing from the API response, warn and still record whatever ident
 
 ### Per-model summary
 
-- `tok_s_median` / `tok_s_min` / `tok_s_max` from **throughput** attempts only  
-- `pass_rate` across check/live attempts  
-- `load_ms` only if `--cold-load`  
+- `tok_s_median` / `tok_s_min` / `tok_s_max` from **throughput** attempts only (computed from stored attempts)  
+- `pass_rate` across check attempts (exclude `live`)  
+- `load_ms` only if `--cold-load` (from `cold_load` probe, not from timed cases)  
 - `judge_avg` if judging produced ≥1 score  
 - `self_judge: true` flag if `--judge-model` equals the subject model  
 
@@ -311,6 +341,7 @@ Override: `OLLANET_BENCHMARKS_DIR`. Gitignore `benchmarks/`.
       "parameter_size": "1.2B",
       "quantization_level": "Q4_K_M",
       "size_vram": 123456789,
+      "cold_load": null,
       "summary": {
         "tok_s_median": 98.4,
         "tok_s_min": 96.0,
@@ -319,9 +350,44 @@ Override: `OLLANET_BENCHMARKS_DIR`. Gitignore `benchmarks/`.
         "load_ms": null,
         "self_judge": false
       },
-      "cases": []
+      "cases": [
+        {
+          "id": "throughput",
+          "role": "throughput",
+          "attempts": [
+            {
+              "run": 1,
+              "wall_ms": 4100,
+              "tok_s": 96.0,
+              "ollama": { "eval_count": 256, "eval_duration": 2666666666 }
+            },
+            {
+              "run": 2,
+              "wall_ms": 4000,
+              "tok_s": 98.4,
+              "ollama": { "eval_count": 256, "eval_duration": 2601626016 }
+            },
+            {
+              "run": 3,
+              "wall_ms": 3900,
+              "tok_s": 101.2,
+              "ollama": { "eval_count": 256, "eval_duration": 2530000000 }
+            }
+          ]
+        }
+      ]
     }
   ]
+}
+```
+
+When `--cold-load` succeeded, `cold_load` looks like:
+
+```json
+{
+  "load_ms": 2100,
+  "ollama": { "load_duration": 2100000000, "eval_count": 1 },
+  "ps_poll_ms": 340
 }
 ```
 
@@ -379,16 +445,17 @@ Wire: `case "bench":` / `"benchmark":` in `cli.ts`.
 ## Acceptance criteria
 
 1. `ollanet bench localhost llama3.2:1b` runs `quick` with default `--runs 3`, prints median tok/s **and** spread, saves JSON with digests + `suite_revision`.
-2. `ollanet bench localhost --all --json` includes every `/api/tags` model; a failure on model 2 does not skip the rest (unless `--fail-fast`). Covered by mock test.
-3. Throughput cases use pinned `num_predict`; check cases use `temperature: 0` and `seed: 0`.
-4. Load column absent unless `--cold-load`; cold-load polls `/api/ps`.
-5. Multi-model runs unload and poll `/api/ps` before the next model.
-6. `--judge` without `--judge-model` errors; self-judge rows flagged; failed 1–5 parse omits score.
-7. Preflight prints model count and rough upper-bound ETA; per-case timeout defaults to 60s.
-8. Sort by pass_rate then tok/s; `live` cases excluded from pass_rate.
-9. `suite_revision` changes when prompt text changes (content hash).
-10. `pnpm test` + `pnpm typecheck` clean; zero new runtime dependencies.
-11. `ollamaChat` extraction lands in a green commit **before** bench feature commits.
+2. Saved JSON includes **per-run `cases[].attempts[]`** (length === `--runs` per case); med/min/max are recomputable from attempts alone. Mock test asserts attempt count and that summary matches recomputation.
+3. `ollanet bench localhost --all --json` includes every `/api/tags` model; a failure on model 2 does not skip the rest (unless `--fail-fast`). Covered by mock test.
+4. Throughput cases use pinned `num_predict`; check cases use `temperature: 0` and `seed: 0`.
+5. Load column absent unless `--cold-load`. With `--cold-load` + default warmup: probe runs **before** warmup; mock asserts `cold_load.load_ms` equals the probe’s non-zero `load_duration`, not the zero post-warmup case timings. Manual GPU smoke: load column non-zero.
+6. Multi-model runs unload and poll `/api/ps` before the next model.
+7. `--judge` without `--judge-model` errors; self-judge rows flagged; failed 1–5 parse omits score.
+8. Preflight prints model count and rough upper-bound ETA; per-case timeout defaults to 60s.
+9. Sort by pass_rate then tok/s; `live` cases excluded from pass_rate.
+10. `suite_revision` changes when prompt text changes (content hash).
+11. `pnpm test` + `pnpm typecheck` clean; zero new runtime dependencies.
+12. `ollamaChat` extraction lands in a green commit **before** bench feature commits.
 
 ---
 
