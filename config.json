@@ -1,0 +1,20 @@
+{
+  "defaultModels": {
+    "mycroftone": "gemma4:12b",
+    "sams-macbook-pro": "qwen3.6:35b-mlx"
+  },
+  "defaults": {
+    "temperature": 0.7,
+    "num_predict": 512,
+    "keep_alive": "5m"
+  },
+  "machineDefaults": {
+    "mycroftone": {
+      "num_ctx": 8192
+    },
+    "sams-macbook-pro": {
+      "num_ctx": 32768,
+      "temperature": 0.6
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "ollanet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chat with Ollama servers across your Tailnet — scan peers, prompt models, continue chats by hash",
+  "type": "module",
+  "bin": {
+    "ollanet": "./bin/ollanet.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "config.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "ollanet": "tsx src/cli.ts",
+    "scan": "tsx src/cli.ts scan",
+    "prompt": "tsx src/cli.ts prompt",
+    "chats": "tsx src/cli.ts chats",
+    "start": "tsx src/cli.ts scan",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ollama",
+    "tailscale",
+    "tailnet",
+    "cli",
+    "llm",
+    "chat"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@8.14.1",
+  "dependencies": {
+    "tsx": "^4.23.12"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "typescript": "^5.8.3"
+  }
+}
