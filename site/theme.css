@@ -95,10 +95,6 @@ body {
 	align-items: center;
 }
 
-.site-id {
-	gap: 0.35rem;
-}
-
 .site-title {
 	display: inline-flex;
 	align-items: center;
@@ -111,9 +107,15 @@ body {
 	text-decoration: none;
 }
 
-/* Wordmark beside the mark — logo alone was too quiet in the masthead. */
-.site-title::after {
-	content: 'ollanet';
+.site-brand-copy {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.25rem;
+	min-width: 0;
+}
+
+.site-wordmark {
 	line-height: 1;
 }
 
