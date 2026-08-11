@@ -36,6 +36,11 @@ Do this only after confirming a GitHub Actions publish works, or you can lock yo
 
 ## How to release afterward
 
+Pushing a version bump alone does **not** publish. The workflow only runs on:
+
+- a GitHub Release (`release: published`), or
+- **Actions → Publish → Run workflow** (`workflow_dispatch`)
+
 1. Bump `version` in `package.json`, commit, push.
 2. Create a GitHub Release (tag `vX.Y.Z`) — or run **Actions → Publish → Run workflow**.
 3. Approve the `npm` environment if reviewers are configured.

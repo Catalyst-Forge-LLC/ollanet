@@ -17,6 +17,8 @@ import { projectPath } from "./paths.ts";
 import { runPrompt } from "./prompt.ts";
 import { scanNetwork } from "./scan.ts";
 
+// Pin to the oldest widely-supported MCP revision. Clients may request a newer
+// date; we still answer with this — legal negotiation, max compatibility.
 const PROTOCOL_VERSION = "2024-11-05";
 
 type JsonRpcId = string | number | null;

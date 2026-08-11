@@ -15,10 +15,10 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 
 ## What you get
 
-- **Discover** — config, env, Tailscale, optional LAN scan; JSON for routers and agents
+- **Discover** — config, env, and Tailscale first; `--lan` is opt-in (probes your subnet for `:11434`, never the default). Dead hosts just don’t show up. JSON for routers and agents.
 - **Prompt** — any host by name or IP, streaming replies, sane defaults per machine
 - **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
-- **Bench** — tok/s + light quality checks across your fleet
+- **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks
 - **MCP** — `ollanet mcp` exposes scan / prompt / chats over stdio
 
 ## Quick start
