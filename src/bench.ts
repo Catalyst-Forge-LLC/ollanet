@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * ollanet bench — speed + lightweight quality suite against Ollama models.
  */

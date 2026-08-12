@@ -16,7 +16,10 @@ export function envInt(name: string, fallback: number): number {
   return Math.trunc(n);
 }
 
-export const OLLAMA_PORT = envInt("OLLAMA_PORT", 11434);
+/** Default Ollama port. Read at call time so a bad env var cannot break `import`. */
+export function ollamaPort(): number {
+  return envInt("OLLAMA_PORT", 11434);
+}
 
 export type HostSource = "localhost" | "config" | "env" | "tailscale" | "lan" | "direct";
 
@@ -97,7 +100,7 @@ export function shortName(host: HostTarget): string {
   return host.hostname;
 }
 
-export function ollamaBaseUrl(host: HostTarget, port = host.port || OLLAMA_PORT): string {
+export function ollamaBaseUrl(host: HostTarget, port = host.port || ollamaPort()): string {
   const hostPart = host.ip.includes(":") ? `[${host.ip}]` : host.ip;
   return `http://${hostPart}:${port}`;
 }
@@ -120,7 +123,7 @@ function makeHost(partial: {
     os: partial.os ?? "unknown",
     isSelf: partial.isSelf ?? false,
     source: partial.source,
-    port: partial.port ?? OLLAMA_PORT,
+    port: partial.port ?? ollamaPort(),
   };
 }
 
@@ -195,7 +198,7 @@ function parseHostEntry(entry: HostConfigEntry): HostTarget | null {
     ip: address,
     source: "config",
     online: true,
-    port: typeof entry.port === "number" ? entry.port : OLLAMA_PORT,
+    port: typeof entry.port === "number" ? entry.port : ollamaPort(),
   });
 }
 
@@ -390,7 +393,7 @@ function parseDirectAddress(query: string): HostTarget | null {
 
   let hostname = q;
   let ip = q;
-  let port = OLLAMA_PORT;
+  let port = ollamaPort();
 
   const ipv4WithPort = q.match(/^(\d{1,3}(?:\.\d{1,3}){3}):(\d+)$/);
   if (ipv4WithPort) {
@@ -463,7 +466,7 @@ export async function discoverHosts(opts: DiscoverOptions = {}): Promise<Discove
   if (lanEnabled) {
     const cidrs =
       discovery.cidrs && discovery.cidrs.length > 0 ? discovery.cidrs : guessLocalCidrs();
-    const lanHosts = await lanScanTargets(cidrs, OLLAMA_PORT);
+    const lanHosts = await lanScanTargets(cidrs, ollamaPort());
     if (lanHosts.length > 0) {
       collected.push(...lanHosts);
       sources.push("lan");

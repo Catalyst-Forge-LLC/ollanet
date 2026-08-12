@@ -1,21 +1,25 @@
-#!/usr/bin/env node
 /**
  * Scan reachable networks for Ollama servers and list available models.
  *
  * Usage: ollanet scan [--lan] [--json] [--all]
  */
 
-import { loadConfig } from "./config.ts";
+import { configFromPartial, loadConfig, type AppConfig } from "./config.ts";
 import {
-  OLLAMA_PORT,
   discoverHosts,
   envInt,
+  ollamaPort,
   shortName,
   type HostTarget,
 } from "./hosts.ts";
 
-const TIMEOUT_MS = envInt("OLLAMA_TIMEOUT_MS", 2500);
-const CONCURRENCY = Math.max(1, envInt("OLLAMA_CONCURRENCY", 16));
+function scanTimeoutMs(): number {
+  return envInt("OLLAMA_TIMEOUT_MS", 2500);
+}
+
+function scanConcurrency(): number {
+  return Math.max(1, envInt("OLLAMA_CONCURRENCY", 16));
+}
 
 interface OllamaModel {
   name: string;
@@ -54,8 +58,9 @@ function formatBytes(bytes: number | undefined): string {
 
 async function fetchModels(host: HostTarget): Promise<{ models: OllamaModel[]; url: string }> {
   const url = `http://${host.ip.includes(":") ? `[${host.ip}]` : host.ip}:${host.port}/api/tags`;
+  const timeoutMs = scanTimeoutMs();
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
       signal: controller.signal,
@@ -105,7 +110,7 @@ async function scanHost(host: HostTarget): Promise<ScanResult> {
     const message = err instanceof Error ? err.message : String(err);
     const error =
       name === "AbortError" || message.toLowerCase().includes("abort")
-        ? `timeout after ${TIMEOUT_MS}ms`
+        ? `timeout after ${scanTimeoutMs()}ms`
         : message;
     return { host, ok: false, models: [], error, url };
   }
@@ -171,7 +176,13 @@ function printResults(
 
 export interface ScanOptions {
   includeOffline?: boolean;
+  /** TCP-scan local /24s. Opt-in; never the default. */
   lanScan?: boolean;
+  /**
+   * In-memory config. When set, the config file (`~/.ollanet` / `OLLANET_CONFIG`)
+   * is not read. Omit to keep CLI/MCP file behavior.
+   */
+  config?: Partial<AppConfig>;
 }
 
 export interface ScannedServer {
@@ -209,7 +220,7 @@ function toPayload(
   return {
     network: networkLabel,
     sources,
-    port: OLLAMA_PORT,
+    port: ollamaPort(),
     scanned: results.length,
     servers: results
       .filter((r) => r.ok)
@@ -234,9 +245,9 @@ function toPayload(
   };
 }
 
-/** Programmatic scan used by CLI `--json` and the MCP server. */
+/** Programmatic scan used by CLI `--json`, MCP, and `import { scanNetwork } from "ollanet"`. */
 export async function scanNetwork(options: ScanOptions = {}): Promise<ScanPayload> {
-  const config = await loadConfig();
+  const config = options.config ? configFromPartial(options.config) : await loadConfig();
   const { hosts, sources, networkLabel } = await discoverHosts({
     hosts: config.hosts,
     discovery: config.discovery,
@@ -250,7 +261,7 @@ export async function scanNetwork(options: ScanOptions = {}): Promise<ScanPayloa
     );
   }
 
-  const results = await mapPool(hosts, CONCURRENCY, scanHost);
+  const results = await mapPool(hosts, scanConcurrency(), scanHost);
   return toPayload(results, networkLabel, sources);
 }
 
@@ -275,7 +286,7 @@ export async function main(): Promise<void> {
     return;
   }
 
-  const results = await mapPool(hosts, CONCURRENCY, scanHost);
+  const results = await mapPool(hosts, scanConcurrency(), scanHost);
 
   if (jsonOut) {
     console.log(JSON.stringify(toPayload(results, networkLabel, sources), null, 2));

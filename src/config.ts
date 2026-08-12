@@ -48,6 +48,18 @@ function emptyConfig(): AppConfig {
   };
 }
 
+/** Build an AppConfig from an in-memory partial (no file I/O). */
+export function configFromPartial(partial: Partial<AppConfig> = {}): AppConfig {
+  const empty = emptyConfig();
+  return {
+    hosts: Array.isArray(partial.hosts) ? partial.hosts : empty.hosts,
+    discovery: partial.discovery ?? empty.discovery,
+    defaultModels: partial.defaultModels ?? empty.defaultModels,
+    defaults: partial.defaults ?? empty.defaults,
+    machineDefaults: partial.machineDefaults ?? empty.machineDefaults,
+  };
+}
+
 const CONFIG_PATH =
   process.env.OLLANET_CONFIG ??
   process.env.OLLAMA_CONFIG ??

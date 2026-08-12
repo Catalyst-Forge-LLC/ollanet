@@ -4,9 +4,11 @@
 
 # ollanet
 
-Chat with **Ollama** servers on **any network you can reach** — LAN, localhost, Tailscale, VPN, or a raw IP.
+Find the models. Talk to them. Keep the thread.
 
-Scan for models, fire prompts, and continue conversations later by a short hash. No browser UI required.
+Chat with **Ollama** servers on **any network you can reach** — LAN, localhost, Tailscale, VPN, or a raw IP. CLI for humans, MCP for agents, **Node library for apps**.
+
+Scan for models, fire prompts, and continue conversations later by a short hash. No browser UI required. **Node 20+ · zero runtime deps.**
 
 **Site:** [ollanet.dev](https://ollanet.dev) — Downpress + Cloudflare Pages (`site/`).
 
@@ -23,7 +25,7 @@ Typical loop:
 1. On the host: `finetuna` → create something like `gemma4-ctx32k`
 2. From anywhere on the network: `ollanet scan` → `ollanet prompt that-host gemma4-ctx32k "…"`
 
-They share the same Ollama API; Finetuna shapes the models, ollanet finds and chats with them.
+They share the same Ollama API; Finetuna shapes the models, ollanet finds and chats with them. Host tunes the model. Network finds and uses it. Same API, closed loop.
 
 ## Features
 
@@ -33,6 +35,7 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)
 - **MCP** — `ollanet mcp` exposes scan/prompt/chats as Model Context Protocol tools for agents
+- **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Use cases
 
@@ -43,6 +46,7 @@ The core idea: turn “I have to remember which IP has which models loaded” in
 - **Live model inventory / routing** — `ollanet_scan` (or `scan --json`) lists reachable hosts and models. Route each sub-task to the best host: the big-VRAM box for reasoning, the laptop for quick lookups.
 - **Conversations that survive machines** — chats are stored by short hash with full history. Start a long thread on the GPU box, continue it later with `ollanet_prompt` + `chat_id` (or `--chat <hash>`).
 - **A “talk to any Ollama on my network” tool** — `ollanet_prompt` / `prompt … --json --no-stream`; no hard-coded endpoints.
+- **Embed in an app** — same scan + pick + call as a library. The app does not own the GPUs; it discovers them (FilePress, CLIs, Electron, a local companion for a hosted product).
 - **Fleet health and speed checks** — periodic `ollanet bench <host> --json` builds a record of which model on which machine is currently fastest (or has silently gone offline). Saved results live in `benchmarks/`.
 - **The Finetuna loop** — [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) shapes a GPU-tuned named variant on the host; ollanet discovers and uses it from anywhere on the network.
 
@@ -65,7 +69,7 @@ Tailscale is optional. If the `tailscale` CLI is present, peers are included aut
 Run without installing:
 
 ```bash
-npx ollanet scan                                                  # from npm (once published)
+npx ollanet scan
 npx --allow-git=all github:Catalyst-Forge-LLC/ollanet scan        # straight from GitHub
 ```
 
@@ -76,7 +80,7 @@ npx --allow-git=all github:Catalyst-Forge-LLC/ollanet scan        # straight fro
 Or install globally, which puts the `ollanet` command on your PATH:
 
 ```bash
-npm install -g ollanet                                            # from npm (once published)
+npm install -g ollanet
 npm install -g --allow-git=all github:Catalyst-Forge-LLC/ollanet  # from GitHub
 ollanet scan
 ```
@@ -121,6 +125,49 @@ ollanet prompt --chat a1b2c3d4e5f6 "Give a concrete example"
 # Browse saved chats
 ollanet chats
 ollanet chats --id a1b2c3d4e5f6
+```
+
+## Use as a library
+
+ollanet is a **Node 20+ library that happens to have a CLI**. Not for the browser — discovery uses `node:net`, `child_process` (`tailscale status`), and `os.networkInterfaces()`. Call it from a dev server, CLI, Electron main, or a Worker with Node, never from Svelte/Vite client code.
+
+Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. This treats it like a **private inference mesh**: any machine you can already reach. The app does not own the GPUs; it discovers them. LAN scan is opt-in so you do not look like a port scanner. Tailscale is automatic if the CLI exists. Config lives in `~/.ollanet` unless you pass `config`.
+
+```ts
+import { scanNetwork } from "ollanet";
+
+const { servers, sources } = await scanNetwork({ lanScan: false });
+for (const s of servers) {
+  console.log(s.endpoint, s.models.map((m) => m.name));
+}
+```
+
+| Call | What it does | When apps should use it |
+|---|---|---|
+| `scanNetwork()` | localhost + config + `OLLANET_HOSTS` + Tailscale | Button / first “find servers” |
+| `scanNetwork({ lanScan: true })` | plus TCP sweep of local `/24`s | Checkbox, never on every health check |
+| `discoverHosts()` then probe yourself | candidates only, no `/api/tags` | If the app already has its own Ollama client |
+
+Pass `config` to skip the file (useful when the app already has its own config):
+
+```ts
+await scanNetwork({
+  lanScan: false,
+  config: {
+    hosts: ["studio.tailnet.ts.net", "192.168.1.50"],
+    discovery: { localhost: true, tailscale: true, lan: false },
+  },
+});
+```
+
+`runPrompt({ save: false, writeStdout: false })` is a one-shot call that does not write `~/.ollanet/responses/`.
+
+Requires **ollanet ≥ 0.4.0**. Bundlers (Vite / SvelteKit SSR):
+
+```ts
+// vite.config.ts
+ssr: { external: ["ollanet"] },
+optimizeDeps: { exclude: ["ollanet"] },
 ```
 
 ## Commands
@@ -307,6 +354,7 @@ The first turn asks the model for a short topic title (falls back to the prompt 
 ```text
 ollanet/
   src/
+    index.ts          # public library entry (scan, discover, prompt, ollama helpers)
     cli.ts            # subcommand router (CLI entry)
     hosts.ts          # discovery + host resolution
     scan.ts
@@ -316,6 +364,7 @@ ollanet/
     config.ts
     paths.ts          # checkout vs installed path resolution
     ollama-chat.ts    # shared /api/chat (+ tags/show/ps helpers)
+    mcp.ts            # stdio MCP server
     bench.ts          # ollanet bench
     bench-suite.ts
     bench-store.ts

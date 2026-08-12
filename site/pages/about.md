@@ -4,7 +4,7 @@ description: Discover Ollama hosts, prompt models, continue chats by hash, and h
 order: 1
 ---
 
-AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** is the small CLI that finds Ollama hosts, talks to them, and keeps conversations alive across machines — including as MCP tools for your agents.
+AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** is the small CLI that finds Ollama hosts, talks to them, and keeps conversations alive across machines — including as MCP tools for your agents, and as a Node library for apps. Nothing leaves the networks you already trust.
 
 <div class="cta-row">
   <a class="cta cta-primary" href="/install">Install ollanet →</a>
@@ -20,6 +20,7 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 - **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
 - **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks
 - **MCP** — `ollanet mcp` exposes scan / prompt / chats over stdio
+- **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Quick start
 
@@ -54,6 +55,18 @@ Point your MCP host at the stdio server — then route work to whatever’s aliv
 ```
 
 Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_list_chats`, `ollanet_get_chat`.
+
+## For apps
+
+Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh — any machine you can already reach. The app does not own the GPUs; it discovers them. Requires **ollanet ≥ 0.4.0**. Node only; keep LAN opt-in.
+
+```ts
+import { scanNetwork } from "ollanet";
+
+const { servers } = await scanNetwork({ lanScan: false });
+```
+
+Same inventory MCP wraps. Health checks can stay on localhost; scan is a user action.
 
 <div class="cta-row">
   <a class="cta cta-primary" href="/install">Get started →</a>

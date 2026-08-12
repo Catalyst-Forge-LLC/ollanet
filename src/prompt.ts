@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Run a prompt / continue a chat against an Ollama server on the network.
  *
@@ -33,6 +32,8 @@ import {
   parseFormat,
   settingsFromEnv,
   settingsSummary,
+  configFromPartial,
+  type AppConfig,
   type GenerateSettings,
 } from "./config.ts";
 import {
@@ -47,7 +48,9 @@ import {
 import { ollamaChat } from "./ollama-chat.ts";
 
 /** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
-const PROMPT_TIMEOUT_MS = envInt("OLLAMA_PROMPT_TIMEOUT_MS", 600_000);
+function promptTimeoutMs(): number {
+  return envInt("OLLAMA_PROMPT_TIMEOUT_MS", 600_000);
+}
 
 function usage(): never {
   console.error(`Usage:
@@ -108,7 +111,7 @@ function modelNameMatches(available: string[], candidate: string): boolean {
 async function listModelNames(host: HostTarget): Promise<string[] | null> {
   const url = `${ollamaBaseUrl(host)}/api/tags`;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Math.min(PROMPT_TIMEOUT_MS || 2500, 5000));
+  const timer = setTimeout(() => controller.abort(), Math.min(promptTimeoutMs() || 2500, 5000));
   try {
     const res = await fetch(url, {
       signal: controller.signal,
@@ -331,7 +334,7 @@ async function generateTopic(opts: {
       model: opts.model,
       stream: false,
       writeStdout: false,
-      timeoutMs: PROMPT_TIMEOUT_MS,
+      timeoutMs: promptTimeoutMs(),
       settings: mergeSettings(opts.settings, {
         temperature: 0.2,
         num_predict: 24,
@@ -366,12 +369,15 @@ export interface PromptRunOptions {
   model?: string;
   prompt: string;
   chatId?: string;
+  /** Persist transcript. Default true; pass false for one-shot app calls. */
   save?: boolean;
   settings?: GenerateSettings;
   /** When false, never write the reply to stdout (MCP / programmatic). Default true for CLI. */
   writeStdout?: boolean;
   stream?: boolean;
   quiet?: boolean;
+  /** In-memory config; skips the config file when set. */
+  config?: Partial<AppConfig>;
 }
 
 export interface PromptRunResult {
@@ -392,7 +398,7 @@ export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult
   const writeStdout = opts.writeStdout !== false;
   let promptParts = opts.prompt ? [opts.prompt] : [];
 
-  const config = await loadConfig();
+  const config = opts.config ? configFromPartial(opts.config) : await loadConfig();
   const { hosts: targets } = await discoverHosts({
     hosts: config.hosts,
     discovery: config.discovery,
@@ -487,7 +493,7 @@ export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult
     messages: toApiMessages(chat),
     stream: writeStdout ? stream : false,
     writeStdout,
-    timeoutMs: PROMPT_TIMEOUT_MS,
+    timeoutMs: promptTimeoutMs(),
     settings,
   });
 
