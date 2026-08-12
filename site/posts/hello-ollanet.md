@@ -9,7 +9,7 @@ Today **ollanet.dev** stands up as the home for the project: install notes, shor
 
 What shipped so far:
 
-- **Discover** Ollama hosts (config, env, Tailscale, optional LAN scan)
+- **Discover** Ollama hosts (config, env, Tailscale; LAN scan only with `--lan`)
 - **Prompt** any machine by name or IP, with hash-addressed chat continuity
 - **Bench** models for tok/s and light quality checks
 - **MCP** — `ollanet mcp` exposes scan/prompt/chats to agents over stdio

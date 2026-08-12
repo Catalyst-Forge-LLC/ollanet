@@ -176,7 +176,7 @@ function printResults(
 
 export interface ScanOptions {
   includeOffline?: boolean;
-  /** TCP-scan local /24s. Opt-in; never the default. */
+  /** TCP-scan local /24s for Ollama (port 11434 by default). Off unless set. */
   lanScan?: boolean;
   /**
    * In-memory config. When set, the config file (`~/.ollanet` / `OLLANET_CONFIG`)

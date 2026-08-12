@@ -29,7 +29,7 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 
 ## Features
 
-- **Discover** Ollama hosts from localhost, `config.hosts`, `OLLANET_HOSTS`, optional Tailscale, and optional LAN scan
+- **Discover** Ollama hosts from localhost, `config.hosts`, `OLLANET_HOSTS`, optional Tailscale, and optional LAN scan (`--lan`, off by default)
 - **Prompt** any hostname/IP/model with streaming replies
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
@@ -145,7 +145,7 @@ for (const s of servers) {
 | Call | What it does | When apps should use it |
 |---|---|---|
 | `scanNetwork()` | localhost + config + `OLLANET_HOSTS` + Tailscale | Button / first “find servers” |
-| `scanNetwork({ lanScan: true })` | plus TCP sweep of local `/24`s | Checkbox, never on every health check |
+| `scanNetwork({ lanScan: true })` | plus TCP sweep of local `/24`s on port 11434 | Checkbox; never the default scan, never on every health check |
 | `discoverHosts()` then probe yourself | candidates only, no `/api/tags` | If the app already has its own Ollama client |
 
 Pass `config` to skip the file (useful when the app already has its own config):

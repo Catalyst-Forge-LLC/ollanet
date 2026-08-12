@@ -42,7 +42,7 @@ const TOOLS: ToolDef[] = [
     description:
       "Discover reachable Ollama hosts and list their models. " +
       "Use this before routing work to pick a host/model. " +
-      "Optional LAN TCP scan (--lan equivalent) and include offline Tailscale peers.",
+      "Optional LAN TCP scan (off unless lan=true; equivalent to CLI --lan) and include offline Tailscale peers.",
     inputSchema: {
       type: "object",
       properties: {

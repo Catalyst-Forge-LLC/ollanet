@@ -15,7 +15,7 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 
 ## What you get
 
-- **Discover** — config, env, and Tailscale first; `--lan` is opt-in (probes your subnet for `:11434`, never the default). Dead hosts just don’t show up. JSON for routers and agents.
+- **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents.
 - **Prompt** — any host by name or IP, streaming replies, sane defaults per machine
 - **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
 - **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks

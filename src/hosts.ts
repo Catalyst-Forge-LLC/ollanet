@@ -80,7 +80,7 @@ export interface DiscoverOptions {
   discovery?: DiscoveryConfig;
   /** Include Tailscale peers marked offline. */
   includeOffline?: boolean;
-  /** Probe local LAN CIDRs for open Ollama ports. */
+  /** Probe local LAN CIDRs for open Ollama ports. Off unless true. */
   lanScan?: boolean;
 }
 
