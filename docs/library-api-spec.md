@@ -29,7 +29,7 @@ MCP is the agent version of the same idea. A public `import` surface is the app 
 
 ### Package entry
 
-`package.json`: `exports["."]` → `dist/index.js` + `dist/index.d.ts`; optional `./scan` subpath; `types`; `files` already `dist` + README + LICENSE. `bin` still `dist/cli.js`. Version **0.4.0**.
+`package.json`: `exports["."]` → `dist/index.js` + `dist/index.d.ts`; optional `./scan` subpath; `types`; `files` already `dist` + README + LICENSE. `bin` still `dist/cli.js`. Library API shipped in **0.4.0**; **0.4.1** is a docs patch (README / LAN-scan wording).
 
 `src/index.ts` re-exports library API only (scan, hosts, config, prompt, ollama client helpers). Shebang only on `cli.ts`. `declaration: true` in `tsconfig.build.json`.
 
@@ -69,3 +69,4 @@ Concrete use cases: design/authoring tools (FilePress), devtools/CLIs, agents (M
 - [x] README “Use as a library”: Node-only, LAN opt-in, Vite `ssr.external` / `optimizeDeps.exclude`.
 - [x] Tests against `dist/` for the package entry.
 - [x] Publish `0.4.0` (GitHub Actions `workflow_dispatch` / Release — not a version-bump trigger).
+- [ ] Publish `0.4.1` (same trigger; README/LAN-scan wording only).
