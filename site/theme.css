@@ -30,7 +30,7 @@
 		format('woff2');
 }
 
-:root {
+:root:root {
 	--font-serif: 'Source Serif 4', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
 	--font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -46,13 +46,14 @@
 	--accent-wash: color-mix(in srgb, var(--accent) 11%, transparent);
 	--amber-wash: color-mix(in srgb, var(--accent-strong) 12%, transparent);
 	--radius: 10px;
-	--measure: 40rem;
-	--measure-wide: 72rem;
+	/* Essay defaults 40 / 46 — same +50% product widening as getfilepress.com */
+	--measure: 60rem;
+	--measure-wide: 69rem;
 	--gap: clamp(1.25rem, 4vw, 2.75rem);
 }
 
 @media (prefers-color-scheme: dark) {
-	:root {
+	:root:root {
 		--bg: #f3f7f6;
 		--surface: #ffffff;
 		--ink: #101820;
@@ -65,7 +66,7 @@
 	}
 }
 
-body {
+html body {
 	-webkit-font-smoothing: antialiased;
 	color: var(--ink);
 	font-family: var(--font-sans);
@@ -80,16 +81,22 @@ body {
 	background-attachment: fixed;
 }
 
+/* Keep FilePress chrome centered even if Essay CSS emits after this sheet. */
+.wrap {
+	max-width: var(--measure-wide);
+	margin: 0 auto;
+}
+
 /* ----- Chrome ----- */
 
-.site-header {
+header.site-header {
 	border-bottom: 1px solid color-mix(in srgb, var(--rule) 80%, transparent);
 	background: color-mix(in srgb, var(--surface) 82%, transparent);
 	backdrop-filter: blur(12px);
 	margin-bottom: 0;
 }
 
-.site-header .wrap {
+header.site-header .wrap {
 	padding-top: 1.35rem;
 	padding-bottom: 1.35rem;
 	align-items: center;
@@ -167,7 +174,7 @@ body {
 }
 
 .home-page .page-header {
-	max-width: 40rem;
+	max-width: none;
 	margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
 	padding-bottom: clamp(1.5rem, 4vw, 2.25rem);
 	border-bottom: 1px solid var(--rule);
@@ -197,7 +204,7 @@ body {
 }
 
 .home-page .prose {
-	max-width: 42rem;
+	max-width: none;
 	font-size: 1.1rem;
 	line-height: 1.7;
 	color: var(--ink);
@@ -208,7 +215,7 @@ body {
 	font-size: clamp(1.15rem, 2.2vw, 1.3rem);
 	line-height: 1.55;
 	color: var(--ink-soft);
-	max-width: 38rem;
+	max-width: 46rem;
 }
 
 .home-page .prose h2 {
@@ -236,6 +243,7 @@ body {
 	margin: 0;
 	padding: 0;
 	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
 	gap: 0.75rem;
 }
 
@@ -323,7 +331,7 @@ body {
 
 .mesh-panel p {
 	margin: 0;
-	max-width: 36rem;
+	max-width: 46rem;
 }
 
 .mesh-panel p + p {
