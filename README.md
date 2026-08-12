@@ -370,6 +370,7 @@ ollanet/
     bench-store.ts
   dist/               # compiled output (published to npm)
   docs/bench-spec.md  # bench measurement spec
+  docs/library-api-spec.md
   config.json
   responses/          # gitignored chat history
   benchmarks/         # gitignored bench results
