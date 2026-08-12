@@ -369,15 +369,24 @@ a:hover {
 	color: var(--ink);
 }
 
-.post-card {
+/* Essay uses vertical-only padding (borderless list). Boxed cards need full
+   padding — `.featured .post-card` is more specific, so it must set it too. */
+.post-card,
+.featured .post-card {
 	background: var(--surface);
 	border: 1px solid var(--rule);
 	border-radius: var(--radius);
-	padding: 1.25rem 1.35rem;
+	padding: 1.35rem 1.5rem;
+	border-bottom: 1px solid var(--rule);
 }
 
 .featured .post-card {
 	box-shadow: 0 12px 32px rgba(16, 24, 32, 0.07);
+	padding: 1.5rem 1.65rem;
+}
+
+.post-list > li:first-child .post-card {
+	padding-top: 1.35rem;
 }
 
 .eyebrow,
@@ -426,5 +435,10 @@ pre {
 
 	.home-page .page-header h1 {
 		max-width: none;
+	}
+
+	.post-card,
+	.featured .post-card {
+		padding: 1.15rem 1.2rem;
 	}
 }
