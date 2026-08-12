@@ -16,4 +16,4 @@ What shipped so far:
 
 Install with `npm i -g ollanet`, or see [/install](/install). The companion host-side tuner is [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna).
 
-This site is built with [Downpress](https://github.com/Catalyst-Forge-LLC/downpress) — git-native Markdown, static HTML, Cloudflare Pages — and will grow as the mesh does.
+This site is built with [FilePress](https://getfilepress.com) — git-native Markdown, static HTML, Cloudflare Pages — and will grow as the mesh does.

@@ -10,7 +10,7 @@ Chat with **Ollama** servers on **any network you can reach** — LAN, localhost
 
 Scan for models, fire prompts, and continue conversations later by a short hash. No browser UI required. **Node 20+ · zero runtime deps.**
 
-**Site:** [ollanet.dev](https://ollanet.dev) — Downpress + Cloudflare Pages (`site/`).
+**Site:** [ollanet.dev](https://ollanet.dev) — FilePress + Cloudflare Pages (`site/`).
 
 ## Origin
 

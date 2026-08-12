@@ -4,14 +4,14 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "downpress dev",
-		"build": "downpress build",
-		"preview": "downpress preview",
-		"check": "downpress check",
+		"dev": "filepress dev",
+		"build": "filepress build",
+		"preview": "filepress preview",
+		"check": "filepress check",
 		"deploy": "pnpm build && wrangler pages deploy build --project-name=ollanet"
 	},
 	"devDependencies": {
-		"downpress": "link:../../downpress",
+		"getfilepress": "^0.1.2",
 		"wrangler": "^4.28.0"
 	}
 }

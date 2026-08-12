@@ -2,11 +2,8 @@
 	// Cloudflare Pages — static output only (no Worker script).
 	// Deploy:  pnpm deploy   (= build + wrangler pages deploy build --project-name=ollanet)
 	//
-	// Do NOT also run Workers Builds / `wrangler deploy` from GitHub against this
-	// same project while downpress is a local `link:` — CI can't see the sibling
-	// engine and will publish broken versions that fight your local deploys
-	// (intermittent 500s). Prefer one pipeline: local `pnpm deploy` until
-	// downpress is a public git pin, then Pages Git with root directory `site`.
+	// Prefer one pipeline. Git-connected Pages can build this folder now that
+	// getfilepress is on npm (root directory `site`, output `build`).
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "ollanet",
 	"compatibility_date": "2026-08-10",

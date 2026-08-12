@@ -2,5 +2,6 @@
 /node_modules
 .DS_Store
 Thumbs.db
-.downpress-genie/
-.downpress-import/crawl-cache/
+.filepress/
+.filepress-genie/
+.filepress-import/crawl-cache/

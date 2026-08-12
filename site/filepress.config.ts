@@ -1,6 +1,6 @@
-import { defineDownpressConfig } from 'downpress';
+import { defineFilepressConfig } from 'getfilepress';
 
-export default defineDownpressConfig({
+export default defineFilepressConfig({
 	title: 'ollanet',
 	description:
 		'Chat with Ollama servers on any network you can reach — LAN, Tailscale, VPN, or a raw IP. Discover hosts, prompt models, continue chats by hash, and expose them to agents over MCP.',
@@ -19,6 +19,6 @@ export default defineDownpressConfig({
 		{ label: 'Home', href: '/' },
 		{ label: 'Posts', href: '/writing' },
 		{ label: 'Install', href: '/install' },
-		{ label: 'GitHub', href: 'https://github.com/Catalyst-Forge-LLC/ollanet' }
+		{ label: 'GitHub', href: 'https://github.com/Catalyst-Forge-LLC/ollanet', icon: 'github' }
 	]
 });
