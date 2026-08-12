@@ -68,4 +68,4 @@ Concrete use cases: design/authoring tools (FilePress), devtools/CLIs, agents (M
 - [x] `scanNetwork({ config, lanScan: false })` skips the file and does not LAN-scan.
 - [x] README “Use as a library”: Node-only, LAN opt-in, Vite `ssr.external` / `optimizeDeps.exclude`.
 - [x] Tests against `dist/` for the package entry.
-- [ ] Publish `0.4.0` (GitHub Actions `workflow_dispatch` / Release — not a version-bump trigger).
+- [x] Publish `0.4.0` (GitHub Actions `workflow_dispatch` / Release — not a version-bump trigger).
