@@ -1,0 +1,8 @@
+---
+description: Deploy the marketing site with pnpm ship
+alwaysApply: true
+---
+
+# Deploy
+
+Site publish is `pnpm ship` from the repo root (FilePress build, then Wrangler Pages project `ollanet`). `site:deploy` is the same command.

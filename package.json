@@ -36,9 +36,10 @@
     "typecheck": "tsc --noEmit",
     "test": "tsc -p tsconfig.build.json && node scripts/fix-dts-extensions.mjs && node --test test/*.test.mjs",
     "test:only": "node --test test/*.test.mjs",
+    "ship": "pnpm --dir site run ship",
     "site:dev": "pnpm --dir site dev",
     "site:build": "pnpm --dir site build",
-    "site:deploy": "pnpm --dir site run deploy"
+    "site:deploy": "pnpm --dir site run ship"
   },
   "keywords": [
     "ollama",

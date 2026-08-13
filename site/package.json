@@ -8,7 +8,8 @@
 		"build": "filepress build",
 		"preview": "filepress preview",
 		"check": "filepress check",
-		"deploy": "pnpm build && wrangler pages deploy build --project-name=ollanet"
+		"ship": "pnpm build && wrangler pages deploy build --project-name=ollanet",
+		"deploy": "pnpm ship"
 	},
 	"devDependencies": {
 		"getfilepress": "^0.1.2",
