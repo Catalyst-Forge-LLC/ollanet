@@ -14,6 +14,6 @@ What shipped so far:
 - **Bench** models for tok/s and light quality checks
 - **MCP** — `ollanet mcp` exposes scan/prompt/chats to agents over stdio
 
-Install with `npm i -g ollanet`, or see [/install](/install). The companion host-side tuner is [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna).
+Install with `npm i -g ollanet`, or see [/install](/install). The companion host-side tuner is [Finetuna](https://finetuna.net).
 
 This site is built with [FilePress](https://getfilepress.com) — git-native Markdown, static HTML, Cloudflare Pages — and will grow as the mesh does.

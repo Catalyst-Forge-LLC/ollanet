@@ -35,7 +35,7 @@ Full flags and config live on the [install](/install) page.
 ## The Finetuna loop
 
 <div class="mesh-panel">
-  <p>On the machine that <em>runs</em> Ollama, <a href="https://github.com/Catalyst-Forge-LLC/finetuna"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. ollanet discovers it from anywhere on the network and starts the session.</p>
+  <p>On the machine that <em>runs</em> Ollama, <a href="https://finetuna.net"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. ollanet discovers it from anywhere on the network and starts the session.</p>
   <p>Host tunes the model. Network finds and uses it. Same API, closed loop.</p>
 </div>
 

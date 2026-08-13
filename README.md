@@ -18,7 +18,7 @@ This started as a personal little script. I had Ollama running on a laptop on my
 
 ## Related: Finetuna
 
-**ollanet** is the client-side / network tool. On the machine that *runs* Ollama, use **[Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna)** to turn a stock model into a GPU-tuned, named variant (context, batch, Modelfile, auto-tune).
+**ollanet** is the client-side / network tool. On the machine that *runs* Ollama, use **[Finetuna](https://finetuna.net)** to turn a stock model into a GPU-tuned, named variant (context, batch, Modelfile, auto-tune).
 
 Typical loop:
 
@@ -48,7 +48,7 @@ The core idea: turn “I have to remember which IP has which models loaded” in
 - **A “talk to any Ollama on my network” tool** — `ollanet_prompt` / `prompt … --json --no-stream`; no hard-coded endpoints.
 - **Embed in an app** — same scan + pick + call as a library. The app does not own the GPUs; it discovers them (FilePress, CLIs, Electron, a local companion for a hosted product).
 - **Fleet health and speed checks** — periodic `ollanet bench <host> --json` builds a record of which model on which machine is currently fastest (or has silently gone offline). Saved results live in `benchmarks/`.
-- **The Finetuna loop** — [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) shapes a GPU-tuned named variant on the host; ollanet discovers and uses it from anywhere on the network.
+- **The Finetuna loop** — [Finetuna](https://finetuna.net) shapes a GPU-tuned named variant on the host; ollanet discovers and uses it from anywhere on the network.
 
 **For humans:**
 
