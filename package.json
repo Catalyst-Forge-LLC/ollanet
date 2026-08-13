@@ -38,7 +38,7 @@
     "test:only": "node --test test/*.test.mjs",
     "site:dev": "pnpm --dir site dev",
     "site:build": "pnpm --dir site build",
-    "site:deploy": "pnpm --dir site deploy"
+    "site:deploy": "pnpm --dir site run deploy"
   },
   "keywords": [
     "ollama",

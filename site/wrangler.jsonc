@@ -1,6 +1,6 @@
 {
 	// Cloudflare Pages — static output only (no Worker script).
-	// Deploy:  pnpm deploy   (= build + wrangler pages deploy build --project-name=ollanet)
+	// Deploy:  pnpm run deploy   (= build + wrangler pages deploy build --project-name=ollanet)
 	//
 	// Prefer one pipeline. Git-connected Pages can build this folder now that
 	// getfilepress is on npm (root directory `site`, output `build`).

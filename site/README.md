@@ -15,7 +15,7 @@ Optional: edit `theme.css` next to `filepress.config.ts`.
 **Use one pipeline only.** Dual deploys overwrite each other and can surface intermittent SvelteKit `500 Internal Error` pages when asset hashes disagree mid-rollout.
 
 ```bash
-pnpm deploy
+pnpm run deploy
 # = pnpm build && wrangler pages deploy build --project-name=ollanet
 ```
 
