@@ -51,6 +51,7 @@ describe("package entry", () => {
   it("import { scanNetwork } from dist/index.js exposes the library API, not main()", async () => {
     const mod = await import(INDEX);
     assert.equal(typeof mod.scanNetwork, "function");
+    assert.equal(typeof mod.lastScan, "function");
     assert.equal(typeof mod.discoverHosts, "function");
     assert.equal(typeof mod.runPrompt, "function");
     assert.equal(typeof mod.pullModel, "function");

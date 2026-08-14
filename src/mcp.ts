@@ -18,6 +18,7 @@ import { listLoaded } from "./ps.ts";
 import { pullModel } from "./pull.ts";
 import { runPrompt } from "./prompt.ts";
 import { removeModel } from "./rm.ts";
+import { lastScan } from "./scan-store.ts";
 import { scanNetwork } from "./scan.ts";
 import { showModel } from "./show.ts";
 
@@ -57,6 +58,10 @@ const TOOLS: ToolDef[] = [
         all: {
           type: "boolean",
           description: "Also probe offline Tailscale peers (default false)",
+        },
+        last: {
+          type: "boolean",
+          description: "Return the last saved scan without probing the network (default false)",
         },
       },
       additionalProperties: false,
@@ -254,6 +259,13 @@ async function callTool(
 ): Promise<ReturnType<typeof textResult>> {
   switch (name) {
     case "ollanet_scan": {
+      if (args.last === true) {
+        const stored = await lastScan();
+        if (!stored) {
+          return textResult({ error: "No saved scan. Run ollanet_scan without last=true first." }, true);
+        }
+        return textResult(stored);
+      }
       const payload = await scanNetwork({
         lanScan: Boolean(args.lan),
         includeOffline: Boolean(args.all),

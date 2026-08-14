@@ -154,6 +154,7 @@ for (const s of servers) {
 |---|---|---|
 | `scanNetwork()` | localhost + config + `OLLANET_HOSTS` + Tailscale | Button / first “find servers” |
 | `scanNetwork({ lanScan: true })` | plus TCP sweep of local `/24`s on port 11434 | Checkbox; never the default scan, never on every health check |
+| `lastScan()` | last saved snapshot, no network | UI “show last inventory” |
 | `discoverHosts()` then probe yourself | candidates only, no `/api/tags` | If the app already has its own Ollama client |
 
 Pass `config` to skip the file (useful when the app already has its own config):
@@ -199,6 +200,7 @@ optimizeDeps: { exclude: ["ollanet"] },
 - `--json` — machine-readable output
 - `--all` — also probe offline Tailscale peers
 - `--lan` — scan local LAN CIDRs for open Ollama ports
+- `--last` / `--cached` — print the last saved scan (no network). Written to `~/.ollanet/last-scan.json` when installed, or `./last-scan.json` in a checkout (`OLLANET_LAST_SCAN` overrides).
 
 ### `prompt` options
 
@@ -274,7 +276,7 @@ Runs a **stdio MCP server** (no extra npm deps). Cursor / Claude Desktop / any M
 
 | Tool | What it does |
 |---|---|
-| `ollanet_scan` | Discover hosts + models (`lan`, `all` optional) |
+| `ollanet_scan` | Discover hosts + models (`lan`, `all`, `last` optional) |
 | `ollanet_prompt` | Prompt a host or continue with `chat_id` |
 | `ollanet_pull` | Pull / update a model on a host (`machine`, `model`) |
 | `ollanet_show` | Inspect a model (`machine`, `model`) |

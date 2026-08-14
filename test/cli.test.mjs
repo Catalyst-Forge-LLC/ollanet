@@ -5,7 +5,7 @@
  * Tests tagged "Regression:" each correspond to a bug that actually shipped.
  */
 import assert from "node:assert/strict";
-import { readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 
@@ -388,6 +388,37 @@ describe("scan and chats", () => {
     const server = payload.servers.find((s) => s.ip === "127.0.0.1" && s.port === mock.port);
     assert.ok(server, "expected the mock host in scan output");
     assert.deepEqual(server.models.map((m) => m.name).sort(), ["fake:1b", "qwen3:0.6b"]);
+  });
+
+  it("saves the last scan and --last replays it without probing", async () => {
+    mock.requests.length = 0;
+    const live = await runCli(["scan", "--json"], { sandbox });
+    assert.equal(live.code, 0, live.stderr);
+    const tagsAfterLive = mock.requests.filter((r) => r.url === "/api/tags").length;
+    assert.ok(tagsAfterLive > 0);
+    await access(sandbox.lastScanFile);
+
+    mock.requests.length = 0;
+    const cached = await runCli(["scan", "--last", "--json"], { sandbox });
+    assert.equal(cached.code, 0, cached.stderr);
+    assert.equal(mock.requests.filter((r) => r.url === "/api/tags").length, 0);
+    const stored = JSON.parse(cached.stdout);
+    assert.ok(stored.scanned_at);
+    assert.equal(stored.lan, false);
+    const server = stored.servers.find((s) => s.ip === "127.0.0.1" && s.port === mock.port);
+    assert.ok(server);
+    assert.deepEqual(server.models.map((m) => m.name).sort(), ["fake:1b", "qwen3:0.6b"]);
+  });
+
+  it("errors on --last when nothing has been saved", async () => {
+    const empty = await makeSandbox(mockConfig(mock.port));
+    try {
+      const res = await runCli(["scan", "--last"], { sandbox: empty });
+      assert.notEqual(res.code, 0);
+      assert.match(res.stderr, /No saved scan/);
+    } finally {
+      await empty.cleanup();
+    }
   });
 
   it("lists saved chats", async () => {

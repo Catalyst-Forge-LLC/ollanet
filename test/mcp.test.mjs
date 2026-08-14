@@ -10,6 +10,7 @@ function startMcp(sandbox) {
       OLLANET_CONFIG: sandbox.configFile,
       OLLANET_RESPONSES_DIR: sandbox.responsesDir,
       OLLANET_BENCHMARKS_DIR: sandbox.benchmarksDir,
+      OLLANET_LAST_SCAN: sandbox.lastScanFile,
       OLLANET_HOSTS: "",
       OLLAMA_KEEP_ALIVE: "",
       OLLAMA_TEMPERATURE: "",
@@ -128,6 +129,16 @@ describe("ollanet mcp", () => {
       const scanBody = JSON.parse(scan.result.content[0].text);
       assert.ok(scanBody.servers.some((s) => s.ip === "127.0.0.1"));
       assert.ok(scanBody.servers[0].models.some((m) => m.name === "fake:1b"));
+
+      const last = await mcp.rpc(
+        "tools/call",
+        { name: "ollanet_scan", arguments: { last: true } },
+        15,
+      );
+      assert.equal(last.result.isError, undefined);
+      const lastBody = JSON.parse(last.result.content[0].text);
+      assert.ok(lastBody.scanned_at);
+      assert.ok(lastBody.servers.some((s) => s.ip === "127.0.0.1"));
 
       const prompt = await mcp.rpc(
         "tools/call",

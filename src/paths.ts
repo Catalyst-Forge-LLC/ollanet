@@ -33,3 +33,8 @@ export function defaultResponsesDir(): string {
 export function defaultBenchmarksDir(): string {
   return IS_INSTALLED ? path.join(USER_DIR, "benchmarks") : projectPath("benchmarks");
 }
+
+/** Last successful scan snapshot (single file). */
+export function defaultLastScanPath(): string {
+  return IS_INSTALLED ? path.join(USER_DIR, "last-scan.json") : projectPath("last-scan.json");
+}

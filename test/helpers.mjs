@@ -317,6 +317,7 @@ export async function makeSandbox(config = {}) {
     configFile,
     responsesDir: path.join(dir, "responses"),
     benchmarksDir: path.join(dir, "benchmarks"),
+    lastScanFile: path.join(dir, "last-scan.json"),
     cleanup: () => rm(dir, { recursive: true, force: true }),
   };
 }
@@ -341,6 +342,7 @@ export function runCli(args, opts = {}) {
             OLLANET_CONFIG: sandbox.configFile,
             OLLANET_RESPONSES_DIR: sandbox.responsesDir,
             OLLANET_BENCHMARKS_DIR: sandbox.benchmarksDir,
+            OLLANET_LAST_SCAN: sandbox.lastScanFile,
           }
         : {}),
       // Don't let a developer's real settings leak into assertions.

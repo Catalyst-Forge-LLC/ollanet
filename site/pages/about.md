@@ -15,7 +15,7 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 
 ## What you get
 
-- **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents.
+- **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents. `--last` reprints the previous scan with no network.
 - **Pull** — `ollanet pull studio gemma3:12b` asks that machine to download (or update) a library model. The server fetches it; ollanet does not upload weights.
 - **Manage** — `show` a Modelfile, `ps` what’s in VRAM, `rm` leftovers (`--yes`). Scan marks Finetuna-style names `[tuned]`.
 - **Prompt** — any host by name or IP, streaming replies, sane defaults per machine

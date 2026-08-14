@@ -17,7 +17,7 @@ Discover Ollama hosts on localhost, your LAN, Tailscale, or any IP/hostname
 you can reach — then chat with hash-addressed transcripts.
 
 Usage:
-  ollanet scan [--json] [--all] [--lan]
+  ollanet scan [--json] [--all] [--lan] [--last]
   ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet pull <machine|ip> <model>
@@ -31,6 +31,7 @@ Usage:
 Examples:
   ollanet scan
   ollanet scan --lan
+  ollanet scan --last            # print the last saved scan (no network)
   ollanet prompt localhost "What is MagicDNS?"
   ollanet prompt 192.168.1.50 gemma4:12b "Hello"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
@@ -47,6 +48,7 @@ Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
         (override with OLLANET_CONFIG)
 Hosts:  config.hosts, OLLANET_HOSTS, optional Tailscale + --lan
 Chats:  ~/.ollanet/responses or ./responses (override with OLLANET_RESPONSES_DIR)
+Scan:   ~/.ollanet/last-scan.json or ./last-scan.json (override with OLLANET_LAST_SCAN)
 `;
 
 async function main(): Promise<void> {
