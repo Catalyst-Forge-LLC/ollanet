@@ -40,6 +40,9 @@ ollanet bench mycroftone --all
 # More throughput repeats for a tighter Finetuna comparison
 ollanet bench localhost my-model-finetuna --runs 5
 
+# Steady-state tok/s: discard the first throughput run, keep the model loaded
+ollanet bench localhost my-model-finetuna --hot --runs 5
+
 # Cold-load measurement + machine-readable
 ollanet bench localhost --all --cold-load --json
 
@@ -53,8 +56,9 @@ ollanet bench localhost gemma4:12b --judge --judge-model llama3.2:1b
 |---|---|
 | `--all` | Benchmark every **completion-capable** model from `/api/tags` (see Capability filter) |
 | `--suite <name>` | Prompt suite: `quick` (default) or `full` |
-| `--runs <n>` | Repeats for the **throughput** case only (default **3**, min 1) |
-| `--warmup` | Discarded short call per model before timed cases (default **on**) |
+| `--runs <n>` | Repeats for the **throughput** case only (default **3**, min 1). With `--hot`, these are the **counted** hot runs after the discarded first shot. |
+| `--hot` | Steady-state tok/s: run throughput `--runs + 1` times, **discard the first** from median/spread, and **do not unload** between models. The discarded full generation is the warmup (short `--warmup` is off unless you pass `--warmup` too). |
+| `--warmup` | Discarded short call per model before timed cases (default **on**, **off** under `--hot`) |
 | `--no-warmup` | Skip warmup |
 | `--cold-load` | Explicit cold-load measurement via unload + `/api/ps` poll (default **off**) |
 | `--keep-alive <value>` | Passed through for timed cases (default inherit config / `5m`) |
@@ -102,7 +106,7 @@ Mock harness: configurable `capabilities` per model (including omit-key) so the 
 
 ### Repeats — throughput only
 
-`--runs <n>` (default **3**) applies **only** to the **throughput** case. Report for tok/s:
+`--runs <n>` (default **3**) applies **only** to the **throughput** case. With `--hot`, `--runs` is the number of **counted** shots after a discarded first generation. Report for tok/s:
 
 - **median** (headline)
 - **min / max** (or IQR when `runs ≥ 4`)
@@ -147,9 +151,24 @@ Cold-load procedure (per model, once) — **before warmup**:
 - Mock: probe canned `load_duration` non-zero; post-warmup cases `0`; assert saved `load_ms` equals the probe.  
 - Unload+ps timeout → `cold_load.error`, omit load column (no fallback to timed-case load).
 
+### `--hot` — discard first, keep loaded
+
+Default bench already **does not** unload between throughput repeats of the same model. The short `--warmup` (`hi`, 8 tokens) only gets weights into VRAM; the first *full* throughput generation is often still the slow one (kernels, cache, thermal).
+
+`--hot` measures **steady-state** tok/s:
+
+1. Skip the short warmup unless `--warmup` is also passed.
+2. Run the throughput case `--runs + 1` times.
+3. Mark the first attempt `discarded: true` (`run: 0`). Exclude it from median / min / max / `early_stop_count`.
+4. **Do not unload** between models (weights stay resident). `--cold-load` still unloads *that* model for its probe.
+
+`--hot` is part of `comparability_key`. Do not compare a hot median to a default (unloaded-between-models) median.
+
+VRAM: `--all --hot` can leave several models resident. Prefer `--hot` on one model (Finetuna before/after).
+
 ### Unload between models (async + shared-host warning)
 
-When ≥2 models are benchmarked, after model A: unload → poll `/api/ps` until gone → start B. Do **not** unload between cases of the same model.
+When ≥2 models are benchmarked **and `--hot` is off**, after model A: unload → poll `/api/ps` until gone → start B. Do **not** unload between cases of the same model.
 
 **Shared-host warning:** ollanet’s premise is remote machines on a tailnet. `keep_alive: 0` (between models and during cold-load) evicts models that may be serving someone else. When the resolved target is **not** localhost / loopback, print a preflight warning:
 
@@ -222,13 +241,13 @@ Store both. Finetuna before/after compares **one field**; mismatch → refuse th
 1. Resolve candidates; `/api/show` for capabilities; filter/skip non-completion; warn on `--think` without `thinking`.  
 2. Record identity from `/api/tags` + capabilities from show; `/api/version` once per host.  
 3. If `--cold-load`: ps-first unload (if needed) → poll → 1-token probe → `cold_load`.  
-4. If warmup: short discarded call.  
+4. If warmup: short discarded call. (`--hot` skips this unless `--warmup` is explicit.)  
 5. Run suite cases:
    - `check` / `live`: **once** each (`temperature: 0`, `seed: 0`).  
-   - `throughput`: `--runs` times with pinned `num_predict`; record `done_reason`.  
+   - `throughput`: `--runs` times with pinned `num_predict`; record `done_reason`. With `--hot`, one extra discarded first attempt.  
    - Errors: per-attempt; continue unless `--fail-fast`.  
    - Optional `--judge` after successful check/live (excluded from tok/s).  
-6. If more models: unload → ps poll → next.
+6. If more models and not `--hot`: unload → ps poll → next.
 
 Concurrency: **serial only**.
 
@@ -253,8 +272,9 @@ Once per run / host: `ollama_version` (`/api/version`). Per model while loaded (
 
 ```text
 models[].cases[]
-  cases[].attempts[]     length === runs for throughput; length === 1 for check/live
-    attempt.run
+  cases[].attempts[]     length === runs for throughput (runs+1 when --hot); length === 1 for check/live
+    attempt.run            1..n counted; 0 when discarded
+    attempt.discarded?     true on the --hot first throughput shot
     attempt.wall_ms
     attempt.tok_s?         throughput
     attempt.done_reason?   throughput (and any chat final)
@@ -340,6 +360,7 @@ After first model (optional): `Typical remaining ≈ …` based on observed pace
     "throughput_num_predict": 256,
     "num_ctx": null,
     "warmup": true,
+    "hot": false,
     "cold_load": false,
     "think": false,
     "bench_timeout_ms": 60000
@@ -440,11 +461,11 @@ src/bench-store.ts    # Persist under benchmarks/
 ## Acceptance criteria
 
 1. Default run: `--runs 3` on throughput only; checks once; median + spread; digests + `suite_revision` + `comparability_key` saved.  
-2. `cases[].attempts[]` retained; throughput length === `--runs`; check length === 1; med/min/max recomputable; early-stop attempts excluded from median and flagged.  
+2. `cases[].attempts[]` retained; throughput length === `--runs` (or `--runs + 1` with `--hot`, first `discarded`); check length === 1; med/min/max recomputable; early-stop and discarded attempts excluded from median and flagged.  
 3. `--all` benches only known non-completion exclusions; omitted/empty `capabilities` still benches. Mock covers omit-key.  
 4. `--think` warns only when capabilities are present and lack `thinking`.  
 5. Cold-load + warmup: probe before warmup; mock asserts `load_ms` === probe non-zero value, not post-warmup zeros; ps-first skip when already unloaded.  
-6. Multi-model unload + `/api/ps` poll; non-localhost preflight unload warning.  
+6. Multi-model unload + `/api/ps` poll; non-localhost preflight unload warning. `--hot` skips that unload and prints a hot note instead.  
 7. Preflight shows counts + timeout + worst-case ceiling (not a fake “ETA”); optional typical estimate after first model.  
 8. `ping` accepts `Sure — OK`; `math` accepts `323 (i.e., 17×19)`.  
 9. Changing `--num-predict` changes `comparability_key` even if `suite_revision` matches; warn if `--num-predict` &lt; 64.  
@@ -459,9 +480,9 @@ src/bench-store.ts    # Persist under benchmarks/
 ## Resolved decisions
 
 1. **Default model when omitted:** host default, else error.  
-2. **Unload between models:** only when ≥2 models, with `/api/ps` poll + shared-host warning.  
-3. **Suite evolution:** `suite_revision` content hash; **comparability** via `comparability_key` including pins/settings.  
-4. **`--runs`:** throughput only.  
+2. **Unload between models:** only when ≥2 models and not `--hot`, with `/api/ps` poll + shared-host warning.  
+3. **Suite evolution:** `suite_revision` content hash; **comparability** via `comparability_key` including pins/settings (`hot` included).  
+4. **`--runs`:** throughput only. `--hot` adds one discarded first shot.  
 5. **`--all`:** completion capability filter via `/api/show`.
 
 ---

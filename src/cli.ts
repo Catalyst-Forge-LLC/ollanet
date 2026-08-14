@@ -46,6 +46,7 @@ Examples:
   ollanet chats
   ollanet bench localhost --all
   ollanet bench localhost llama3.2:1b --runs 3
+  ollanet bench localhost gemma3:12b --hot --runs 5
   ollanet mcp                  # stdio MCP server for agents
 
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout

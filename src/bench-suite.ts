@@ -162,6 +162,8 @@ export function comparabilityKey(opts: {
   temperature: number;
   think: boolean;
   numCtx: number | null;
+  /** Steady-state tok/s: first throughput run discarded, no inter-model unload. */
+  hot?: boolean;
 }): string {
   const payload = [
     suiteRevision(opts.suite),
@@ -170,6 +172,7 @@ export function comparabilityKey(opts: {
     `temperature=${opts.temperature}`,
     `think=${opts.think ? 1 : 0}`,
     `num_ctx=${opts.numCtx ?? ""}`,
+    ...(opts.hot ? ["hot=1"] : []),
   ].join("|");
   return createHash("sha256").update(payload).digest("hex").slice(0, 16);
 }

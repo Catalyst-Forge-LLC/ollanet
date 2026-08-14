@@ -389,6 +389,74 @@ describe("bench", () => {
     await sandbox.cleanup();
   });
 
+  it("discards the first throughput run under --hot and skips inter-model unload", async () => {
+    let throughput = 0;
+    const mock = await startMock({
+      models: ["fake:1b", "qwen3:0.6b"],
+      capabilities: {
+        "fake:1b": ["completion"],
+        "qwen3:0.6b": ["completion"],
+      },
+      onChat: ({ body }) => {
+        if (body?.options?.num_predict === 256) {
+          throughput += 1;
+          const durations = [4e9, 2e9, 2e9]; // discarded 64 tok/s; counted 128
+          const eval_duration = durations[(throughput - 1) % 3];
+          return {
+            message: { content: "x".repeat(50) },
+            done: true,
+            done_reason: "length",
+            eval_count: 256,
+            eval_duration,
+            load_duration: 0,
+            total_duration: eval_duration,
+          };
+        }
+        return {
+          message: { content: "OK" },
+          done: true,
+          done_reason: "stop",
+          eval_count: 2,
+          eval_duration: 1e8,
+          load_duration: 0,
+          total_duration: 1e8,
+        };
+      },
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+
+    const res = await runCli(
+      ["bench", "mockhost", "fake:1b", "qwen3:0.6b", "--hot", "--runs", "2", "--json", "--no-save"],
+      { sandbox, env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" } },
+    );
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stderr, /Hot: discarding the first throughput run/);
+    const payload = JSON.parse(res.stdout);
+    assert.equal(payload.runs, 2);
+    assert.equal(payload.settings.hot, true);
+    assert.equal(payload.settings.warmup, false);
+
+    const model = payload.models[0];
+    const thru = model.cases.find((c) => c.id === "throughput");
+    assert.equal(thru.attempts.length, 3);
+    assert.equal(thru.attempts[0].discarded, true);
+    assert.equal(thru.attempts[0].run, 0);
+    assert.equal(thru.attempts[1].discarded, undefined);
+    assert.equal(thru.attempts[1].run, 1);
+    assert.equal(thru.attempts[2].run, 2);
+    // Median from the two counted 128 tok/s shots, not the discarded 64.
+    assert.ok(Math.abs(model.summary.tok_s_median - 128) < 0.1);
+
+    const unloads = mock.requests.filter(
+      (r) => r.body?.keep_alive === 0 || r.body?.keep_alive === "0",
+    );
+    assert.equal(unloads.length, 0, " --hot must not unload between models");
+
+    await mock.close();
+    await sandbox.cleanup();
+  });
+
   it("requires --judge-model with --judge", async () => {
     const mock = await startMock({ models: ["fake:1b"] });
     const sandbox = await makeSandbox(mockConfig(mock.port));

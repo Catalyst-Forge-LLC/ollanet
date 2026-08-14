@@ -44,6 +44,7 @@ describe("bench checkers", () => {
     const b = comparabilityKey({ ...base, throughputNumPredict: 128 });
     assert.notEqual(a, b);
     assert.equal(comparabilityKey(base), a);
+    assert.notEqual(a, comparabilityKey({ ...base, hot: true }));
   });
 
   it("median works for odd and even lengths", () => {

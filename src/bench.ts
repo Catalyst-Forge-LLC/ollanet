@@ -52,6 +52,8 @@ const UNLOAD_WAIT_MS = envInt("OLLAMA_BENCH_UNLOAD_WAIT_MS", 60_000);
 
 interface AttemptResult {
   run: number;
+  /** First throughput shot under --hot; excluded from median/spread. */
+  discarded?: boolean;
   wall_ms: number;
   tok_s?: number;
   done_reason?: string;
@@ -103,11 +105,16 @@ function usage(): never {
   ollanet bench <machine|ip> [model...] [options]
   ollanet bench <machine|ip> --all [options]
 
+Examples:
+  ollanet bench studio gemma3:12b --runs 5
+  ollanet bench studio gemma3:12b --hot --runs 5
+
 Options:
   --all                 Every completion-capable model from /api/tags
   --exclude-vision      With --all, skip models that advertise vision
   --suite quick|full    Prompt suite (default quick)
   --runs <n>            Throughput repeats (default 3)
+  --hot                 Discard first throughput run; keep models loaded
   --warmup / --no-warmup
   --cold-load           Measure cold load via unload + /api/ps
   --num-predict <n>     Pin throughput length (default 256)
@@ -181,6 +188,8 @@ function parseArgs(argv: string[]) {
   let all = false;
   let excludeVision = false;
   let warmup = true;
+  let warmupSet = false;
+  let hot = false;
   let coldLoad = false;
   let json = false;
   let save = true;
@@ -222,10 +231,16 @@ function parseArgs(argv: string[]) {
     }
     if (arg === "--warmup") {
       warmup = true;
+      warmupSet = true;
       continue;
     }
     if (arg === "--no-warmup") {
       warmup = false;
+      warmupSet = true;
+      continue;
+    }
+    if (arg === "--hot") {
+      hot = true;
       continue;
     }
     if (arg === "--cold-load") {
@@ -320,7 +335,8 @@ function parseArgs(argv: string[]) {
     excludeVision,
     suite,
     runs,
-    warmup,
+    warmup: hot && !warmupSet ? false : warmup,
+    hot,
     coldLoad,
     json,
     save,
@@ -505,15 +521,17 @@ async function runCaseAttempt(opts: {
   }
 }
 
+function countedAttempts(attempts: AttemptResult[]): AttemptResult[] {
+  return attempts.filter((a) => !a.discarded);
+}
+
 function summarizeModel(cases: CaseResult[], cold: ModelResult["cold_load"], selfJudge: boolean) {
   const throughput = cases.find((c) => c.id === "throughput");
-  const fullLen = throughput?.attempts.filter(
-    (a) => !a.error && !a.early_stop && a.tok_s != null,
-  ) ?? [];
+  const counted = countedAttempts(throughput?.attempts ?? []);
+  const fullLen = counted.filter((a) => !a.error && !a.early_stop && a.tok_s != null);
   const toks = fullLen.map((a) => a.tok_s!);
   const earlyStopCount =
-    throughput?.attempts.filter((a) => a.early_stop || (a.done_reason && a.done_reason !== "length"))
-      .length ?? 0;
+    counted.filter((a) => a.early_stop || (a.done_reason && a.done_reason !== "length")).length;
 
   const checkAttempts = cases
     .filter((c) => c.role === "check")
@@ -543,13 +561,16 @@ function printTable(
   models: ModelResult[],
   skipped: Array<{ name: string; reason: string }>,
   coldLoad: boolean,
+  hot: boolean,
 ) {
   const lines: string[] = [];
   lines.push(
-    `Bench: ${models.length} completion model(s) × suite=${suite} × runs=${runs}`,
+    `Bench: ${models.length} completion model(s) × suite=${suite} × runs=${runs}` +
+      (hot ? " (hot: first discarded)" : ""),
   );
   lines.push(`comparability_key=${compKey}   suite_revision=${revision}   timeout: ${BENCH_TIMEOUT_MS}ms/case`);
   if (coldLoad) lines.push("Cold-load: on");
+  if (hot) lines.push("Hot: first throughput run discarded; models stay loaded");
   lines.push("");
 
   const header = coldLoad
@@ -600,6 +621,7 @@ function printTable(
     const notes: string[] = [];
     if (m.error) notes.push(m.error.slice(0, 60));
     if (m.summary.early_stop_count > 0) notes.push(`${m.summary.early_stop_count}× early-stop`);
+    if (hot) notes.push("hot");
     if (m.summary.self_judge) notes.push("self-judge");
     const load =
       m.summary.load_ms != null && m.summary.load_ms > 0
@@ -750,13 +772,15 @@ export async function main(): Promise<void> {
     temperature: 0,
     think: baseSettings.think === true,
     numCtx: baseSettings.num_ctx ?? null,
+    hot: parsed.hot,
   });
 
   const suiteCases = getSuiteCases(parsed.suite);
+  const throughputReps = parsed.runs + (parsed.hot ? 1 : 0);
   const caseCount =
     selected.length *
     (suiteCases.filter((c) => c.role !== "throughput").length +
-      suiteCases.filter((c) => c.role === "throughput").length * parsed.runs);
+      suiteCases.filter((c) => c.role === "throughput").length * throughputReps);
 
   if (!parsed.json) {
     const skipBits = [
@@ -770,13 +794,14 @@ export async function main(): Promise<void> {
     console.error(
       `Bench: ${selected.length} completion model(s)` +
         (skipBits.length ? ` (skipped ${skipBits.join(", ")})` : "") +
-        ` × suite=${parsed.suite} × runs=${parsed.runs}`,
+        ` × suite=${parsed.suite} × runs=${parsed.runs}` +
+        (parsed.hot ? " (hot: +1 discarded)" : ""),
     );
     console.error(
       `Cases: ~${caseCount} chat calls   timeout: ${BENCH_TIMEOUT_MS}ms/case` +
         `   worst-case ceiling: ~${Math.ceil((caseCount * BENCH_TIMEOUT_MS) / 60000)}m if every call times out`,
     );
-    if (!isLoopback(host)) {
+    if (!parsed.hot && !isLoopback(host)) {
       console.error(
         `Note: benchmarking unloads models on ${machineLabel} between runs` +
           (parsed.coldLoad ? " (and for --cold-load)" : "") +
@@ -784,6 +809,12 @@ export async function main(): Promise<void> {
       );
     }
     console.error("Proceeding…");
+  }
+
+  if (parsed.hot) {
+    console.error(
+      "Hot: discarding the first throughput run; models stay loaded (no unload between models).",
+    );
   }
 
   if (parsed.settings.think === true) {
@@ -840,18 +871,21 @@ export async function main(): Promise<void> {
 
     for (const caseDef of suiteCases) {
       const attempts: AttemptResult[] = [];
-      const reps = caseDef.role === "throughput" ? parsed.runs : 1;
-      for (let r = 1; r <= reps; r += 1) {
+      const discardFirst = parsed.hot && caseDef.role === "throughput";
+      const reps = caseDef.role === "throughput" ? parsed.runs + (discardFirst ? 1 : 0) : 1;
+      for (let i = 0; i < reps; i += 1) {
+        const discarded = discardFirst && i === 0;
         const attempt = await runCaseAttempt({
           baseUrl,
           model,
           caseDef,
-          run: r,
+          run: discarded ? 0 : discardFirst ? i : i + 1,
           settings: baseSettings,
           throughputNumPredict: parsed.throughputNumPredict,
           judgeModel,
           selfJudge,
         });
+        if (discarded) attempt.discarded = true;
         attempts.push(attempt);
         if (attempt.error) {
           anyError = true;
@@ -890,8 +924,9 @@ export async function main(): Promise<void> {
 
     if (parsed.failFast && modelError) break;
 
-    // Unload before next model when ≥2 models remain after this one / multi-model run
-    if (selected.length >= 2 && mi < selected.length - 1) {
+    // Unload before next model when ≥2 models remain after this one / multi-model run.
+    // --hot keeps weights resident so the discarded first shot warms the rest.
+    if (!parsed.hot && selected.length >= 2 && mi < selected.length - 1) {
       try {
         await ollamaUnload(baseUrl, model, BENCH_TIMEOUT_MS);
         await waitUntilUnloaded(baseUrl, model, UNLOAD_WAIT_MS);
@@ -929,6 +964,7 @@ export async function main(): Promise<void> {
       throughput_num_predict: parsed.throughputNumPredict,
       num_ctx: baseSettings.num_ctx ?? null,
       warmup: parsed.warmup,
+      hot: parsed.hot,
       cold_load: parsed.coldLoad,
       think: baseSettings.think === true,
       bench_timeout_ms: BENCH_TIMEOUT_MS,
@@ -961,6 +997,7 @@ export async function main(): Promise<void> {
       modelResults,
       skipped,
       parsed.coldLoad,
+      parsed.hot,
     );
     if (parsed.save) console.error(`benchmarks dir: ${benchmarksDir()}`);
   }
