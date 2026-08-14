@@ -1,4 +1,4 @@
-# Head-to-head compare (0.5.0)
+# Head-to-head compare (0.6.0)
 
 **Status:** Implemented  
 **Spec kind:** Feature
@@ -30,4 +30,4 @@
 - [x] Saved markdown includes the prompt and each model’s reply + stats.
 - [x] `prompt --file` accepts `.txt`/`.md` and rejects other extensions.
 - [x] MCP + library.
-- [ ] Publish `0.5.0`.
+- [ ] Publish `0.6.0`.

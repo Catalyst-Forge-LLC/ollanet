@@ -27,4 +27,4 @@
 - [x] `rm` without `--yes` / `confirm` does not delete.
 - [x] `scan --json` includes `models[].tuned`.
 - [x] `pull` result includes a Finetuna `next` hint.
-- [ ] Publish `0.5.0` (workflow_dispatch / Release).
+- [x] Publish `0.5.0` (workflow_dispatch / Release).

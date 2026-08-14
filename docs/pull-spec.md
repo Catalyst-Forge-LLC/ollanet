@@ -35,4 +35,4 @@ New models land in the Ollama library constantly. ollanet can already find a hos
 - [x] Unknown host / missing model / Ollama error fail loudly.
 - [x] `import { pullModel } from "ollanet"`.
 - [x] MCP `ollanet_pull` (`machine`, `model`, optional `insecure`).
-- [ ] Publish `0.5.0` (workflow_dispatch / Release — not a version-bump trigger).
+- [x] Publish `0.5.0` (workflow_dispatch / Release — not a version-bump trigger).

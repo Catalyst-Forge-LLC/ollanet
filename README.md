@@ -176,7 +176,7 @@ await scanNetwork({
 
 `pullModel({ machine, model })` asks that host to download (or update) a library model. The bits never transit ollanet. `showModel`, `removeModel({ yes: true })`, and `listLoaded` are the inspect / delete / VRAM trio.
 
-Requires **ollanet ≥ 0.4.0** (library). **Model management (`pull` / `show` / `rm` / `ps`) needs ≥ 0.5.0.** Bundlers (Vite / SvelteKit SSR):
+Requires **ollanet ≥ 0.4.0** (library). **Model management (`pull` / `show` / `rm` / `ps`) needs ≥ 0.5.0.** **Compare, `lastScan`, and bench `--hot` need ≥ 0.6.0.** Bundlers (Vite / SvelteKit SSR):
 
 ```ts
 // vite.config.ts
