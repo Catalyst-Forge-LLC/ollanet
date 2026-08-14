@@ -18,7 +18,7 @@ New models land in the Ollama library constantly. ollanet can already find a hos
 ## Non-goals
 
 - Uploading a local GGUF / blob (`/api/create` + `/api/blobs`) — Finetuna’s territory for named variants.
-- Delete / copy / push.
+- Delete / copy / push as part of *this* spec (`rm` / `show` / `ps` live in [models-spec.md](./models-spec.md)).
 - Auth for Ollama (none exists by default; same as scan/prompt).
 - Defaulting the model from `defaultModels` — pull must name what to fetch.
 

@@ -14,9 +14,12 @@ import { readFile } from "node:fs/promises";
 import { listChats, loadChat } from "./chat-store.ts";
 import type { GenerateSettings } from "./config.ts";
 import { projectPath } from "./paths.ts";
+import { listLoaded } from "./ps.ts";
 import { pullModel } from "./pull.ts";
 import { runPrompt } from "./prompt.ts";
+import { removeModel } from "./rm.ts";
 import { scanNetwork } from "./scan.ts";
+import { showModel } from "./show.ts";
 
 // Pin to the oldest widely-supported MCP revision. Clients may request a newer
 // date; we still answer with this — legal negotiation, max compatibility.
@@ -130,6 +133,56 @@ const TOOLS: ToolDef[] = [
         },
       },
       required: ["machine", "model"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "ollanet_show",
+    description:
+      "Inspect a model on a reachable Ollama host (Modelfile, parameters, capabilities). " +
+      "Marks Finetuna-style tuned names. Machine is a discovered name, MagicDNS name, hostname, or IP[:port].",
+    inputSchema: {
+      type: "object",
+      properties: {
+        machine: { type: "string", description: "Host name/IP" },
+        model: { type: "string", description: "Model to inspect" },
+      },
+      required: ["machine", "model"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "ollanet_rm",
+    description:
+      "Delete a model from a reachable Ollama host's disk. Destructive. " +
+      "Requires confirm=true. Machine is a discovered name, MagicDNS name, hostname, or IP[:port].",
+    inputSchema: {
+      type: "object",
+      properties: {
+        machine: { type: "string", description: "Host name/IP" },
+        model: { type: "string", description: "Model to delete" },
+        confirm: {
+          type: "boolean",
+          description: "Must be true to actually delete (default false)",
+        },
+      },
+      required: ["machine", "model", "confirm"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "ollanet_ps",
+    description:
+      "List models currently loaded in VRAM. Optional machine; omit to probe every discovered host. " +
+      "scan is on-disk inventory; ps is what is resident right now.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        machine: {
+          type: "string",
+          description: "Host name/IP (optional; omit for all discovered hosts)",
+        },
+      },
       additionalProperties: false,
     },
   },
@@ -253,6 +306,27 @@ async function callTool(
         quiet: true,
       });
       return textResult(result);
+    }
+    case "ollanet_show": {
+      const machine = typeof args.machine === "string" ? args.machine : "";
+      const model = typeof args.model === "string" ? args.model : "";
+      if (!machine.trim()) return textResult({ error: "machine is required" }, true);
+      if (!model.trim()) return textResult({ error: "model is required" }, true);
+      return textResult(await showModel({ machine, model }));
+    }
+    case "ollanet_rm": {
+      const machine = typeof args.machine === "string" ? args.machine : "";
+      const model = typeof args.model === "string" ? args.model : "";
+      if (!machine.trim()) return textResult({ error: "machine is required" }, true);
+      if (!model.trim()) return textResult({ error: "model is required" }, true);
+      if (args.confirm !== true) {
+        return textResult({ error: "confirm must be true to delete a model" }, true);
+      }
+      return textResult(await removeModel({ machine, model, yes: true }));
+    }
+    case "ollanet_ps": {
+      const machine = typeof args.machine === "string" ? args.machine : undefined;
+      return textResult(await listLoaded({ machine }));
     }
     case "ollanet_list_chats": {
       const chats = await listChats();

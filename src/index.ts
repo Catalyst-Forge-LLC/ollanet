@@ -40,5 +40,29 @@ export type { PromptRunOptions, PromptRunResult } from "./prompt.ts";
 export { pullModel } from "./pull.ts";
 export type { PullOptions, PullResult } from "./pull.ts";
 
-export { ollamaChat, ollamaTags, ollamaShow, ollamaPs, ollamaPull } from "./ollama-chat.ts";
-export type { PullChunk, OllamaPullOptions, OllamaPullResult } from "./ollama-chat.ts";
+export { showModel } from "./show.ts";
+export type { ShowOptions, ShowResult } from "./show.ts";
+
+export { removeModel } from "./rm.ts";
+export type { RemoveOptions, RemoveResult } from "./rm.ts";
+
+export { listLoaded } from "./ps.ts";
+export type { PsOptions, PsResult, LoadedHost, LoadedModel } from "./ps.ts";
+
+export { looksTuned } from "./tuned.ts";
+
+export {
+  ollamaChat,
+  ollamaTags,
+  ollamaShow,
+  ollamaPs,
+  ollamaPsRequired,
+  ollamaPull,
+  ollamaDelete,
+} from "./ollama-chat.ts";
+export type {
+  PullChunk,
+  OllamaPullOptions,
+  OllamaPullResult,
+  OllamaShowInfo,
+} from "./ollama-chat.ts";

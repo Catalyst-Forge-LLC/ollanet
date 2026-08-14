@@ -42,11 +42,11 @@ Point your MCP host at the stdio server:
 }
 ```
 
-Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_pull`, `ollanet_list_chats`, `ollanet_get_chat`.
+Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_pull`, `ollanet_show`, `ollanet_rm`, `ollanet_ps`, `ollanet_list_chats`, `ollanet_get_chat`.
 
 ### Library (apps)
 
-Node 20+ only (not the browser). Requires ollanet **0.4.0+**. `pullModel` needs **0.5.0+**.
+Node 20+ only (not the browser). Requires ollanet **0.4.0+**. `pullModel` / `showModel` / `removeModel` / `listLoaded` need **0.5.0+**.
 
 ```ts
 import { scanNetwork } from "ollanet";

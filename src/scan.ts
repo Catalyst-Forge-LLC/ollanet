@@ -12,6 +12,7 @@ import {
   shortName,
   type HostTarget,
 } from "./hosts.ts";
+import { looksTuned } from "./tuned.ts";
 
 function scanTimeoutMs(): number {
   return envInt("OLLAMA_TIMEOUT_MS", 2500);
@@ -163,7 +164,8 @@ function printResults(
         const params = model.details?.parameter_size;
         const quant = model.details?.quantization_level;
         const meta = [params, quant, size].filter(Boolean).join(" · ");
-        console.log(meta ? `    - ${model.name}  (${meta})` : `    - ${model.name}`);
+        const tag = looksTuned(model.name) ? " [tuned]" : "";
+        console.log(meta ? `    - ${model.name}  (${meta})${tag}` : `    - ${model.name}${tag}`);
       }
     }
     console.log("");
@@ -201,6 +203,8 @@ export interface ScannedServer {
     parameter_size?: string;
     quantization_level?: string;
     family?: string;
+    /** Name looks like a Finetuna-style host-side tune. */
+    tuned: boolean;
   }>;
 }
 
@@ -240,6 +244,7 @@ function toPayload(
           parameter_size: m.details?.parameter_size,
           quantization_level: m.details?.quantization_level,
           family: m.details?.family,
+          tuned: looksTuned(m.name),
         })),
       })),
   };

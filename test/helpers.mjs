@@ -31,7 +31,10 @@ export const CLI = path.join(TEST_DIR, "..", "dist", "cli.js");
  * @param {number}   [opts.evalDuration]
  * @param {number}   [opts.loadDuration] load_duration (ns) on chat responses.
  * @param {string}   [opts.version]     /api/version string.
+ * @param {string[]} [opts.loaded]      Models already reported by /api/ps.
+ * @param {Record<string, object>} [opts.show] Extra /api/show fields keyed by model name.
  * @param {string}   [opts.pullError]   If set, /api/pull returns HTTP 500 with this error.
+ * @param {string}   [opts.deleteError] If set, /api/delete returns HTTP 500 with this error.
  * @param {(req: {url: string, body: any}, ctx: object) => object|null} [opts.onChat]
  *        Optional override returning a full JSON body for non-stream chat.
  */
@@ -50,13 +53,15 @@ export async function startMock(opts = {}) {
     loadDuration = 0,
     version = "0.9.0-mock",
     pullError = null,
+    deleteError = null,
+    show = {},
     onChat = null,
   } = opts;
 
   /** @type {Array<{url: string, body: any, method: string}>} */
   const requests = [];
   /** @type {Set<string>} */
-  const loaded = new Set();
+  const loaded = new Set(opts.loaded ?? []);
   /** @type {string | null} */
   let pendingUnload = null;
   let unloadPollsRemaining = 0;
@@ -152,19 +157,40 @@ export async function startMock(opts = {}) {
         return;
       }
 
+      if (req.url === "/api/delete") {
+        if (deleteError) {
+          res.statusCode = 500;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ error: deleteError }));
+          return;
+        }
+        res.statusCode = 200;
+        res.end();
+        return;
+      }
+
       if (req.url === "/api/show") {
         const name = typeof body?.model === "string" ? body.model : "";
         res.setHeader("Content-Type", "application/json");
+        const extra = show[name] ?? {};
         // capabilities[name] === null → omit key (omitempty / older servers)
         // undefined → default ["completion"]
         if (Object.prototype.hasOwnProperty.call(capabilities, name) && capabilities[name] === null) {
-          res.end(JSON.stringify({ modelfile: "", parameters: "", template: "" }));
+          res.end(JSON.stringify({ modelfile: "", parameters: "", template: "", ...extra }));
           return;
         }
         const caps = Object.prototype.hasOwnProperty.call(capabilities, name)
           ? capabilities[name]
           : ["completion"];
-        res.end(JSON.stringify({ capabilities: caps, modelfile: "", parameters: "", template: "" }));
+        res.end(
+          JSON.stringify({
+            capabilities: caps,
+            modelfile: "",
+            parameters: "",
+            template: "",
+            ...extra,
+          }),
+        );
         return;
       }
 
@@ -259,6 +285,12 @@ export async function startMock(opts = {}) {
     chats: () => requests.filter((r) => r.url === "/api/chat").map((r) => r.body),
     /** Requests sent to /api/pull, in order. */
     pulls: () => requests.filter((r) => r.url === "/api/pull").map((r) => r.body),
+    /** Requests sent to /api/delete, in order. */
+    deletes: () => requests.filter((r) => r.url === "/api/delete").map((r) => r.body),
+    /** Requests sent to /api/show, in order. */
+    shows: () => requests.filter((r) => r.url === "/api/show").map((r) => r.body),
+    /** Requests sent to /api/ps, in order. */
+    pses: () => requests.filter((r) => r.url === "/api/ps"),
     close: () =>
       new Promise((resolve) => {
         // undici holds keep-alive sockets open, which would stall server.close().

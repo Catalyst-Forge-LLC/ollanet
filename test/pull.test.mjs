@@ -30,6 +30,8 @@ describe("ollanet pull", () => {
     assert.equal(res.code, 0, res.stderr);
     assert.match(res.stdout, /pulled gemma3:12b on mockhost/);
     assert.match(res.stderr, /pulling gemma3:12b/);
+    assert.match(res.stderr, /finetuna --model gemma3:12b/);
+    assert.match(res.stderr, /finetuna\.net/);
     const body = mock.pulls()[0];
     assert.equal(body.model, "gemma3:12b");
     assert.equal(body.stream, true);
@@ -46,6 +48,8 @@ describe("ollanet pull", () => {
     assert.equal(payload.model, "llama3.2:1b");
     assert.equal(payload.status, "success");
     assert.match(payload.endpoint, /^http:\/\/127\.0\.0\.1:/);
+    assert.match(payload.next.hint, /finetuna --model llama3.2:1b/);
+    assert.equal(payload.next.site, "https://finetuna.net");
   });
 
   it("sends stream:false with --no-stream", async () => {

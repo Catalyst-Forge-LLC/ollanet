@@ -31,11 +31,12 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 
 - **Discover** Ollama hosts from localhost, `config.hosts`, `OLLANET_HOSTS`, optional Tailscale, and optional LAN scan (`--lan`, off by default)
 - **Pull** a library model onto a named host (`ollanet pull studio gemma3:12b`) — the server downloads; re-pull updates
+- **Show / rm / ps** — inspect a Modelfile, delete a model (`--yes`), see what’s in VRAM. Scan marks Finetuna-style `[tuned]` names
 - **Prompt** any hostname/IP/model with streaming replies
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)
-- **MCP** — `ollanet mcp` exposes scan/prompt/pull/chats as Model Context Protocol tools for agents
+- **MCP** — `ollanet mcp` exposes scan/prompt/pull/show/rm/ps/chats as Model Context Protocol tools for agents
 - **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Use cases
@@ -45,12 +46,12 @@ The core idea: turn “I have to remember which IP has which models loaded” in
 **For agents and automation** — prefer `ollanet mcp` (stdio MCP). The same flows also work via CLI flags:
 
 - **Live model inventory / routing** — `ollanet_scan` (or `scan --json`) lists reachable hosts and models. Route each sub-task to the best host: the big-VRAM box for reasoning, the laptop for quick lookups.
-- **Put a new model on a box** — `ollanet_pull` (or `pull studio gemma3:12b`) asks that host to download from the registry. Re-pull updates.
+- **Put a new model on a box** — `ollanet_pull` (or `pull studio gemma3:12b`) asks that host to download from the registry. Re-pull updates. Then `show` / `ps` / `rm` manage what’s on that disk and in VRAM.
 - **Conversations that survive machines** — chats are stored by short hash with full history. Start a long thread on the GPU box, continue it later with `ollanet_prompt` + `chat_id` (or `--chat <hash>`).
 - **A “talk to any Ollama on my network” tool** — `ollanet_prompt` / `prompt … --json --no-stream`; no hard-coded endpoints.
 - **Embed in an app** — same scan + pick + call as a library. The app does not own the GPUs; it discovers them (FilePress, CLIs, Electron, a local companion for a hosted product).
 - **Fleet health and speed checks** — periodic `ollanet bench <host> --json` builds a record of which model on which machine is currently fastest (or has silently gone offline). Saved results live in `benchmarks/`.
-- **The Finetuna loop** — [Finetuna](https://finetuna.net) shapes a GPU-tuned named variant on the host; ollanet discovers and uses it from anywhere on the network.
+- **The Finetuna loop** — [Finetuna](https://finetuna.net) shapes a GPU-tuned named variant on the host; ollanet `scan` / `show` / `prompt` it from anywhere on the network. After `pull`, ollanet prints the next step (`finetuna --model …`).
 
 **For humans:**
 
@@ -119,6 +120,8 @@ ollanet scan --lan
 
 # Put a library model on a named machine (that host downloads it)
 ollanet pull studio gemma3:12b
+ollanet show studio gemma3:12b
+ollanet ps studio
 
 # Talk to a machine by name, MagicDNS name, or IP
 ollanet prompt localhost "What is MagicDNS?"
@@ -167,9 +170,9 @@ await scanNetwork({
 
 `runPrompt({ save: false, writeStdout: false })` is a one-shot call that does not write `~/.ollanet/responses/`.
 
-`pullModel({ machine, model })` asks that host to download (or update) a library model. The bits never transit ollanet.
+`pullModel({ machine, model })` asks that host to download (or update) a library model. The bits never transit ollanet. `showModel`, `removeModel({ yes: true })`, and `listLoaded` are the inspect / delete / VRAM trio.
 
-Requires **ollanet ≥ 0.4.0** (library). **`pullModel` needs ≥ 0.5.0.** Bundlers (Vite / SvelteKit SSR):
+Requires **ollanet ≥ 0.4.0** (library). **Model management (`pull` / `show` / `rm` / `ps`) needs ≥ 0.5.0.** Bundlers (Vite / SvelteKit SSR):
 
 ```ts
 // vite.config.ts
@@ -183,6 +186,9 @@ optimizeDeps: { exclude: ["ollanet"] },
 |---|---|
 | `ollanet scan` | Probe known/discovered hosts for Ollama + list models |
 | `ollanet pull <machine> <model>` | Ask that host to download / update a library model |
+| `ollanet show <machine> <model>` | Inspect Modelfile / params / capabilities (`[tuned]` when it looks like Finetuna) |
+| `ollanet rm <machine> <model> --yes` | Delete a model from that host’s disk |
+| `ollanet ps [machine]` | Models loaded in VRAM (omit machine = every discovered host) |
 | `ollanet prompt …` | Send a prompt / continue a chat |
 | `ollanet chats` | List or inspect saved transcripts |
 | `ollanet bench …` | Benchmark models for tok/s + lightweight quality checks |
@@ -235,7 +241,23 @@ The named machine downloads from the Ollama registry onto **its** disk. Re-pulli
 | `--no-stream` | Single final response (no progress chunks) |
 | `--json` | Result JSON on stdout |
 
-Timeout default is none (large pulls can take hours). Override with `OLLAMA_PULL_TIMEOUT_MS`.
+Timeout default is none (large pulls can take hours). Override with `OLLAMA_PULL_TIMEOUT_MS`. After a successful pull, stderr points at [Finetuna](https://finetuna.net) for a host-side named variant.
+
+### `show` / `rm` / `ps`
+
+```text
+ollanet show <machine|ip> <model>
+ollanet rm <machine|ip> <model> --yes
+ollanet ps [machine]
+```
+
+| Flag | Meaning |
+|---|---|
+| `--yes` / `-y` | Required for `rm` unless you confirm on a TTY |
+| `--json` | Result JSON on stdout |
+| `--machine` / `--model` | Same host resolution as `prompt` |
+
+`scan` is on-disk inventory and marks `*-ctx32k` / `*-flash` / `*finetuna*` as `[tuned]`. `ps` is what’s resident. `show` reads the Modelfile so you can see a Finetuna bake from another machine.
 
 ### `chats` options
 
@@ -255,6 +277,9 @@ Runs a **stdio MCP server** (no extra npm deps). Cursor / Claude Desktop / any M
 | `ollanet_scan` | Discover hosts + models (`lan`, `all` optional) |
 | `ollanet_prompt` | Prompt a host or continue with `chat_id` |
 | `ollanet_pull` | Pull / update a model on a host (`machine`, `model`) |
+| `ollanet_show` | Inspect a model (`machine`, `model`) |
+| `ollanet_rm` | Delete a model (`machine`, `model`, `confirm: true`) |
+| `ollanet_ps` | Loaded models (`machine` optional) |
 | `ollanet_list_chats` | Summarize saved transcripts |
 | `ollanet_get_chat` | Load one chat (full history) |
 

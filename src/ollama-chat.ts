@@ -208,13 +208,40 @@ export async function ollamaTags(
   return body.models ?? [];
 }
 
+export interface OllamaShowInfo {
+  capabilities?: string[];
+  modelfile?: string;
+  parameters?: string;
+  template?: string;
+  system?: string;
+  details?: {
+    parent_model?: string;
+    format?: string;
+    family?: string;
+    families?: string[];
+    parameter_size?: string;
+    quantization_level?: string;
+  };
+  model_info?: Record<string, unknown>;
+  modified_at?: string;
+}
+
 export async function ollamaShow(
   baseUrl: string,
   model: string,
   timeoutMs: number,
-): Promise<{ capabilities?: string[] }> {
+): Promise<OllamaShowInfo> {
   const url = `${baseUrl}/api/show`;
   return ollamaPostJson(url, { model }, timeoutMs);
+}
+
+/** POST /api/delete — removes the named model from that host's disk. */
+export async function ollamaDelete(
+  baseUrl: string,
+  model: string,
+  timeoutMs: number,
+): Promise<void> {
+  await ollamaPostJson(`${baseUrl}/api/delete`, { model }, timeoutMs);
 }
 
 export async function ollamaVersion(
@@ -366,11 +393,16 @@ export async function ollamaPull(opts: OllamaPullOptions): Promise<OllamaPullRes
 
 export async function ollamaPs(baseUrl: string, timeoutMs: number): Promise<PsModel[]> {
   try {
-    const body = await ollamaGetJson<{ models?: PsModel[] }>(`${baseUrl}/api/ps`, timeoutMs);
-    return body.models ?? [];
+    return await ollamaPsRequired(baseUrl, timeoutMs);
   } catch {
     return [];
   }
+}
+
+/** Like ollamaPs, but unreachable hosts throw instead of looking empty. */
+export async function ollamaPsRequired(baseUrl: string, timeoutMs: number): Promise<PsModel[]> {
+  const body = await ollamaGetJson<{ models?: PsModel[] }>(`${baseUrl}/api/ps`, timeoutMs);
+  return body.models ?? [];
 }
 
 function modelKey(name: string): string {
@@ -509,6 +541,7 @@ async function ollamaPostJson<T>(
       );
     }
     const text = await res.text();
+    if (!text.trim()) return {} as T;
     try {
       return JSON.parse(text) as T;
     } catch {

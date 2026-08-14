@@ -7,9 +7,10 @@
  * The *server* downloads from the registry; ollanet only sends POST /api/pull.
  */
 
-import { configFromPartial, loadConfig, type AppConfig } from "./config.ts";
-import { discoverHosts, envInt, ollamaBaseUrl, resolveHost, shortName } from "./hosts.ts";
+import type { AppConfig } from "./config.ts";
+import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaPull, type PullChunk } from "./ollama-chat.ts";
+import { resolveTarget } from "./target.ts";
 
 /** Pull HTTP timeout (ms). 0 = none. Large models can take hours. */
 function pullTimeoutMs(): number {
@@ -167,6 +168,7 @@ export interface PullResult {
   model: string;
   status: string;
   endpoint: string;
+  next: { hint: string; site: string };
 }
 
 /** Programmatic pull used by the CLI, MCP, and apps. */
@@ -176,15 +178,7 @@ export async function pullModel(opts: PullOptions): Promise<PullResult> {
   if (!machineQuery) throw new Error("Machine is required.");
   if (!model) throw new Error("Model is required.");
 
-  const config = opts.config ? configFromPartial(opts.config) : await loadConfig();
-  const { hosts: targets } = await discoverHosts({
-    hosts: config.hosts,
-    discovery: config.discovery,
-  });
-  const host = resolveHost(targets, machineQuery);
-  if (!host.online && !host.isSelf && host.source === "tailscale") {
-    throw new Error(`Machine "${shortName(host)}" appears offline.`);
-  }
+  const host = await resolveTarget(machineQuery, opts.config);
 
   const writeProgress = opts.writeStdout !== false;
   const quiet = opts.quiet === true || !writeProgress;
@@ -211,11 +205,16 @@ export async function pullModel(opts: PullOptions): Promise<PullResult> {
     process.stderr.write("\n");
   }
 
+  const machine = shortName(host);
   return {
-    machine: shortName(host),
+    machine,
     model,
     status: pulled.status,
     endpoint: ollamaBaseUrl(host),
+    next: {
+      hint: `On ${machine}: finetuna --model ${model}  → then ollanet show ${machine} <tuned-name>`,
+      site: "https://finetuna.net",
+    },
   };
 }
 
@@ -241,4 +240,5 @@ export async function main(): Promise<void> {
     return;
   }
   process.stdout.write(`pulled ${result.model} on ${result.machine}\n`);
+  process.stderr.write(`${result.next.hint}\n${result.next.site}\n`);
 }

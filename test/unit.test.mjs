@@ -20,6 +20,7 @@ import {
 } from "../dist/ollama-chat.js";
 import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store.js";
 import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
+import { looksTuned } from "../dist/tuned.js";
 
 /** Minimal HostTarget literal for resolution tests. */
 function host(partial) {
@@ -207,6 +208,19 @@ describe("topic helpers", () => {
     assert.equal(cleanTopic('"Ferret Haiku"', "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("Title: Ferret Haiku", "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("   ", "fb"), "fb");
+  });
+});
+
+describe("looksTuned", () => {
+  it("matches Finetuna-style names and Modelfile text", () => {
+    assert.equal(looksTuned("gemma4-ctx32k"), true);
+    assert.equal(looksTuned("gemma4-ctx32k-flash"), true);
+    assert.equal(looksTuned("llama-finetuna"), true);
+    assert.equal(looksTuned("stock-flash"), true);
+    assert.equal(looksTuned("fake:1b", { modelfile: "# written by finetuna\nFROM fake:1b" }), true);
+    assert.equal(looksTuned("fake:1b"), false);
+    assert.equal(looksTuned("llama3.2:latest"), false);
+    assert.equal(looksTuned(""), false);
   });
 });
 

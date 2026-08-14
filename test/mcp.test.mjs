@@ -98,8 +98,11 @@ describe("ollanet mcp", () => {
         "ollanet_get_chat",
         "ollanet_list_chats",
         "ollanet_prompt",
+        "ollanet_ps",
         "ollanet_pull",
+        "ollanet_rm",
         "ollanet_scan",
+        "ollanet_show",
       ]);
     } finally {
       mcp.close();
@@ -173,6 +176,59 @@ describe("ollanet mcp", () => {
       assert.equal(pullBody.model, "gemma3:12b");
       assert.equal(pullBody.status, "success");
       assert.equal(mock.pulls().at(-1).model, "gemma3:12b");
+    } finally {
+      mcp.close();
+    }
+  });
+
+  it("show / ps / rm (rm requires confirm)", async () => {
+    const mcp = startMcp(sandbox);
+    try {
+      await mcp.rpc("initialize", {
+        protocolVersion: "2024-11-05",
+        capabilities: {},
+        clientInfo: { name: "test", version: "0.0.0" },
+      });
+      mcp.notify("notifications/initialized");
+
+      const shown = await mcp.rpc(
+        "tools/call",
+        { name: "ollanet_show", arguments: { machine: "mockhost", model: "fake:1b" } },
+        20,
+      );
+      assert.equal(shown.result.isError, undefined);
+      const showBody = JSON.parse(shown.result.content[0].text);
+      assert.equal(showBody.model, "fake:1b");
+      assert.equal(showBody.tuned, false);
+
+      const refused = await mcp.rpc(
+        "tools/call",
+        { name: "ollanet_rm", arguments: { machine: "mockhost", model: "fake:1b" } },
+        21,
+      );
+      assert.equal(refused.result.isError, true);
+      assert.match(refused.result.content[0].text, /confirm/);
+
+      const removed = await mcp.rpc(
+        "tools/call",
+        {
+          name: "ollanet_rm",
+          arguments: { machine: "mockhost", model: "fake:1b", confirm: true },
+        },
+        22,
+      );
+      assert.equal(removed.result.isError, undefined);
+      assert.equal(JSON.parse(removed.result.content[0].text).deleted, true);
+      assert.equal(mock.deletes().at(-1).model, "fake:1b");
+
+      const ps = await mcp.rpc(
+        "tools/call",
+        { name: "ollanet_ps", arguments: { machine: "mockhost" } },
+        23,
+      );
+      assert.equal(ps.result.isError, undefined);
+      const psBody = JSON.parse(ps.result.content[0].text);
+      assert.equal(psBody.hosts[0].machine, "mockhost");
     } finally {
       mcp.close();
     }

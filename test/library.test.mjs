@@ -54,7 +54,12 @@ describe("package entry", () => {
     assert.equal(typeof mod.discoverHosts, "function");
     assert.equal(typeof mod.runPrompt, "function");
     assert.equal(typeof mod.pullModel, "function");
+    assert.equal(typeof mod.showModel, "function");
+    assert.equal(typeof mod.removeModel, "function");
+    assert.equal(typeof mod.listLoaded, "function");
+    assert.equal(typeof mod.looksTuned, "function");
     assert.equal(typeof mod.ollamaPull, "function");
+    assert.equal(typeof mod.ollamaDelete, "function");
     assert.equal(typeof mod.ollamaChat, "function");
     assert.equal(typeof mod.loadConfig, "function");
     assert.equal(mod.main, undefined);
@@ -187,6 +192,7 @@ describe("pullModel library contract", () => {
       assert.equal(result.machine, "studio");
       assert.equal(result.model, "gemma3:12b");
       assert.equal(result.status, "success");
+      assert.match(result.next.hint, /finetuna --model gemma3:12b/);
       assert.equal(mock.pulls()[0].model, "gemma3:12b");
     } finally {
       await mock.close();

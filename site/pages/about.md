@@ -17,10 +17,11 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 
 - **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents.
 - **Pull** — `ollanet pull studio gemma3:12b` asks that machine to download (or update) a library model. The server fetches it; ollanet does not upload weights.
+- **Manage** — `show` a Modelfile, `ps` what’s in VRAM, `rm` leftovers (`--yes`). Scan marks Finetuna-style names `[tuned]`.
 - **Prompt** — any host by name or IP, streaming replies, sane defaults per machine
 - **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
 - **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks
-- **MCP** — `ollanet mcp` exposes scan / prompt / pull / chats over stdio
+- **MCP** — `ollanet mcp` exposes scan / prompt / pull / show / rm / ps / chats over stdio
 - **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Quick start
@@ -29,6 +30,7 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 npm install -g ollanet
 ollanet scan
 ollanet pull studio gemma3:12b
+ollanet show studio gemma3:12b
 ollanet prompt localhost "What is MagicDNS?"
 ```
 
@@ -37,7 +39,7 @@ Full flags and config live on the [install](/install) page.
 ## The Finetuna loop
 
 <div class="mesh-panel">
-  <p>On the machine that <em>runs</em> Ollama, <a href="https://finetuna.net"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. ollanet discovers it from anywhere on the network and starts the session.</p>
+  <p>On the machine that <em>runs</em> Ollama, <a href="https://finetuna.net"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. ollanet <code>scan</code> / <code>show</code> / <code>prompt</code> it from anywhere on the network. After <code>pull</code>, ollanet prints the next step.</p>
   <p>Host tunes the model. Network finds and uses it. Same API, closed loop.</p>
 </div>
 
@@ -56,7 +58,7 @@ Point your MCP host at the stdio server — then route work to whatever’s aliv
 }
 ```
 
-Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_pull`, `ollanet_list_chats`, `ollanet_get_chat`.
+Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_pull`, `ollanet_show`, `ollanet_rm`, `ollanet_ps`, `ollanet_list_chats`, `ollanet_get_chat`.
 
 ## For apps
 

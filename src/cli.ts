@@ -5,6 +5,9 @@
  *   ollanet scan
  *   ollanet prompt <machine-or-ip> "hello"
  *   ollanet pull <machine> <model>
+ *   ollanet show <machine> <model>
+ *   ollanet rm <machine> <model> --yes
+ *   ollanet ps [machine]
  *   ollanet chats
  */
 
@@ -18,6 +21,9 @@ Usage:
   ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet pull <machine|ip> <model>
+  ollanet show <machine|ip> <model>
+  ollanet rm <machine|ip> <model> --yes
+  ollanet ps [machine]
   ollanet chats [--json] [--id <hash>]
   ollanet bench <machine|ip> [model...] [--all] [options]
   ollanet mcp
@@ -29,6 +35,9 @@ Examples:
   ollanet prompt 192.168.1.50 gemma4:12b "Hello"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
   ollanet pull studio gemma3:12b
+  ollanet show studio gemma4-ctx32k
+  ollanet rm studio llama3.2:1b --yes
+  ollanet ps studio
   ollanet chats
   ollanet bench localhost --all
   ollanet bench localhost llama3.2:1b --runs 3
@@ -87,6 +96,24 @@ async function main(): Promise<void> {
     case "pull":
     case "download": {
       const { main: run } = await import("./pull.ts");
+      await run();
+      return;
+    }
+    case "show":
+    case "inspect": {
+      const { main: run } = await import("./show.ts");
+      await run();
+      return;
+    }
+    case "rm":
+    case "delete": {
+      const { main: run } = await import("./rm.ts");
+      await run();
+      return;
+    }
+    case "ps":
+    case "loaded": {
+      const { main: run } = await import("./ps.ts");
       await run();
       return;
     }
