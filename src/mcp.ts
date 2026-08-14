@@ -125,6 +125,7 @@ const TOOLS: ToolDef[] = [
     description:
       "Head-to-head: run the same prompt on 2–5 models on one Ollama host. " +
       "Returns a summary plus saved markdown/JSON paths. " +
+      "Omit prompt/file to use the built-in mesh-host tasting prompt. " +
       "Machine is a discovered name, MagicDNS name, hostname, or IP[:port].",
     inputSchema: {
       type: "object",
@@ -137,7 +138,10 @@ const TOOLS: ToolDef[] = [
           maxItems: 5,
           description: "2–5 model names on that host",
         },
-        prompt: { type: "string", description: "Prompt text" },
+        prompt: {
+          type: "string",
+          description: "Prompt text (optional; default is the built-in mesh-host prompt)",
+        },
         file: {
           type: "string",
           description: "Read prompt from a local .txt or .md file",
@@ -379,7 +383,6 @@ async function callTool(
         argv: typeof args.prompt === "string" ? args.prompt : "",
         file: fileText,
       });
-      if (!prompt) return textResult({ error: "prompt or file is required" }, true);
       const settings: GenerateSettings = {};
       if (typeof args.system === "string") settings.system = args.system;
       if (typeof args.temperature === "number") settings.temperature = args.temperature;
@@ -389,7 +392,7 @@ async function callTool(
       const result = await runCompare({
         machine,
         models,
-        prompt,
+        prompt: prompt || undefined,
         settings,
         save: args.save === undefined ? true : Boolean(args.save),
         unload: args.unload === true,

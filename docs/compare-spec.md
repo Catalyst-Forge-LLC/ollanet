@@ -9,7 +9,8 @@
 
 ## Goals
 
-- `ollanet compare <machine> <m1> <m2> [m3] [m4] [m5] --prompt "…" | --file path`
+- `ollanet compare <machine> <m1> <m2> [m3] [m4] [m5] [--prompt "…" | --file path]`
+- Omit prompt → built-in mesh-host tasting prompt (stderr notes that it was the default).
 - 2–5 models, same host resolution as `prompt`
 - Summary table (tok/s, tokens, wall, done)
 - Write `compares/<id>.md` and `.json`
@@ -25,7 +26,7 @@
 
 ## Acceptance criteria
 
-- [x] Compare requires 2–5 models and a prompt (`--prompt`, `--file`, and/or stdin).
+- [x] Compare requires 2–5 models. Prompt from `--prompt`, `--file`, stdin, or the built-in default.
 - [x] Saved markdown includes the prompt and each model’s reply + stats.
 - [x] `prompt --file` accepts `.txt`/`.md` and rejects other extensions.
 - [x] MCP + library.

@@ -235,15 +235,16 @@ Machine can be a discovered name, hostname, FQDN, or IP (`192.168.1.50`, `host:1
 ### `compare` options
 
 ```text
+ollanet compare <machine> <model> <model> [model...]
 ollanet compare <machine> <model> <model> [model...] --prompt <text>
 ollanet compare <machine> <model> <model> [model...] --file <path.txt|.md>
 ```
 
-Same prompt on **2–5 models** on one host. Prints a tok/s table and writes `compares/<id>.md` (readable) plus `.json`. This is not `bench` (no fixed suite / repeats).
+Same prompt on **2–5 models** on one host. Prints a tok/s table and writes `compares/<id>.md` (readable) plus `.json`. This is not `bench` (no fixed suite / repeats). Omit `--prompt` / `--file` to use the built-in mesh-host tasting prompt (printed on stderr when used).
 
 | Flag | Meaning |
 |---|---|
-| `--prompt` / `-p` | Prompt text |
+| `--prompt` / `-p` | Prompt text (default: built-in) |
 | `--file` / `-f` | Prompt from `.txt` or `.md` |
 | `--system` | System prompt |
 | `--temperature` / `--num-predict` / `--num-ctx` / `--keep-alive` | Same as `prompt` |
@@ -305,7 +306,7 @@ Runs a **stdio MCP server** (no extra npm deps). Cursor / Claude Desktop / any M
 |---|---|
 | `ollanet_scan` | Discover hosts + models (`lan`, `all`, `last` optional) |
 | `ollanet_prompt` | Prompt a host or continue with `chat_id` (`file` optional) |
-| `ollanet_compare` | Same prompt on 2–5 models (`machine`, `models`, `prompt` or `file`) |
+| `ollanet_compare` | Same prompt on 2–5 models (`machine`, `models`; `prompt` / `file` optional) |
 | `ollanet_pull` | Pull / update a model on a host (`machine`, `model`) |
 | `ollanet_show` | Inspect a model (`machine`, `model`) |
 | `ollanet_rm` | Delete a model (`machine`, `model`, `confirm: true`) |

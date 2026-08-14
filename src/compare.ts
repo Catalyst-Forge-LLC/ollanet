@@ -28,6 +28,12 @@ import { comparesDir, newCompareId, saveCompare } from "./compare-store.ts";
 const MIN_MODELS = 2;
 const MAX_MODELS = 5;
 
+/** Used when --prompt, --file, and stdin are all omitted. */
+export const DEFAULT_COMPARE_PROMPT =
+  "In 6–10 sentences, explain how you’d pick an Ollama host on a mixed LAN/Tailscale mesh " +
+  "for a 12B chat model. Then give one failure mode (wrong host, cold load, or VRAM spill) " +
+  "and how you’d confirm it. Be specific.";
+
 function compareTimeoutMs(): number {
   return envInt("OLLAMA_COMPARE_TIMEOUT_MS", envInt("OLLAMA_PROMPT_TIMEOUT_MS", 600_000));
 }
@@ -38,18 +44,21 @@ function unloadWaitMs(): number {
 
 function usage(): never {
   console.error(`Usage:
+  ollanet compare <machine> <model> <model> [model...]
   ollanet compare <machine> <model> <model> [model...] --prompt <text>
   ollanet compare <machine> <model> <model> [model...] --file <path.txt|.md>
 
 Examples:
+  ollanet compare studio gemma3:12b llama3.2:3b
   ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
   ollanet compare studio gemma3:12b qwen2.5:7b llama3.2:3b --file ./task.md
 
 Runs the same prompt on 2–5 models on one host. Prints a summary table and
 writes compares/<id>.md plus .json (prompt, replies, stats). Not a bench suite.
+Omit --prompt/--file to use the built-in mesh-host tasting prompt.
 
 Options:
-  --prompt <text>        Prompt text
+  --prompt <text>        Prompt text (default: built-in mesh-host prompt)
   --file <path>          Prompt from a .txt or .md file
   --system <text>        System prompt
   --temperature <n>
@@ -209,6 +218,8 @@ export interface CompareRecord {
   machine: string;
   endpoint: string;
   prompt: string;
+  /** True when the built-in default prompt was used. */
+  default_prompt: boolean;
   system?: string;
   results: CompareModelResult[];
   files?: { json: string; md: string };
@@ -260,10 +271,9 @@ export async function runCompare(opts: CompareOptions): Promise<CompareRecord> {
   if (opts.file) {
     fileText = await readPromptFile(opts.file);
   }
-  const prompt = assemblePrompt({ argv: opts.prompt, file: fileText });
-  if (!prompt) {
-    throw new Error("Prompt is required (--prompt, --file, or both).");
-  }
+  const assembled = assemblePrompt({ argv: opts.prompt, file: fileText });
+  const defaulted = !assembled;
+  const prompt = assembled || DEFAULT_COMPARE_PROMPT;
 
   const config = opts.config ? configFromPartial(opts.config) : await loadConfig();
   const { hosts } = await discoverHosts({
@@ -363,6 +373,7 @@ export async function runCompare(opts: CompareOptions): Promise<CompareRecord> {
     machine: shortName(host),
     endpoint: baseUrl,
     prompt,
+    default_prompt: defaulted,
     system: settings.system,
     results,
   };
@@ -400,21 +411,23 @@ export async function main(): Promise<void> {
   }
 
   const prompt = assemblePrompt({ argv: parsed.prompt, file: fileText, stdin: fromStdin });
-  if (!prompt) {
-    console.error("Prompt is required (--prompt, --file, and/or stdin).");
-    usage();
-  }
 
   const record = await runCompare({
     machine: parsed.machine,
     models: parsed.models,
-    prompt,
+    prompt: prompt || undefined,
     settings: parsed.settings,
     save: parsed.save,
     unload: parsed.unload,
     writeStdout: !parsed.json,
     quiet: parsed.json,
   });
+
+  if (record.default_prompt) {
+    process.stderr.write(
+      "Using default compare prompt (pass --prompt or --file to override).\n",
+    );
+  }
 
   if (parsed.json) {
     process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);

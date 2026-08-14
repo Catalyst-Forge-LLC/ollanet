@@ -70,6 +70,21 @@ describe("ollanet compare", () => {
     assert.equal(payload.files, undefined);
   });
 
+  it("uses the built-in default prompt when none is passed", async () => {
+    mock.requests.length = 0;
+    const res = await runCli(
+      ["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--json", "--no-save"],
+      { sandbox },
+    );
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stderr, /default compare prompt/);
+    const payload = JSON.parse(res.stdout);
+    assert.equal(payload.default_prompt, true);
+    assert.match(payload.prompt, /Ollama host on a mixed LAN\/Tailscale mesh/);
+    assert.match(payload.prompt, /VRAM spill/);
+    assert.equal(mock.chats().at(-1).messages.at(-1).content, payload.prompt);
+  });
+
   it("rejects a single model", async () => {
     const res = await runCli(["compare", "mockhost", "fake:1b", "--prompt", "hi"], { sandbox });
     assert.notEqual(res.code, 0);

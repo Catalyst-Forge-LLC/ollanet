@@ -23,6 +23,9 @@ export function renderCompareMarkdown(record: CompareRecord): string {
     `- **host:** ${record.machine} (${record.endpoint})`,
     `- **when:** ${record.created_at}`,
     `- **models:** ${record.results.map((r) => r.model).join(", ")}`,
+    ...(record.default_prompt
+      ? ["- **prompt:** default (override with --prompt / --file)"]
+      : []),
     "",
     "## Prompt",
     "",
