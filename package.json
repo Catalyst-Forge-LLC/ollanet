@@ -1,6 +1,6 @@
 {
   "name": "ollanet",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Discover and talk to Ollama on any reachable network — CLI, MCP, and a Node library",
   "type": "module",
   "bin": {
