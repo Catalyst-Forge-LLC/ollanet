@@ -30,4 +30,4 @@
 - [x] Saved markdown includes the prompt and each model’s reply + stats.
 - [x] `prompt --file` accepts `.txt`/`.md` and rejects other extensions.
 - [x] MCP + library.
-- [ ] Publish `0.6.0`.
+- [x] Publish `0.6.0`.
