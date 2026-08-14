@@ -20,7 +20,7 @@ import {
 import { benchmarksDir, newBenchId, saveBenchmark } from "./bench-store.ts";
 import { readFile } from "node:fs/promises";
 import { envInt, ollamaBaseUrl, shortName, type HostTarget } from "./hosts.ts";
-import { consumeSettingsFlag, parseNumberFlag, takeFlag } from "./argv.ts";
+import { consumeSettingsFlag, failUsage, isHelpFlag, parseNumberFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import { projectPath } from "./paths.ts";
 import {
@@ -95,35 +95,44 @@ interface ModelResult {
   cases: CaseResult[];
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet bench <machine|ip> [model...] [options]
   ollanet bench <machine|ip> --all [options]
 
 Examples:
   ollanet bench studio gemma3:12b --runs 5
   ollanet bench studio gemma3:12b --hot --runs 5
+  ollanet help bench
+
+Fixed suite (not compare). Checks run once; throughput repeats --runs times.
+Median tok/s excludes early-stops. Unload is between models, not between repeats.
 
 Options:
   --all                 Every completion-capable model from /api/tags
   --exclude-vision      With --all, skip models that advertise vision
   --suite quick|full    Prompt suite (default quick)
-  --runs <n>            Throughput repeats (default 3)
+  --runs <n>            Counted throughput repeats (default 3)
   --hot                 Discard first throughput run; keep models loaded
-  --warmup / --no-warmup
+  --warmup              Short discarded call before timed cases (default on)
+  --no-warmup           Skip the short warmup (--hot implies this)
   --cold-load           Measure cold load via unload + /api/ps
   --num-predict <n>     Pin throughput length (default 256)
-  --num-ctx <n>
-  --keep-alive <value>
-  --think / --no-think
-  --judge --judge-model <name>
+  --num-ctx <n>         Context window override
+  --keep-alive <value>  Keep model loaded (e.g. 5m, 0, -1)
+  --think / --no-think  Thinking tokens (default off)
+  --judge               Second pass: score check answers 1–5
+  --judge-model <name>  Required with --judge (no default)
   --json                Machine-readable stdout
-  --save / --no-save
-  --fail-fast
+  --save / --no-save    Persist under benchmarks/ (default on)
+  --fail-fast           Stop remaining models after the first hard error
   --fail-on-error       Exit 2 if any model/case errored
 
-See docs/bench-spec.md for measurement rules.`);
-  process.exit(1);
+See docs/bench-spec.md for measurement rules.`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function isLoopback(host: HostTarget): boolean {
@@ -180,7 +189,8 @@ function parseArgs(argv: string[]) {
 
   while (args.length > 0) {
     const arg = args.shift()!;
-    if (arg === "--" || arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
+    if (arg === "--") usage();
     if (arg === "--all") {
       all = true;
       continue;

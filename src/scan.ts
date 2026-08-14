@@ -14,6 +14,7 @@ import {
 } from "./hosts.ts";
 import { lastScanPath, loadLastScan, saveLastScan, type StoredScan } from "./scan-store.ts";
 import { looksTuned } from "./tuned.ts";
+import { isHelpFlag, printHelp } from "./argv.ts";
 
 function scanTimeoutMs(): number {
   return envInt("OLLAMA_TIMEOUT_MS", 2500);
@@ -297,7 +298,32 @@ export async function scanNetwork(options: ScanOptions = {}): Promise<ScanPayloa
   return payload;
 }
 
+export function helpText(): string {
+  return `Usage:
+  ollanet scan [--json] [--all] [--lan] [--last]
+
+Examples:
+  ollanet scan
+  ollanet scan --lan
+  ollanet scan --last
+  ollanet scan --json
+
+Discovers Ollama hosts (localhost, config, OLLANET_HOSTS, Tailscale) and lists
+models. --lan is an opt-in TCP sweep of local /24s on port 11434.
+
+Options:
+  --json     Machine-readable output
+  --all      Also probe offline Tailscale peers
+  --lan      TCP-scan local LAN CIDRs for open Ollama ports
+  --last     Reprint the last saved scan (no network)
+  --cached   Same as --last`;
+}
+
 export async function main(): Promise<void> {
+  if (process.argv.slice(2).some((arg) => isHelpFlag(arg))) {
+    printHelp(helpText());
+  }
+
   const includeOffline = process.argv.includes("--all");
   const jsonOut = process.argv.includes("--json");
   const lanScan = process.argv.includes("--lan");

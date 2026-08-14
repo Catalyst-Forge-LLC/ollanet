@@ -10,7 +10,7 @@
 import type { AppConfig } from "./config.ts";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaPull, type PullChunk } from "./ollama-chat.ts";
-import { takeFlag } from "./argv.ts";
+import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 
 /** Pull HTTP timeout (ms). 0 = none. Large models can take hours. */
@@ -18,8 +18,8 @@ function pullTimeoutMs(): number {
   return envInt("OLLAMA_PULL_TIMEOUT_MS", 0);
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet pull <machine> <model>
   ollanet pull --machine <name> --model <name>
 
@@ -37,8 +37,11 @@ Options:
   --model <name>     Model to pull (e.g. gemma3:12b)
   --insecure         Allow HTTP / self-signed model registries
   --no-stream        Wait for a single final response (no progress chunks)
-  --json             Emit result JSON on stdout`);
-  process.exit(1);
+  --json             Emit result JSON on stdout`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function parseArgs(argv: string[]): {
@@ -59,7 +62,7 @@ function parseArgs(argv: string[]): {
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--insecure") {
       insecure = true;
       continue;

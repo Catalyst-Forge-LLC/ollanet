@@ -13,17 +13,20 @@ import {
   responsesDir,
   type ChatTranscript,
 } from "./chat-store.ts";
-import { takeFlag } from "./argv.ts";
+import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 
-function usage(): never {
-  console.error(`Usage: ollanet chats [--json] [--id <hash>]
+export function helpText(): string {
+  return `Usage: ollanet chats [--json] [--id <hash>]
 
 Lists transcripts in ${responsesDir()}.
 
 Options:
   --json       Machine-readable output
-  --id <hash>  Show one chat (messages included with --json, preview otherwise)`);
-  process.exit(1);
+  --id <hash>  Show one chat (messages included with --json, preview otherwise)`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function parseArgs(argv: string[]): { json: boolean; id?: string } {
@@ -34,7 +37,7 @@ function parseArgs(argv: string[]): { json: boolean; id?: string } {
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--json") {
       json = true;
       continue;

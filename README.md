@@ -198,6 +198,7 @@ optimizeDeps: { exclude: ["ollanet"] },
 | `ollanet chats` | List or inspect saved transcripts |
 | `ollanet bench …` | Benchmark models for tok/s + lightweight quality checks |
 | `ollanet mcp` | Stdio [MCP](https://modelcontextprotocol.io) server for agents |
+| `ollanet help [command]` | This overview, or one command’s flags (`ollanet help bench`, `ollanet bench help`) |
 
 ### `scan` options
 

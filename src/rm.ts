@@ -7,7 +7,7 @@
 import { createInterface } from "node:readline";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaDelete } from "./ollama-chat.ts";
-import { takeFlag } from "./argv.ts";
+import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import type { AppConfig } from "./config.ts";
 
@@ -15,8 +15,8 @@ function rmTimeoutMs(): number {
   return envInt("OLLAMA_RM_TIMEOUT_MS", 30_000);
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet rm <machine> <model> --yes
   ollanet rm --machine <name> --model <name> --yes
 
@@ -31,8 +31,11 @@ Options:
   --machine <name>   Host (discovered name, MagicDNS, hostname, or IP[:port])
   --model <name>     Model to delete
   --yes              Required unless stdin is a TTY and you confirm
-  --json             Emit result JSON on stdout`);
-  process.exit(1);
+  --json             Emit result JSON on stdout`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function parseArgs(argv: string[]): {
@@ -51,7 +54,7 @@ function parseArgs(argv: string[]): {
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--yes" || arg === "-y") {
       yes = true;
       continue;

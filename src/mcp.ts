@@ -23,6 +23,7 @@ import { removeModel } from "./rm.ts";
 import { lastScan } from "./scan-store.ts";
 import { scanNetwork } from "./scan.ts";
 import { showModel } from "./show.ts";
+import { isHelpFlag, printHelp } from "./argv.ts";
 
 // Pin to the oldest widely-supported MCP revision. Clients may request a newer
 // date; we still answer with this — legal negotiation, max compatibility.
@@ -508,7 +509,31 @@ async function handleRequest(msg: JsonRpcRequest, version: string): Promise<void
   }
 }
 
+export function helpText(): string {
+  return `Usage:
+  ollanet mcp
+
+Stdio MCP server (no extra npm deps). stdout is JSON-RPC; logs go to stderr.
+
+Tools:
+  ollanet_scan          Discover hosts + models (lan, all, last)
+  ollanet_prompt        Prompt a host or continue with chat_id
+  ollanet_compare       Same prompt on 2–5 models
+  ollanet_pull          Pull / update a model on a host
+  ollanet_show          Inspect a model
+  ollanet_rm            Delete a model (confirm: true)
+  ollanet_ps            Models loaded in VRAM
+  ollanet_list_chats    Saved transcripts
+  ollanet_get_chat      One chat by id
+
+Example Cursor config: { "command": "npx", "args": ["-y", "ollanet", "mcp"] }`;
+}
+
 export async function main(): Promise<void> {
+  if (process.argv.slice(2).some((arg) => isHelpFlag(arg))) {
+    printHelp(helpText());
+  }
+
   const version = await packageVersion();
   console.error(`ollanet mcp ${version} (stdio) — tools: ${TOOLS.map((t) => t.name).join(", ")}`);
 

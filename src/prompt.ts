@@ -46,7 +46,7 @@ import {
 } from "./hosts.ts";
 import { ollamaChat } from "./ollama-chat.ts";
 import { assemblePrompt, readPromptFile } from "./prompt-input.ts";
-import { consumeSettingsFlag, takeFlag, takeValue } from "./argv.ts";
+import { consumeSettingsFlag, failUsage, isHelpFlag, printHelp, takeFlag, takeValue } from "./argv.ts";
 import { listTargets, resolveTarget } from "./target.ts";
 
 /** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
@@ -54,8 +54,8 @@ function promptTimeoutMs(): number {
   return envInt("OLLAMA_PROMPT_TIMEOUT_MS", 600_000);
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet prompt <machine> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet prompt <machine> --chat <hash> <prompt...>
@@ -88,8 +88,11 @@ Options:
   --no-think             Disable thinking (default) so tokens go to the reply
   --file <path>          Prompt from a .txt or .md file (joins argv / stdin)
   --no-stream            Wait for the full response
-  --json                 Emit final response JSON (implies --no-stream)`);
-  process.exit(1);
+  --json                 Emit final response JSON (implies --no-stream)`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 /**
@@ -181,7 +184,7 @@ function parseArgs(argv: string[]): {
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--no-stream") {
       stream = false;
       continue;

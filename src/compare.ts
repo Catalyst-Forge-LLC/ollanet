@@ -15,7 +15,7 @@ import {
   type GenerateSettings,
 } from "./config.ts";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
-import { consumeSettingsFlag, takeFlag, takeValue } from "./argv.ts";
+import { consumeSettingsFlag, failUsage, isHelpFlag, printHelp, takeFlag, takeValue } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import {
   ollamaChat,
@@ -44,8 +44,8 @@ function unloadWaitMs(): number {
   return envInt("OLLAMA_COMPARE_UNLOAD_WAIT_MS", 60_000);
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet compare <machine> <model> <model> [model...]
   ollanet compare <machine> <model> <model> [model...] --prompt <text>
   ollanet compare <machine> <model> <model> [model...] --file <path.txt|.md>
@@ -70,8 +70,11 @@ Options:
   --think / --no-think
   --unload               Unload each model before the next (fairer tok/s)
   --no-save              Do not write compares/*
-  --json                 Emit the full record on stdout`);
-  process.exit(1);
+  --json                 Emit the full record on stdout`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function parseArgs(argv: string[]): {
@@ -96,7 +99,7 @@ function parseArgs(argv: string[]): {
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--json") {
       json = true;
       continue;

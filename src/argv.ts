@@ -5,6 +5,22 @@ import type { GenerateSettings } from "./config.ts";
 
 export type UsageFn = () => never;
 
+export function isHelpFlag(arg: string): boolean {
+  return arg === "--help" || arg === "-h";
+}
+
+/** Intentional help: stdout, exit 0. */
+export function printHelp(text: string): never {
+  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+  process.exit(0);
+}
+
+/** Usage error: stderr, exit 1. */
+export function failUsage(text: string): never {
+  console.error(text);
+  process.exit(1);
+}
+
 export function takeValue(args: string[], flag: string, usage: UsageFn): string {
   const value = args.shift();
   if (!value) {

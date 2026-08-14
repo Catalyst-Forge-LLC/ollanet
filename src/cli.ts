@@ -29,6 +29,7 @@ Usage:
   ollanet chats [--json] [--id <hash>]
   ollanet bench <machine|ip> [model...] [--all] [options]
   ollanet mcp
+  ollanet help [command]
 
 Examples:
   ollanet scan
@@ -47,6 +48,7 @@ Examples:
   ollanet bench localhost --all
   ollanet bench localhost llama3.2:1b --runs 3
   ollanet bench localhost gemma3:12b --hot --runs 5
+  ollanet help bench           # flags for one command (also: ollanet bench help)
   ollanet mcp                  # stdio MCP server for agents
 
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
@@ -61,9 +63,37 @@ async function main(): Promise<void> {
   const argv = process.argv.slice(2).filter((arg) => arg !== "--");
   const cmd = argv[0];
 
-  if (!cmd || cmd === "-h" || cmd === "--help" || cmd === "help") {
+  if (!cmd || cmd === "-h" || cmd === "--help") {
     process.stdout.write(HELP);
     return;
+  }
+
+  if (cmd === "help") {
+    const topic = argv[1];
+    if (!topic || topic === "-h" || topic === "--help") {
+      process.stdout.write(HELP);
+      return;
+    }
+    const { commandHelp, commandNames } = await import("./help.ts");
+    const text = await commandHelp(topic);
+    if (!text) {
+      console.error(`Unknown command: ${topic}`);
+      console.error(`Try: ollanet help   (commands: ${commandNames().join(", ")})`);
+      process.exitCode = 1;
+      return;
+    }
+    process.stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+    return;
+  }
+
+  const rest = argv.slice(1);
+  const { isHelpRequest, commandHelp } = await import("./help.ts");
+  if (isHelpRequest(rest)) {
+    const text = await commandHelp(cmd);
+    if (text) {
+      process.stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+      return;
+    }
   }
 
   if (cmd === "-v" || cmd === "--version" || cmd === "version") {

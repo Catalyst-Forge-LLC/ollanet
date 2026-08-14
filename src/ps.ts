@@ -14,7 +14,7 @@ import {
   type HostTarget,
 } from "./hosts.ts";
 import { ollamaPs, ollamaPsRequired, type PsModel } from "./ollama-chat.ts";
-import { takeFlag } from "./argv.ts";
+import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import { looksTuned } from "./tuned.ts";
 
@@ -22,8 +22,8 @@ function psTimeoutMs(): number {
   return envInt("OLLAMA_PS_TIMEOUT_MS", 10_000);
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet ps [machine]
   ollanet ps --machine <name>
 
@@ -36,8 +36,11 @@ scan lists models on disk. ps lists what is loaded in VRAM right now.
 
 Options:
   --machine <name>   One host (default: every discovered host)
-  --json             Emit result JSON on stdout`);
-  process.exit(1);
+  --json             Emit result JSON on stdout`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function parseArgs(argv: string[]): { machine?: string; json: boolean } {
@@ -49,7 +52,7 @@ function parseArgs(argv: string[]): { machine?: string; json: boolean } {
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--json") {
       json = true;
       continue;

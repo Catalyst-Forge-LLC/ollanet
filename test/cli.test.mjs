@@ -430,3 +430,36 @@ describe("scan and chats", () => {
     assert.ok(list.length > 0, "expected at least one saved chat");
   });
 });
+
+describe("command help", () => {
+  it("prints the overview on ollanet help", async () => {
+    const res = await runCli(["help"]);
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /ollanet help \[command\]/);
+    assert.match(res.stdout, /ollanet bench/);
+  });
+
+  it("prints bench flags on help bench, bench help, and bench --help", async () => {
+    for (const args of [["help", "bench"], ["bench", "help"], ["bench", "--help"]]) {
+      const res = await runCli(args);
+      assert.equal(res.code, 0, `${args.join(" ")}\n${res.stderr}`);
+      assert.match(res.stdout, /--hot/);
+      assert.match(res.stdout, /--runs/);
+      assert.match(res.stdout, /--cold-load/);
+      assert.match(res.stdout, /--judge-model/);
+      assert.equal(res.stderr, "");
+    }
+  });
+
+  it("accepts a command alias on ollanet help", async () => {
+    const res = await runCli(["help", "benchmark"]);
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /--hot/);
+  });
+
+  it("errors on an unknown help topic", async () => {
+    const res = await runCli(["help", "nope"]);
+    assert.notEqual(res.code, 0);
+    assert.match(res.stderr, /Unknown command: nope/);
+  });
+});

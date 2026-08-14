@@ -6,7 +6,7 @@
 
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaShow, type OllamaShowInfo } from "./ollama-chat.ts";
-import { takeFlag } from "./argv.ts";
+import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import { looksTuned } from "./tuned.ts";
 import type { AppConfig } from "./config.ts";
@@ -15,8 +15,8 @@ function showTimeoutMs(): number {
   return envInt("OLLAMA_SHOW_TIMEOUT_MS", 30_000);
 }
 
-function usage(): never {
-  console.error(`Usage:
+export function helpText(): string {
+  return `Usage:
   ollanet show <machine> <model>
   ollanet show --machine <name> --model <name>
 
@@ -30,8 +30,11 @@ Tuned Finetuna-style names are marked [tuned].
 Options:
   --machine <name>   Host (discovered name, MagicDNS, hostname, or IP[:port])
   --model <name>     Model to inspect
-  --json             Emit result JSON on stdout`);
-  process.exit(1);
+  --json             Emit result JSON on stdout`;
+}
+
+function usage(): never {
+  failUsage(helpText());
 }
 
 function parseArgs(argv: string[]): { machine?: string; model?: string; json: boolean } {
@@ -44,7 +47,7 @@ function parseArgs(argv: string[]): { machine?: string; model?: string; json: bo
   while (args.length > 0) {
     const arg = args.shift()!;
     if (arg === "--") continue;
-    if (arg === "--help" || arg === "-h") usage();
+    if (isHelpFlag(arg)) printHelp(helpText());
     if (arg === "--json") {
       json = true;
       continue;
