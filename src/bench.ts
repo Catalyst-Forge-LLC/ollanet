@@ -801,12 +801,12 @@ export async function main(): Promise<void> {
       `Cases: ~${caseCount} chat calls   timeout: ${BENCH_TIMEOUT_MS}ms/case` +
         `   worst-case ceiling: ~${Math.ceil((caseCount * BENCH_TIMEOUT_MS) / 60000)}m if every call times out`,
     );
-    if (!parsed.hot && !isLoopback(host)) {
-      console.error(
-        `Note: benchmarking unloads models on ${machineLabel} between runs` +
-          (parsed.coldLoad ? " (and for --cold-load)" : "") +
-          ".",
-      );
+    if (!parsed.hot && !isLoopback(host) && (selected.length >= 2 || parsed.coldLoad)) {
+      const bits = [
+        selected.length >= 2 ? "unloads each model before the next" : "",
+        parsed.coldLoad ? "unloads for --cold-load" : "",
+      ].filter(Boolean);
+      console.error(`Note: benchmarking ${bits.join(" and ")} on ${machineLabel}.`);
     }
     console.error("Proceeding…");
   }

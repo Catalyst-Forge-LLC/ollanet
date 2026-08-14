@@ -173,7 +173,7 @@ When ≥2 models are benchmarked **and `--hot` is off**, after model A: unload �
 **Shared-host warning:** ollanet’s premise is remote machines on a tailnet. `keep_alive: 0` (between models and during cold-load) evicts models that may be serving someone else. When the resolved target is **not** localhost / loopback, print a preflight warning:
 
 ```text
-Note: benchmarking unloads models on studio between runs (and for --cold-load).
+Note: benchmarking unloads each model before the next and unloads for --cold-load on studio.
 ```
 
 Nothing to change in the design — just don’t surprise people.
@@ -187,7 +187,7 @@ Preflight prints **counts and timeout**, not a multi-hour “estimate” that pe
 ```text
 Bench: 10 completion models (skipped 2 embedding) × suite=quick × runs=3
 Cases: ~40 chat calls   timeout: 60s/case   worst-case ceiling: ~40m if every call times out
-Note: benchmarking unloads models on studio between runs.
+Note: benchmarking unloads each model before the next on studio.
 Proceeding…
 ```
 
@@ -307,7 +307,7 @@ Summaries are derived; JSON must retain attempts so spread is recomputable.
 ```text
 Bench: 3 completion models (skipped 2 embedding) × suite=quick × runs=3
 comparability_key=9f3c…   suite_revision=a1b2…   timeout: 60s/case
-Note: benchmarking unloads models on studio between runs.
+Note: benchmarking unloads each model before the next on studio.
 
 Model              tok/s (med)   spread      pass   notes
 llama3.2:1b            98.4     96–101     2/2
