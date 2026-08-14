@@ -4,7 +4,7 @@ description: Discover Ollama hosts, prompt models, continue chats by hash, and h
 order: 1
 ---
 
-AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** is the small CLI that finds Ollama hosts, talks to them, and keeps conversations alive across machines — including as MCP tools for your agents, and as a Node library for apps. Nothing leaves the networks you already trust.
+AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** finds Ollama hosts, manages models, talks to them, and keeps conversations alive across machines — CLI for you, MCP for agents, Node library for apps. Nothing leaves the networks you already trust.
 
 <div class="cta-row">
   <a class="cta cta-primary" href="/install">Install ollanet →</a>

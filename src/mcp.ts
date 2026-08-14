@@ -2,7 +2,8 @@
  * ollanet mcp — stdio MCP server (zero deps).
  *
  * Speaks the Model Context Protocol over stdin/stdout so agents (Cursor,
- * Claude Desktop, etc.) can discover hosts, prompt models, and continue chats.
+ * Claude Desktop, etc.) can discover hosts, manage models, prompt, compare,
+ * and continue chats.
  *
  *   ollanet mcp
  *

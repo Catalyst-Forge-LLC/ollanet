@@ -14,7 +14,7 @@ Scan for models, fire prompts, and continue conversations later by a short hash.
 
 ## Origin
 
-This started as a personal little script. I had Ollama running on a laptop on my Tailscale network and wanted an easy way to discover it, poke at the models, and actually talk to them from another machine — without babysitting IPs or opening a browser. One scan/prompt tool later, chats by hash showed up, LAN discovery crept in, and the thing grew into **ollanet**: a tiny CLI for using Ollama over whatever network you already have.
+This started as a personal little script. I had Ollama running on a laptop on my Tailscale network and wanted an easy way to discover it, poke at the models, and actually talk to them from another machine — without babysitting IPs or opening a browser. Chats by hash, LAN discovery, pull/show/rm/ps, compare, bench, MCP, and a Node library followed. **ollanet** is the client for a private Ollama mesh: find hosts, manage models, talk to them, and hand the same mesh to agents and apps.
 
 ## Related: Finetuna
 
@@ -34,6 +34,7 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 - **Show / rm / ps** — inspect a Modelfile, delete a model (`--yes`), see what’s in VRAM. Scan marks Finetuna-style `[tuned]` names
 - **Prompt** any hostname/IP/model with streaming replies (`--file` for `.txt` / `.md`)
 - **Compare** 2–5 models on one host with the same prompt; summary table + `compares/<id>.md`
+- **Bench** tok/s (256-token peak, plus a long prose shot on `--suite full`) and a few instruction checks
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)

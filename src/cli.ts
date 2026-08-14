@@ -1,20 +1,23 @@
 #!/usr/bin/env node
 /**
- * ollanet — chat with Ollama servers on any reachable network.
+ * ollanet — Ollama over any reachable network (CLI, MCP, library).
  *
  *   ollanet scan
  *   ollanet prompt <machine-or-ip> "hello"
+ *   ollanet compare <machine> <model> <model>
  *   ollanet pull <machine> <model>
  *   ollanet show <machine> <model>
  *   ollanet rm <machine> <model> --yes
  *   ollanet ps [machine]
+ *   ollanet bench <machine> [model...]
  *   ollanet chats
+ *   ollanet mcp
  */
 
 const HELP = `ollanet — Ollama over your network
 
-Discover Ollama hosts on localhost, your LAN, Tailscale, or any IP/hostname
-you can reach — then chat with hash-addressed transcripts.
+Discover hosts, manage models, prompt and compare, bench tok/s, and continue
+chats by hash. CLI, MCP, and a Node library — same mesh.
 
 Usage:
   ollanet scan [--json] [--all] [--lan] [--last]
