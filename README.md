@@ -192,7 +192,7 @@ optimizeDeps: { exclude: ["ollanet"] },
 | `ollanet pull <machine> <model>` | Ask that host to download / update a library model |
 | `ollanet show <machine> <model>` | Inspect Modelfile / params / capabilities (`[tuned]` when it looks like Finetuna) |
 | `ollanet rm <machine> <model> --yes` | Delete a model from that host’s disk |
-| `ollanet ps [machine]` | Models loaded in VRAM (omit machine = every discovered host) |
+| `ollanet ps [machine]` | Models loaded in VRAM, with CPU/GPU % (omit machine = every discovered host) |
 | `ollanet prompt …` | Send a prompt / continue a chat (`--file` for `.txt` / `.md`) |
 | `ollanet compare …` | Same prompt on 2–5 models; summary + `compares/<id>.md` |
 | `ollanet chats` | List or inspect saved transcripts |

@@ -259,6 +259,8 @@ export async function ollamaVersion(
 export interface PsModel {
   name?: string;
   model?: string;
+  /** Total resident bytes (VRAM + CPU/RAM). */
+  size?: number;
   size_vram?: number;
   context_length?: number;
   digest?: string;

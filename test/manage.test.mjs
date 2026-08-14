@@ -108,6 +108,7 @@ describe("ollanet ps", () => {
       assert.match(res.stdout, /\[tuned\]/);
       assert.match(res.stdout, /fake:1b/);
       assert.match(res.stdout, /VRAM/);
+      assert.match(res.stdout, /100% GPU/);
     } finally {
       await mock.close();
       await sandbox.cleanup();
@@ -125,6 +126,26 @@ describe("ollanet ps", () => {
       assert.equal(payload.hosts[0].machine, "mockhost");
       assert.equal(payload.hosts[0].models[0].name, "fake:1b");
       assert.equal(payload.hosts[0].models[0].tuned, false);
+      assert.equal(payload.hosts[0].models[0].gpu_percent, 100);
+      assert.equal(payload.hosts[0].models[0].cpu_percent, 0);
+      assert.equal(payload.hosts[0].models[0].processor, "100% GPU");
+    } finally {
+      await mock.close();
+      await sandbox.cleanup();
+    }
+  });
+
+  it("shows a CPU/GPU split when size_vram is less than size", async () => {
+    const mock = await startMock({
+      loaded: ["fake:1b"],
+      psSize: 200,
+      psVram: 50,
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+    try {
+      const res = await runCli(["ps", "mockhost"], { sandbox });
+      assert.equal(res.code, 0, res.stderr);
+      assert.match(res.stdout, /75%\/25% CPU\/GPU/);
     } finally {
       await mock.close();
       await sandbox.cleanup();

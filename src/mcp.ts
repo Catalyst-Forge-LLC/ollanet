@@ -226,7 +226,7 @@ const TOOLS: ToolDef[] = [
     name: "ollanet_ps",
     description:
       "List models currently loaded in VRAM. Optional machine; omit to probe every discovered host. " +
-      "scan is on-disk inventory; ps is what is resident right now.",
+      "scan is on-disk inventory; ps is what is resident right now, with CPU/GPU %.",
     inputSchema: {
       type: "object",
       properties: {

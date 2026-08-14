@@ -11,7 +11,7 @@
 
 - `ollanet show <machine> <model>` — `/api/show` (Modelfile, parameters, capabilities). Mark Finetuna-style names `[tuned]`.
 - `ollanet rm <machine> <model> --yes` — `/api/delete`. Loud default: `--yes` or TTY confirm. MCP requires `confirm: true`.
-- `ollanet ps [machine]` — `/api/ps`. Disk vs resident. Optional host; omit = every discovered host.
+- `ollanet ps [machine]` — `/api/ps`. Disk vs resident, plus CPU/GPU % (same rule as `ollama ps`). Optional host; omit = every discovered host.
 - Scan marks tuned names (`-ctx32k`, `-flash`, `finetuna`, or Modelfile text on `show`).
 - After `pull`, point at [Finetuna](https://finetuna.net) for a host-side named variant. Do **not** remote-run Finetuna.
 

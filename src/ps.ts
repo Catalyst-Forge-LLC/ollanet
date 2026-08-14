@@ -32,7 +32,8 @@ Examples:
   ollanet ps studio
   ollanet ps studio --json
 
-scan lists models on disk. ps lists what is loaded in VRAM right now.
+scan lists models on disk. ps lists what is loaded and the CPU/GPU split
+(same rule as ollama ps: size_vram / size).
 
 Options:
   --machine <name>   One host (default: every discovered host)
@@ -90,7 +91,12 @@ function formatBytes(bytes: number | undefined): string {
 
 export interface LoadedModel {
   name: string;
+  size?: number;
   size_vram?: number;
+  cpu_percent?: number;
+  gpu_percent?: number;
+  /** Same wording as `ollama ps` PROCESSOR (e.g. "100% GPU", "83%/17% CPU/GPU"). */
+  processor?: string;
   context_length?: number;
   digest?: string;
   tuned: boolean;
@@ -114,11 +120,32 @@ export interface PsResult {
   hosts: LoadedHost[];
 }
 
+/** Match `ollama ps` PROCESSOR: CPU% from (size - size_vram) / size. */
+export function processorSplit(
+  size?: number,
+  sizeVram?: number,
+): { cpu_percent?: number; gpu_percent?: number; processor?: string } {
+  const total = size ?? 0;
+  const vram = sizeVram ?? 0;
+  if (vram === 0 && total === 0) return {};
+  if (vram === 0) return { cpu_percent: 100, gpu_percent: 0, processor: "100% CPU" };
+  if (total > 0 && vram === total) {
+    return { cpu_percent: 0, gpu_percent: 100, processor: "100% GPU" };
+  }
+  if (vram > total || total === 0) return { processor: "Unknown" };
+  const cpu = Math.round(((total - vram) / total) * 100);
+  const gpu = 100 - cpu;
+  return { cpu_percent: cpu, gpu_percent: gpu, processor: `${cpu}%/${gpu}% CPU/GPU` };
+}
+
 function toLoaded(m: PsModel): LoadedModel {
   const name = (m.name ?? m.model ?? "").trim();
+  const split = processorSplit(m.size, m.size_vram);
   return {
     name,
+    size: m.size,
     size_vram: m.size_vram,
+    ...split,
     context_length: m.context_length,
     digest: m.digest,
     tuned: looksTuned(name),
@@ -184,7 +211,7 @@ function printPs(result: PsResult): void {
         const vram = formatBytes(m.size_vram);
         const ctx = m.context_length != null ? `ctx ${m.context_length}` : "";
         const tag = m.tuned ? " [tuned]" : "";
-        const meta = [vram ? `VRAM ${vram}` : "", ctx].filter(Boolean).join("  ");
+        const meta = [vram ? `VRAM ${vram}` : "", m.processor, ctx].filter(Boolean).join("  ");
         process.stdout.write(meta ? `  ${m.name}  ${meta}${tag}\n` : `  ${m.name}${tag}\n`);
       }
     }

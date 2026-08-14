@@ -22,6 +22,7 @@ import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store
 import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
 import { looksTuned } from "../dist/tuned.js";
 import { assemblePrompt, assertPromptFilename } from "../dist/prompt-input.js";
+import { processorSplit } from "../dist/ps.js";
 import { consumeSettingsFlag, parseKeepAlive, takeFlag } from "../dist/argv.js";
 
 /** Minimal HostTarget literal for resolution tests. */
@@ -210,6 +211,28 @@ describe("topic helpers", () => {
     assert.equal(cleanTopic('"Ferret Haiku"', "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("Title: Ferret Haiku", "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("   ", "fb"), "fb");
+  });
+});
+
+describe("processorSplit", () => {
+  it("matches ollama ps PROCESSOR wording", () => {
+    assert.deepEqual(processorSplit(100, 100), {
+      cpu_percent: 0,
+      gpu_percent: 100,
+      processor: "100% GPU",
+    });
+    assert.deepEqual(processorSplit(100, 0), {
+      cpu_percent: 100,
+      gpu_percent: 0,
+      processor: "100% CPU",
+    });
+    assert.deepEqual(processorSplit(200, 50), {
+      cpu_percent: 75,
+      gpu_percent: 25,
+      processor: "75%/25% CPU/GPU",
+    });
+    assert.equal(processorSplit(0, 10).processor, "Unknown");
+    assert.deepEqual(processorSplit(), {});
   });
 });
 

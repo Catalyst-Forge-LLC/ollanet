@@ -32,6 +32,8 @@ export const CLI = path.join(TEST_DIR, "..", "dist", "cli.js");
  * @param {number}   [opts.loadDuration] load_duration (ns) on chat responses.
  * @param {string}   [opts.version]     /api/version string.
  * @param {string[]} [opts.loaded]      Models already reported by /api/ps.
+ * @param {number}   [opts.psSize]      /api/ps `size` (default same as size_vram).
+ * @param {number}   [opts.psVram]      /api/ps `size_vram`.
  * @param {Record<string, object>} [opts.show] Extra /api/show fields keyed by model name.
  * @param {string}   [opts.pullError]   If set, /api/pull returns HTTP 500 with this error.
  * @param {string}   [opts.deleteError] If set, /api/delete returns HTTP 500 with this error.
@@ -72,10 +74,13 @@ export async function startMock(opts = {}) {
     if (pendingUnload && unloadPollsRemaining > 0) {
       names.add(pendingUnload);
     }
+    const sizeVram = opts.psVram ?? 123456789;
+    const size = opts.psSize ?? sizeVram;
     return [...names].map((name) => ({
       name,
       model: name,
-      size_vram: 123456789,
+      size,
+      size_vram: sizeVram,
       context_length: 8192,
       digest: `sha256:digest-${name.replace(/[^a-z0-9]+/gi, "")}`,
     }));
