@@ -457,6 +457,50 @@ describe("bench", () => {
     await sandbox.cleanup();
   });
 
+  it("full suite records one 1024-token prose throughput shot", async () => {
+    const mock = await startMock({
+      models: ["fake:1b"],
+      capabilities: { "fake:1b": ["completion"] },
+      reply: "OK",
+      doneReason: "length",
+      evalCount: 256,
+      evalDuration: 2e9,
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+
+    const res = await runCli(
+      [
+        "bench",
+        "mockhost",
+        "fake:1b",
+        "--suite",
+        "full",
+        "--hot",
+        "--runs",
+        "2",
+        "--json",
+      ],
+      { sandbox, env: { OLLAMA_BENCH_TIMEOUT_MS: "10000" } },
+    );
+
+    assert.equal(res.code, 0, res.stderr);
+    const payload = JSON.parse(res.stdout);
+    assert.equal(payload.suite, "full");
+    assert.equal(payload.settings.throughput_long_num_predict, 1024);
+    const model = payload.models[0];
+    const peak = model.cases.find((c) => c.id === "throughput");
+    const long = model.cases.find((c) => c.id === "throughput_long");
+    assert.equal(peak.attempts.length, 3);
+    assert.equal(peak.attempts[0].discarded, true);
+    assert.ok(long);
+    assert.equal(long.attempts.length, 1);
+    assert.equal(long.attempts[0].discarded, undefined);
+    assert.ok(model.summary.tok_s_long_median != null);
+
+    await mock.close();
+    await sandbox.cleanup();
+  });
+
   it("requires --judge-model with --judge", async () => {
     const mock = await startMock({ models: ["fake:1b"] });
     const sandbox = await makeSandbox(mockConfig(mock.port));

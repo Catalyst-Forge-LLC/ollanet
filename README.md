@@ -340,10 +340,12 @@ ollanet bench localhost gemma4:12b --hot --runs 5
 ```
 
 Runs a built-in suite (`quick` default, or `--suite full`) against one or more **completion**
-models: instruction checks once, throughput case repeated (`--runs`, default 3) with
+models: instruction checks once, 256-token throughput repeated (`--runs`, default 3) with
 pinned `num_predict` / `seed` / `temperature`. Reports median tok/s + spread.
-`--hot` discards the first throughput run and leaves models loaded so the counted
-repeats are already warm (Finetuna steady-state). Under `--all`,
+`--hot` discards the first 256-token run and leaves models loaded so the counted
+repeats are already warm (Finetuna steady-state). `--suite full` also runs json/reason
+checks and **one** 1024-token prose generation (`tok/s long`) — closer to a long chat
+reply. Under `--all`,
 skips non-completion models (embeddings); multimodal `completion`+`vision` models stay in
 (early-stop / pass_rate handle text-suite failures). Use `--exclude-vision` to drop them.
 Saves `benchmarks/<id>.json` (or `~/.ollanet/benchmarks/` when installed).
@@ -351,7 +353,7 @@ See [`docs/bench-spec.md`](docs/bench-spec.md) for measurement rules.
 
 `quick` has only two scored checks (`ping`, `math`), so `pass` is a coarse
 liveness/sanity gauge (`0/2`, `1/2`, `2/2`) — not “50% broken.” Use `--suite full`
-when you care more about the quality signal.
+when you care more about the quality signal or want the long tok/s column.
 
 ## Discovery
 

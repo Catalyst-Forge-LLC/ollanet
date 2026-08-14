@@ -12,6 +12,7 @@ import {
 import {
   comparabilityKey,
   getSuiteCases,
+  LONG_THROUGHPUT_NUM_PREDICT,
   median,
   suiteRevision,
   type BenchCase,
@@ -86,6 +87,9 @@ interface ModelResult {
     tok_s_median: number | null;
     tok_s_min: number | null;
     tok_s_max: number | null;
+    tok_s_long_median: number | null;
+    tok_s_long_min: number | null;
+    tok_s_long_max: number | null;
     early_stop_count: number;
     pass_rate: number | null;
     load_ms: number | null;
@@ -105,19 +109,20 @@ Examples:
   ollanet bench studio gemma3:12b --hot --runs 5
   ollanet help bench
 
-Fixed suite (not compare). Checks run once; throughput repeats --runs times.
+Fixed suite (not compare). Checks run once; 256-token throughput repeats --runs times.
 Median tok/s excludes early-stops. Unload is between models, not between repeats.
+full adds json/reason checks plus one 1024-token prose generation (tok/s long).
 
 Options:
   --all                 Every completion-capable model from /api/tags
   --exclude-vision      With --all, skip models that advertise vision
   --suite quick|full    Prompt suite (default quick)
-  --runs <n>            Counted throughput repeats (default 3)
-  --hot                 Discard first throughput run; keep models loaded
+  --runs <n>            Counted 256-token throughput repeats (default 3)
+  --hot                 Discard first 256-token throughput run; keep models loaded
   --warmup              Short discarded call before timed cases (default on)
   --no-warmup           Skip the short warmup (--hot implies this)
   --cold-load           Measure cold load via unload + /api/ps
-  --num-predict <n>     Pin throughput length (default 256)
+  --num-predict <n>     Pin 256-token throughput length (default 256; not the long case)
   --num-ctx <n>         Context window override
   --keep-alive <value>  Keep model loaded (e.g. 5m, 0, -1)
   --think / --no-think  Thinking tokens (default off)
@@ -152,6 +157,28 @@ function resolveModelName(tags: OllamaModelInfo[], query: string): string | unde
     (t) => t.name.toLowerCase().startsWith(`${q}:`) || q.startsWith(`${t.name.toLowerCase()}:`),
   );
   return prefix?.name;
+}
+
+function pinnedNumPredict(caseDef: BenchCase, throughputNumPredict: number): number {
+  if (caseDef.role === "throughput") {
+    return caseDef.num_predict ?? throughputNumPredict;
+  }
+  return caseDef.num_predict ?? 32;
+}
+
+/** At least the global timeout; longer pins need room to finish at ~8 tok/s. */
+function attemptTimeoutMs(numPredict: number): number {
+  return Math.max(BENCH_TIMEOUT_MS, Math.ceil(numPredict / 8) * 1000);
+}
+
+function caseReps(caseDef: BenchCase, runs: number, hot: boolean): number {
+  if (caseDef.role !== "throughput") return 1;
+  if (caseDef.repeats != null) return caseDef.repeats;
+  return runs + (hot ? 1 : 0);
+}
+
+function discardFirstThroughput(caseDef: BenchCase, hot: boolean): boolean {
+  return hot && caseDef.role === "throughput" && caseDef.repeats == null;
 }
 
 function tokPerSec(chunk: { eval_count?: number; eval_duration?: number }): number | undefined {
@@ -394,10 +421,7 @@ async function runCaseAttempt(opts: {
   judgeModel?: string;
   selfJudge: boolean;
 }): Promise<AttemptResult> {
-  const numPredict =
-    opts.caseDef.role === "throughput"
-      ? opts.throughputNumPredict
-      : (opts.caseDef.num_predict ?? 32);
+  const numPredict = pinnedNumPredict(opts.caseDef, opts.throughputNumPredict);
 
   const settings = mergeSettings(opts.settings, {
     temperature: 0,
@@ -415,7 +439,7 @@ async function runCaseAttempt(opts: {
       messages: [{ role: "user", content: opts.caseDef.prompt }],
       stream: false,
       writeStdout: false,
-      timeoutMs: BENCH_TIMEOUT_MS,
+      timeoutMs: attemptTimeoutMs(numPredict),
       settings,
     });
     const wallMs = Date.now() - wall0;
@@ -490,13 +514,26 @@ function countedAttempts(attempts: AttemptResult[]): AttemptResult[] {
   return attempts.filter((a) => !a.discarded);
 }
 
-function summarizeModel(cases: CaseResult[], cold: ModelResult["cold_load"], selfJudge: boolean) {
-  const throughput = cases.find((c) => c.id === "throughput");
-  const counted = countedAttempts(throughput?.attempts ?? []);
+function speedFrom(cases: CaseResult[], id: string) {
+  const counted = countedAttempts(cases.find((c) => c.id === id)?.attempts ?? []);
   const fullLen = counted.filter((a) => !a.error && !a.early_stop && a.tok_s != null);
   const toks = fullLen.map((a) => a.tok_s!);
-  const earlyStopCount =
-    counted.filter((a) => a.early_stop || (a.done_reason && a.done_reason !== "length")).length;
+  return {
+    median: median(toks) ?? null,
+    min: toks.length ? Math.min(...toks) : null,
+    max: toks.length ? Math.max(...toks) : null,
+  };
+}
+
+function summarizeModel(cases: CaseResult[], cold: ModelResult["cold_load"], selfJudge: boolean) {
+  const peak = speedFrom(cases, "throughput");
+  const long = speedFrom(cases, "throughput_long");
+  const throughputAttempts = cases
+    .filter((c) => c.role === "throughput")
+    .flatMap((c) => countedAttempts(c.attempts));
+  const earlyStopCount = throughputAttempts.filter(
+    (a) => a.early_stop || (a.done_reason && a.done_reason !== "length"),
+  ).length;
 
   const checkAttempts = cases
     .filter((c) => c.role === "check")
@@ -506,9 +543,12 @@ function summarizeModel(cases: CaseResult[], cold: ModelResult["cold_load"], sel
   const passRate = checkAttempts.length > 0 ? passed / checkAttempts.length : null;
 
   return {
-    tok_s_median: median(toks) ?? null,
-    tok_s_min: toks.length ? Math.min(...toks) : null,
-    tok_s_max: toks.length ? Math.max(...toks) : null,
+    tok_s_median: peak.median,
+    tok_s_min: peak.min,
+    tok_s_max: peak.max,
+    tok_s_long_median: long.median,
+    tok_s_long_min: long.min,
+    tok_s_long_max: long.max,
     early_stop_count: earlyStopCount,
     pass_rate: passRate,
     load_ms:
@@ -536,18 +576,22 @@ function printTable(
   lines.push(`comparability_key=${compKey}   suite_revision=${revision}   timeout: ${BENCH_TIMEOUT_MS}ms/case`);
   if (coldLoad) lines.push("Cold-load: on");
   if (hot) lines.push("Hot: first throughput run discarded; models stay loaded");
+  if (suite === "full") lines.push("full: tok/s long is one 1024-token prose generation");
   lines.push("");
 
+  const showLong = suite === "full";
   const header = coldLoad
     ? pad("Model", MODEL_COL) +
       pad("tok/s (med)", 12) +
       pad("spread", 12) +
+      (showLong ? pad("tok/s long", 12) : "") +
       pad("load", 8) +
       pad("pass", 8) +
       "notes"
     : pad("Model", MODEL_COL) +
       pad("tok/s (med)", 12) +
       pad("spread", 12) +
+      (showLong ? pad("tok/s long", 12) : "") +
       pad("pass", 8) +
       "notes";
   lines.push(header);
@@ -579,6 +623,8 @@ function printTable(
       m.summary.tok_s_min != null && m.summary.tok_s_max != null
         ? `${m.summary.tok_s_min.toFixed(1)}–${m.summary.tok_s_max.toFixed(1)}`
         : "—";
+    const tokLong =
+      m.summary.tok_s_long_median != null ? m.summary.tok_s_long_median.toFixed(1) : "—";
     const pass =
       m.summary.pass_rate != null
         ? `${Math.round(m.summary.pass_rate * checkDenom(m))}/${checkDenom(m)}`
@@ -596,12 +642,14 @@ function printTable(
       ? pad(m.name, MODEL_COL) +
         pad(tok, 12) +
         pad(spread, 12) +
+        (showLong ? pad(tokLong, 12) : "") +
         pad(load, 8) +
         pad(pass, 8) +
         notes.join("; ")
       : pad(m.name, MODEL_COL) +
         pad(tok, 12) +
         pad(spread, 12) +
+        (showLong ? pad(tokLong, 12) : "") +
         pad(pass, 8) +
         notes.join("; ");
     lines.push(row);
@@ -737,11 +785,15 @@ export async function main(): Promise<void> {
   });
 
   const suiteCases = getSuiteCases(parsed.suite);
-  const throughputReps = parsed.runs + (parsed.hot ? 1 : 0);
   const caseCount =
     selected.length *
-    (suiteCases.filter((c) => c.role !== "throughput").length +
-      suiteCases.filter((c) => c.role === "throughput").length * throughputReps);
+    suiteCases.reduce((n, c) => n + caseReps(c, parsed.runs, parsed.hot), 0);
+  const worstCaseMs =
+    selected.length *
+    suiteCases.reduce((n, c) => {
+      const pin = pinnedNumPredict(c, parsed.throughputNumPredict);
+      return n + caseReps(c, parsed.runs, parsed.hot) * attemptTimeoutMs(pin);
+    }, 0);
 
   if (!parsed.json) {
     const skipBits = [
@@ -760,7 +812,10 @@ export async function main(): Promise<void> {
     );
     console.error(
       `Cases: ~${caseCount} chat calls   timeout: ${BENCH_TIMEOUT_MS}ms/case` +
-        `   worst-case ceiling: ~${Math.ceil((caseCount * BENCH_TIMEOUT_MS) / 60000)}m if every call times out`,
+        (parsed.suite === "full"
+          ? ` (long case ≥${attemptTimeoutMs(LONG_THROUGHPUT_NUM_PREDICT)}ms)`
+          : "") +
+        `   worst-case ceiling: ~${Math.ceil(worstCaseMs / 60000)}m if every call times out`,
     );
     if (!parsed.hot && !isLoopback(host) && (selected.length >= 2 || parsed.coldLoad)) {
       const bits = [
@@ -832,8 +887,8 @@ export async function main(): Promise<void> {
 
     for (const caseDef of suiteCases) {
       const attempts: AttemptResult[] = [];
-      const discardFirst = parsed.hot && caseDef.role === "throughput";
-      const reps = caseDef.role === "throughput" ? parsed.runs + (discardFirst ? 1 : 0) : 1;
+      const discardFirst = discardFirstThroughput(caseDef, parsed.hot);
+      const reps = caseReps(caseDef, parsed.runs, parsed.hot);
       for (let i = 0; i < reps; i += 1) {
         const discarded = discardFirst && i === 0;
         const attempt = await runCaseAttempt({
@@ -923,6 +978,8 @@ export async function main(): Promise<void> {
       temperature: 0,
       seed: 0,
       throughput_num_predict: parsed.throughputNumPredict,
+      throughput_long_num_predict:
+        parsed.suite === "full" ? LONG_THROUGHPUT_NUM_PREDICT : null,
       num_ctx: baseSettings.num_ctx ?? null,
       warmup: parsed.warmup,
       hot: parsed.hot,

@@ -57,4 +57,14 @@ describe("bench checkers", () => {
     assert.match(cases.throughput.prompt, /Count from 1/i);
     assert.doesNotMatch(cases.throughput.prompt, /Explain how/i);
   });
+
+  it("full adds a single 1024-token prose throughput case; quick does not", () => {
+    const quick = Object.fromEntries(getSuiteCases("quick").map((c) => [c.id, c]));
+    assert.equal(quick.throughput_long, undefined);
+    assert.equal(cases.throughput_long.role, "throughput");
+    assert.equal(cases.throughput_long.num_predict, 1024);
+    assert.equal(cases.throughput_long.repeats, 1);
+    assert.match(cases.throughput_long.prompt, /trade-off briefing/i);
+    assert.doesNotMatch(cases.throughput_long.prompt, /Count from 1/i);
+  });
 });

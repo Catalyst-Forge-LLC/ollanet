@@ -9,11 +9,19 @@ export interface BenchCase {
   id: string;
   role: CaseRole;
   prompt: string;
-  /** Cap for this case; throughput uses settings.throughput_num_predict. */
+  /** Cap for this case. Peak throughput uses `--num-predict` when omitted. */
   num_predict?: number;
+  /**
+   * Throughput attempts. Omit to use `--runs` (and `--hot` discard).
+   * Set `1` for a single large shot that does not repeat.
+   */
+  repeats?: number;
   format?: "json";
   check?: (content: string) => { ok: boolean; detail?: string };
 }
+
+/** Pinned length for `full`'s prose throughput case (`throughput_long`). */
+export const LONG_THROUGHPUT_NUM_PREDICT = 1024;
 
 export type SuiteName = "quick" | "full";
 
@@ -129,20 +137,24 @@ const FULL_EXTRA: BenchCase[] = [
   {
     id: "reason",
     role: "check",
-    prompt:
-      "A box has 10 apples. You eat 3, then buy 5 more, then give away 2 times as many as you ate. " +
-      "How many apples are left? Reply with only the final number.",
+    prompt: "Start with 40. Add 7. Subtract 5. Reply with only the final number.",
     num_predict: 48,
-    // 10 - 3 + 5 - 6 = 6... wait: gave away 2*3=6, so 10-3+5-6=6. Spec said 42 as placeholder.
-    // Use a problem that clearly ends at 42:
-    // Actually rewrite for 42: "Start with 40. Add 7. Subtract 5. Reply with only the number." => 42
     check: checkExpectedInt(REASON_ANSWER),
   },
+  {
+    id: "throughput_long",
+    role: "throughput",
+    // Chat-shaped tokens (markdown, lists, a table) at a long pin. Anti-EOS
+    // so done_reason=length; one shot (not --runs) so full stays usable.
+    prompt:
+      "Write a detailed trade-off briefing for a product team choosing a web UI stack. " +
+      "Compare at least two options. Use markdown headings, bullet lists, and at least one table. " +
+      "Keep adding sections (testing, hiring, migration, failure modes, cost) without wrapping up. " +
+      "Do not write a closing recommendation that ends the piece. Do not stop early.",
+    num_predict: LONG_THROUGHPUT_NUM_PREDICT,
+    repeats: 1,
+  },
 ];
-
-// Fix reason prompt to match REASON_ANSWER
-FULL_EXTRA[FULL_EXTRA.length - 1]!.prompt =
-  "Start with 40. Add 7. Subtract 5. Reply with only the final number.";
 
 export function getSuiteCases(suite: SuiteName): BenchCase[] {
   if (suite === "full") return [...QUICK_CASES, ...FULL_EXTRA];

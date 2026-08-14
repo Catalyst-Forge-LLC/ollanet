@@ -55,14 +55,14 @@ ollanet bench localhost gemma4:12b --judge --judge-model llama3.2:1b
 | Flag | Meaning |
 |---|---|
 | `--all` | Benchmark every **completion-capable** model from `/api/tags` (see Capability filter) |
-| `--suite <name>` | Prompt suite: `quick` (default) or `full` |
-| `--runs <n>` | Repeats for the **throughput** case only (default **3**, min 1). With `--hot`, these are the **counted** hot runs after the discarded first shot. |
+| `--suite <name>` | Prompt suite: `quick` (default) or `full`. `full` adds json/reason checks plus one 1024-token prose throughput case. |
+| `--runs <n>` | Repeats for the **256-token throughput** case only (default **3**, min 1). With `--hot`, these are the **counted** hot runs after the discarded first shot. Does **not** repeat `throughput_long`. |
 | `--hot` | Steady-state tok/s: run throughput `--runs + 1` times, **discard the first** from median/spread, and **do not unload** between models. The discarded full generation is the warmup (short `--warmup` is off unless you pass `--warmup` too). |
 | `--warmup` | Discarded short call per model before timed cases (default **on**, **off** under `--hot`) |
 | `--no-warmup` | Skip warmup |
 | `--cold-load` | Explicit cold-load measurement via unload + `/api/ps` poll (default **off**) |
 | `--keep-alive <value>` | Passed through for timed cases (default inherit config / `5m`) |
-| `--num-predict <n>` | Override pin for the throughput case only (default **256**) |
+| `--num-predict <n>` | Override pin for the **256-token** throughput case only (default **256**). Does not change `throughput_long` (1024). |
 | `--num-ctx <n>` | Context window override |
 | `--no-think` / `--think` | Same semantics as `prompt` (default off) |
 | `--judge` | Optional second pass: judge model scores answers 1–5 |
@@ -216,7 +216,8 @@ Store both. Finetuna before/after compares **one field**; mismatch → refuse th
 |---|---|---|---|
 | `check` | Instruction-following / correctness | No | **1** |
 | `live` | Liveness only (not quality) | No | **1** |
-| `throughput` | Headline tok/s | Yes | **`--runs`** (default 3) |
+| `throughput` | Headline tok/s (256-token peak) | Yes | **`--runs`** (default 3) |
+| `throughput` (`throughput_long`) | Sustained / chat-shaped tok/s | Yes | **1** (`full` only) |
 
 ### `quick` (default)
 
@@ -233,6 +234,7 @@ Store both. Finetuna before/after compares **one field**; mismatch → refuse th
 |---|---|---|---|
 | `json` | check | Ask for a **structure** (do not embed the answer JSON) | `format: "json"` and/or strip \`\`\` fences; assert keys/values |
 | `reason` | check | Short multi-step word problem; final number only | Same integer rule as `math`: last line, expected value among integers |
+| `throughput_long` | throughput | Chat-shaped briefing (headings, lists, a table); keep writing, do not stop | No content check; **1024** tokens; **one** attempt (not `--runs`); `--num-predict` does not apply. Timeout floors at 8 tok/s (`max(60s, 128s)`). |
 
 ---
 
@@ -245,6 +247,7 @@ Store both. Finetuna before/after compares **one field**; mismatch → refuse th
 5. Run suite cases:
    - `check` / `live`: **once** each (`temperature: 0`, `seed: 0`).  
    - `throughput`: `--runs` times with pinned `num_predict`; record `done_reason`. With `--hot`, one extra discarded first attempt.  
+   - `throughput_long` (`full` only): **once**, 1024 tokens, no `--hot` discard.  
    - Errors: per-attempt; continue unless `--fail-fast`.  
    - Optional `--judge` after successful check/live (excluded from tok/s).  
 6. If more models and not `--hot`: unload → ps poll → next.
@@ -272,7 +275,7 @@ Once per run / host: `ollama_version` (`/api/version`). Per model while loaded (
 
 ```text
 models[].cases[]
-  cases[].attempts[]     length === runs for throughput (runs+1 when --hot); length === 1 for check/live
+  cases[].attempts[]     length === runs for peak throughput (runs+1 when --hot); length === 1 for check/live and throughput_long
     attempt.run            1..n counted; 0 when discarded
     attempt.discarded?     true on the --hot first throughput shot
     attempt.wall_ms
@@ -294,8 +297,9 @@ Summaries are derived; JSON must retain attempts so spread is recomputable.
 
 ### Per-model summary
 
-- `tok_s_median` / `min` / `max` from throughput attempts with `done_reason === "length"` only  
-- `early_stop_count` for throughput attempts that did not hit the pin  
+- `tok_s_median` / `min` / `max` from **peak** (`throughput`) attempts with `done_reason === "length"` only  
+- `tok_s_long_median` / `min` / `max` from `throughput_long` (`full` only; null on `quick`)  
+- `early_stop_count` for all throughput attempts (peak + long) that did not hit the pin  
 - `pass_rate` from check cases only (exclude `live`)  
 - `load_ms` only if `--cold-load` succeeded  
 - `self_judge` if judge === subject  
@@ -316,6 +320,8 @@ fake:1b                 —         —        0/2    connection refused
 
 Skipped 2 non-completion models: nomic-embed-text, all-minilm
 ```
+
+`--suite full` adds a `tok/s long` column (one 1024-token prose shot). Peak `tok/s (med)` stays the Finetuna headline.
 
 **Sort:** pass_rate descending, then median tok/s. Failed / zero-pass sink.
 
@@ -358,6 +364,7 @@ After first model (optional): `Typical remaining ≈ …` based on observed pace
     "temperature": 0,
     "seed": 0,
     "throughput_num_predict": 256,
+    "throughput_long_num_predict": null,
     "num_ctx": null,
     "warmup": true,
     "hot": false,
@@ -473,7 +480,8 @@ src/bench-store.ts    # Persist under benchmarks/
 11. Sort by pass_rate then tok/s; null tok/s sinks below defined values; `live` excluded from pass_rate.  
 12. JSON records `context_length` (+ `size_vram`) from `/api/ps` while loaded.  
 13. Manual GPU: on ~1B and ~12B, all three throughput attempts report `done_reason === "length"` and `eval_count === 256` (prompt must resist EOS).  
-14. `pnpm test` + typecheck clean; zero new runtime deps; `ollamaChat` extract before bench code.
+14. `pnpm test` + typecheck clean; zero new runtime deps; `ollamaChat` extract before bench code.  
+15. `--suite full` adds `throughput_long` (1024, one shot); table shows `tok/s long`; `--hot` / `--runs` / `--num-predict` do not change that case.
 
 ---
 
@@ -482,7 +490,7 @@ src/bench-store.ts    # Persist under benchmarks/
 1. **Default model when omitted:** host default, else error.  
 2. **Unload between models:** only when ≥2 models and not `--hot`, with `/api/ps` poll + shared-host warning.  
 3. **Suite evolution:** `suite_revision` content hash; **comparability** via `comparability_key` including pins/settings (`hot` included).  
-4. **`--runs`:** throughput only. `--hot` adds one discarded first shot.  
+4. **`--runs`:** 256-token throughput only. `--hot` adds one discarded first shot. `throughput_long` is one attempt and ignores both.  
 5. **`--all`:** completion capability filter via `/api/show`.
 
 ---
