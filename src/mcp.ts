@@ -14,6 +14,7 @@ import { readFile } from "node:fs/promises";
 import { listChats, loadChat } from "./chat-store.ts";
 import type { GenerateSettings } from "./config.ts";
 import { projectPath } from "./paths.ts";
+import { pullModel } from "./pull.ts";
 import { runPrompt } from "./prompt.ts";
 import { scanNetwork } from "./scan.ts";
 
@@ -103,6 +104,32 @@ const TOOLS: ToolDef[] = [
         },
       },
       required: ["prompt"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "ollanet_pull",
+    description:
+      "Pull (or update) a model onto a reachable Ollama host. " +
+      "The named machine downloads from the registry onto its own disk — " +
+      "ollanet does not upload weights. Machine is a discovered name, MagicDNS name, hostname, or IP[:port].",
+    inputSchema: {
+      type: "object",
+      properties: {
+        machine: {
+          type: "string",
+          description: "Host name/IP that should download the model",
+        },
+        model: {
+          type: "string",
+          description: "Model to pull (e.g. gemma3:12b)",
+        },
+        insecure: {
+          type: "boolean",
+          description: "Allow HTTP / self-signed model registries (default false)",
+        },
+      },
+      required: ["machine", "model"],
       additionalProperties: false,
     },
   },
@@ -209,6 +236,20 @@ async function callTool(
         settings,
         writeStdout: false,
         stream: false,
+        quiet: true,
+      });
+      return textResult(result);
+    }
+    case "ollanet_pull": {
+      const machine = typeof args.machine === "string" ? args.machine : "";
+      const model = typeof args.model === "string" ? args.model : "";
+      if (!machine.trim()) return textResult({ error: "machine is required" }, true);
+      if (!model.trim()) return textResult({ error: "model is required" }, true);
+      const result = await pullModel({
+        machine,
+        model,
+        insecure: args.insecure === true,
+        writeStdout: false,
         quiet: true,
       });
       return textResult(result);

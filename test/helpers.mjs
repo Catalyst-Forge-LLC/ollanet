@@ -31,6 +31,7 @@ export const CLI = path.join(TEST_DIR, "..", "dist", "cli.js");
  * @param {number}   [opts.evalDuration]
  * @param {number}   [opts.loadDuration] load_duration (ns) on chat responses.
  * @param {string}   [opts.version]     /api/version string.
+ * @param {string}   [opts.pullError]   If set, /api/pull returns HTTP 500 with this error.
  * @param {(req: {url: string, body: any}, ctx: object) => object|null} [opts.onChat]
  *        Optional override returning a full JSON body for non-stream chat.
  */
@@ -48,6 +49,7 @@ export async function startMock(opts = {}) {
     evalDuration = 1e9,
     loadDuration = 0,
     version = "0.9.0-mock",
+    pullError = null,
     onChat = null,
   } = opts;
 
@@ -121,6 +123,32 @@ export async function startMock(opts = {}) {
         }
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ models: psModels() }));
+        return;
+      }
+
+      if (req.url === "/api/pull") {
+        if (pullError) {
+          res.statusCode = 500;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ error: pullError }));
+          return;
+        }
+        if (!body?.stream) {
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ status: "success" }));
+          return;
+        }
+        res.setHeader("Content-Type", "application/x-ndjson");
+        res.write(JSON.stringify({ status: "pulling manifest" }) + "\n");
+        res.write(
+          JSON.stringify({
+            status: "downloading",
+            digest: "sha256:abc123def456",
+            total: 1000,
+            completed: 500,
+          }) + "\n",
+        );
+        res.end(JSON.stringify({ status: "success" }) + "\n");
         return;
       }
 
@@ -229,6 +257,8 @@ export async function startMock(opts = {}) {
     },
     /** Requests sent to /api/chat, in order. */
     chats: () => requests.filter((r) => r.url === "/api/chat").map((r) => r.body),
+    /** Requests sent to /api/pull, in order. */
+    pulls: () => requests.filter((r) => r.url === "/api/pull").map((r) => r.body),
     close: () =>
       new Promise((resolve) => {
         // undici holds keep-alive sockets open, which would stall server.close().

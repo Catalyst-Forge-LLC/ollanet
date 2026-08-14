@@ -16,10 +16,11 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 ## What you get
 
 - **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents.
+- **Pull** — `ollanet pull studio gemma3:12b` asks that machine to download (or update) a library model. The server fetches it; ollanet does not upload weights.
 - **Prompt** — any host by name or IP, streaming replies, sane defaults per machine
 - **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
 - **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks
-- **MCP** — `ollanet mcp` exposes scan / prompt / chats over stdio
+- **MCP** — `ollanet mcp` exposes scan / prompt / pull / chats over stdio
 - **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Quick start
@@ -27,6 +28,7 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 ```bash
 npm install -g ollanet
 ollanet scan
+ollanet pull studio gemma3:12b
 ollanet prompt localhost "What is MagicDNS?"
 ```
 
@@ -54,7 +56,7 @@ Point your MCP host at the stdio server — then route work to whatever’s aliv
 }
 ```
 
-Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_list_chats`, `ollanet_get_chat`.
+Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_pull`, `ollanet_list_chats`, `ollanet_get_chat`.
 
 ## For apps
 

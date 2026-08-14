@@ -53,6 +53,8 @@ describe("package entry", () => {
     assert.equal(typeof mod.scanNetwork, "function");
     assert.equal(typeof mod.discoverHosts, "function");
     assert.equal(typeof mod.runPrompt, "function");
+    assert.equal(typeof mod.pullModel, "function");
+    assert.equal(typeof mod.ollamaPull, "function");
     assert.equal(typeof mod.ollamaChat, "function");
     assert.equal(typeof mod.loadConfig, "function");
     assert.equal(mod.main, undefined);
@@ -163,6 +165,31 @@ describe("runPrompt library options", () => {
     } finally {
       await mock.close();
       await sandbox.cleanup();
+    }
+  });
+});
+
+describe("pullModel library contract", () => {
+  it("pulls onto a host from in-memory config", async () => {
+    const mock = await startMock();
+    const { pullModel } = await import(INDEX);
+    try {
+      const result = await pullModel({
+        machine: "studio",
+        model: "gemma3:12b",
+        writeStdout: false,
+        quiet: true,
+        config: {
+          hosts: [{ name: "studio", host: "127.0.0.1", port: mock.port }],
+          discovery: { localhost: false, tailscale: false, lan: false },
+        },
+      });
+      assert.equal(result.machine, "studio");
+      assert.equal(result.model, "gemma3:12b");
+      assert.equal(result.status, "success");
+      assert.equal(mock.pulls()[0].model, "gemma3:12b");
+    } finally {
+      await mock.close();
     }
   });
 });

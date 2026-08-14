@@ -237,6 +237,133 @@ export interface PsModel {
   digest?: string;
 }
 
+export interface PullChunk {
+  status?: string;
+  digest?: string;
+  total?: number;
+  completed?: number;
+  error?: string;
+}
+
+export interface OllamaPullOptions {
+  baseUrl: string;
+  model: string;
+  /** Allow HTTP / self-signed registries (Ollama `insecure`). */
+  insecure?: boolean;
+  stream: boolean;
+  timeoutMs: number;
+  onProgress?: (chunk: PullChunk) => void;
+}
+
+export interface OllamaPullResult {
+  status: string;
+  chunks: PullChunk[];
+}
+
+function parsePullChunk(url: string, raw: string): PullChunk {
+  try {
+    return JSON.parse(raw) as PullChunk;
+  } catch {
+    throw new Error(
+      `Non-JSON response from ${url} (is something else on this port?): ${raw.slice(0, 120)}`,
+    );
+  }
+}
+
+/**
+ * POST /api/pull — the *server* downloads the model. The client only sends the
+ * request. Default timeout 0 (none): large pulls can take hours.
+ */
+export async function ollamaPull(opts: OllamaPullOptions): Promise<OllamaPullResult> {
+  const url = `${opts.baseUrl}/api/pull`;
+  const body: Record<string, unknown> = {
+    model: opts.model,
+    stream: opts.stream,
+  };
+  if (opts.insecure) body.insecure = true;
+
+  const controller = new AbortController();
+  const timer =
+    opts.timeoutMs > 0 ? setTimeout(() => controller.abort(), opts.timeoutMs) : undefined;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (timer) clearTimeout(timer);
+    const name = err instanceof Error ? err.name : "";
+    if (name === "AbortError") {
+      throw new Error(`Pull timed out after ${opts.timeoutMs}ms (${url})`);
+    }
+    throw err;
+  }
+
+  if (!res.ok) {
+    if (timer) clearTimeout(timer);
+    const text = await res.text().catch(() => "");
+    let detail = text;
+    try {
+      const parsed = JSON.parse(text) as { error?: string };
+      if (parsed.error) detail = parsed.error;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(`Ollama HTTP ${res.status} ${res.statusText}${detail ? `: ${detail}` : ""}`);
+  }
+
+  const chunks: PullChunk[] = [];
+  const take = (chunk: PullChunk): void => {
+    if (chunk.error) throw new Error(chunk.error);
+    chunks.push(chunk);
+    opts.onProgress?.(chunk);
+  };
+
+  try {
+    if (!opts.stream) {
+      take(parsePullChunk(url, await res.text()));
+    } else {
+      if (!res.body) throw new Error("No response body from Ollama");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          take(parsePullChunk(url, trimmed));
+        }
+      }
+      const trailing = buffer.trim();
+      if (trailing) take(parsePullChunk(url, trailing));
+    }
+  } catch (err) {
+    const name = err instanceof Error ? err.name : "";
+    if (name === "AbortError") {
+      throw new Error(`Pull timed out after ${opts.timeoutMs}ms (${url})`);
+    }
+    throw err;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+
+  const last = chunks.at(-1);
+  const status = last?.status ?? "";
+  if (status !== "success") {
+    throw new Error(status ? `Pull ended: ${status}` : "Pull failed (no success status)");
+  }
+  return { status, chunks };
+}
+
 export async function ollamaPs(baseUrl: string, timeoutMs: number): Promise<PsModel[]> {
   try {
     const body = await ollamaGetJson<{ models?: PsModel[] }>(`${baseUrl}/api/ps`, timeoutMs);

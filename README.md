@@ -30,11 +30,12 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 ## Features
 
 - **Discover** Ollama hosts from localhost, `config.hosts`, `OLLANET_HOSTS`, optional Tailscale, and optional LAN scan (`--lan`, off by default)
+- **Pull** a library model onto a named host (`ollanet pull studio gemma3:12b`) — the server downloads; re-pull updates
 - **Prompt** any hostname/IP/model with streaming replies
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)
-- **MCP** — `ollanet mcp` exposes scan/prompt/chats as Model Context Protocol tools for agents
+- **MCP** — `ollanet mcp` exposes scan/prompt/pull/chats as Model Context Protocol tools for agents
 - **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Use cases
@@ -44,6 +45,7 @@ The core idea: turn “I have to remember which IP has which models loaded” in
 **For agents and automation** — prefer `ollanet mcp` (stdio MCP). The same flows also work via CLI flags:
 
 - **Live model inventory / routing** — `ollanet_scan` (or `scan --json`) lists reachable hosts and models. Route each sub-task to the best host: the big-VRAM box for reasoning, the laptop for quick lookups.
+- **Put a new model on a box** — `ollanet_pull` (or `pull studio gemma3:12b`) asks that host to download from the registry. Re-pull updates.
 - **Conversations that survive machines** — chats are stored by short hash with full history. Start a long thread on the GPU box, continue it later with `ollanet_prompt` + `chat_id` (or `--chat <hash>`).
 - **A “talk to any Ollama on my network” tool** — `ollanet_prompt` / `prompt … --json --no-stream`; no hard-coded endpoints.
 - **Embed in an app** — same scan + pick + call as a library. The app does not own the GPUs; it discovers them (FilePress, CLIs, Electron, a local companion for a hosted product).
@@ -115,6 +117,9 @@ ollanet scan
 # Also TCP-scan your local /24s for open Ollama ports
 ollanet scan --lan
 
+# Put a library model on a named machine (that host downloads it)
+ollanet pull studio gemma3:12b
+
 # Talk to a machine by name, MagicDNS name, or IP
 ollanet prompt localhost "What is MagicDNS?"
 ollanet prompt 192.168.1.50 gemma4:12b "Hello from the LAN"
@@ -162,7 +167,9 @@ await scanNetwork({
 
 `runPrompt({ save: false, writeStdout: false })` is a one-shot call that does not write `~/.ollanet/responses/`.
 
-Requires **ollanet ≥ 0.4.0**. Bundlers (Vite / SvelteKit SSR):
+`pullModel({ machine, model })` asks that host to download (or update) a library model. The bits never transit ollanet.
+
+Requires **ollanet ≥ 0.4.0** (library). **`pullModel` needs ≥ 0.5.0.** Bundlers (Vite / SvelteKit SSR):
 
 ```ts
 // vite.config.ts
@@ -175,6 +182,7 @@ optimizeDeps: { exclude: ["ollanet"] },
 | Command | Description |
 |---|---|
 | `ollanet scan` | Probe known/discovered hosts for Ollama + list models |
+| `ollanet pull <machine> <model>` | Ask that host to download / update a library model |
 | `ollanet prompt …` | Send a prompt / continue a chat |
 | `ollanet chats` | List or inspect saved transcripts |
 | `ollanet bench …` | Benchmark models for tok/s + lightweight quality checks |
@@ -211,6 +219,24 @@ ollanet prompt --chat <hash> <prompt...>
 
 Machine can be a discovered name, hostname, FQDN, or IP (`192.168.1.50`, `host:11434`). Direct addresses work even if they were never scanned.
 
+### `pull` options
+
+```text
+ollanet pull <machine|ip> <model>
+```
+
+The named machine downloads from the Ollama registry onto **its** disk. Re-pulling the same name updates it. This is not a file upload and not a Finetuna runtime tune.
+
+| Flag | Meaning |
+|---|---|
+| `--machine <name>` | Host (same resolution as `prompt`) |
+| `--model <name>` | Model to pull |
+| `--insecure` | Allow HTTP / self-signed registries |
+| `--no-stream` | Single final response (no progress chunks) |
+| `--json` | Result JSON on stdout |
+
+Timeout default is none (large pulls can take hours). Override with `OLLAMA_PULL_TIMEOUT_MS`.
+
 ### `chats` options
 
 - `--json` — list summary JSON
@@ -228,6 +254,7 @@ Runs a **stdio MCP server** (no extra npm deps). Cursor / Claude Desktop / any M
 |---|---|
 | `ollanet_scan` | Discover hosts + models (`lan`, `all` optional) |
 | `ollanet_prompt` | Prompt a host or continue with `chat_id` |
+| `ollanet_pull` | Pull / update a model on a host (`machine`, `model`) |
 | `ollanet_list_chats` | Summarize saved transcripts |
 | `ollanet_get_chat` | Load one chat (full history) |
 

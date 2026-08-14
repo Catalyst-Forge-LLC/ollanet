@@ -4,6 +4,7 @@
  *
  *   ollanet scan
  *   ollanet prompt <machine-or-ip> "hello"
+ *   ollanet pull <machine> <model>
  *   ollanet chats
  */
 
@@ -16,6 +17,7 @@ Usage:
   ollanet scan [--json] [--all] [--lan]
   ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
+  ollanet pull <machine|ip> <model>
   ollanet chats [--json] [--id <hash>]
   ollanet bench <machine|ip> [model...] [--all] [options]
   ollanet mcp
@@ -26,6 +28,7 @@ Examples:
   ollanet prompt localhost "What is MagicDNS?"
   ollanet prompt 192.168.1.50 gemma4:12b "Hello"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
+  ollanet pull studio gemma3:12b
   ollanet chats
   ollanet bench localhost --all
   ollanet bench localhost llama3.2:1b --runs 3
@@ -78,6 +81,12 @@ async function main(): Promise<void> {
     case "ls":
     case "history": {
       const { main: run } = await import("./chats.ts");
+      await run();
+      return;
+    }
+    case "pull":
+    case "download": {
+      const { main: run } = await import("./pull.ts");
       await run();
       return;
     }

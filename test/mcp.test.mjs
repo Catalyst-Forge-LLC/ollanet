@@ -98,6 +98,7 @@ describe("ollanet mcp", () => {
         "ollanet_get_chat",
         "ollanet_list_chats",
         "ollanet_prompt",
+        "ollanet_pull",
         "ollanet_scan",
       ]);
     } finally {
@@ -158,6 +159,20 @@ describe("ollanet mcp", () => {
       const chat = JSON.parse(got.result.content[0].text);
       assert.equal(chat.id, promptBody.chat_id);
       assert.ok(chat.messages.some((m) => m.role === "user" && m.content.includes("hello from mcp")));
+
+      const pulled = await mcp.rpc(
+        "tools/call",
+        {
+          name: "ollanet_pull",
+          arguments: { machine: "mockhost", model: "gemma3:12b" },
+        },
+        14,
+      );
+      assert.equal(pulled.result.isError, undefined);
+      const pullBody = JSON.parse(pulled.result.content[0].text);
+      assert.equal(pullBody.model, "gemma3:12b");
+      assert.equal(pullBody.status, "success");
+      assert.equal(mock.pulls().at(-1).model, "gemma3:12b");
     } finally {
       mcp.close();
     }

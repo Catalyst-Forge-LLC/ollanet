@@ -37,4 +37,8 @@ export type { AppConfig, DiscoveryConfig, GenerateSettings } from "./config.ts";
 export { runPrompt } from "./prompt.ts";
 export type { PromptRunOptions, PromptRunResult } from "./prompt.ts";
 
-export { ollamaChat, ollamaTags, ollamaShow, ollamaPs } from "./ollama-chat.ts";
+export { pullModel } from "./pull.ts";
+export type { PullOptions, PullResult } from "./pull.ts";
+
+export { ollamaChat, ollamaTags, ollamaShow, ollamaPs, ollamaPull } from "./ollama-chat.ts";
+export type { PullChunk, OllamaPullOptions, OllamaPullResult } from "./ollama-chat.ts";
