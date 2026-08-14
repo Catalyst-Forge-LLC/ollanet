@@ -19,14 +19,9 @@ import {
 } from "./bench-suite.ts";
 import { benchmarksDir, newBenchId, saveBenchmark } from "./bench-store.ts";
 import { readFile } from "node:fs/promises";
-import {
-  discoverHosts,
-  envInt,
-  ollamaBaseUrl,
-  resolveHost,
-  shortName,
-  type HostTarget,
-} from "./hosts.ts";
+import { envInt, ollamaBaseUrl, shortName, type HostTarget } from "./hosts.ts";
+import { consumeSettingsFlag, parseNumberFlag, takeFlag } from "./argv.ts";
+import { resolveTarget } from "./target.ts";
 import { projectPath } from "./paths.ts";
 import {
   contextLengthForModel,
@@ -129,24 +124,6 @@ Options:
 
 See docs/bench-spec.md for measurement rules.`);
   process.exit(1);
-}
-
-function takeValue(args: string[], flag: string): string {
-  const value = args.shift();
-  if (!value) {
-    console.error(`${flag} requires a value`);
-    usage();
-  }
-  return value;
-}
-
-function parseNumberFlag(raw: string, flag: string): number {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) {
-    console.error(`${flag} must be a number (got "${raw}")`);
-    usage();
-  }
-  return n;
 }
 
 function isLoopback(host: HostTarget): boolean {
@@ -255,57 +232,35 @@ function parseArgs(argv: string[]) {
       failOnError = true;
       continue;
     }
-    if (arg === "--think") {
-      settings.think = true;
-      continue;
-    }
-    if (arg === "--no-think") {
-      settings.think = false;
-      continue;
-    }
     if (arg === "--judge") {
       judge = true;
       continue;
     }
-    if (arg === "--suite" || arg.startsWith("--suite=")) {
-      const raw = arg.includes("=") ? arg.slice("--suite=".length) : takeValue(args, "--suite");
-      if (raw !== "quick" && raw !== "full") {
-        console.error(`Unknown suite "${raw}" (use quick|full)`);
+    if (consumeSettingsFlag(arg, args, settings, usage)) {
+      continue;
+    }
+    const suiteRaw = takeFlag(arg, "--suite", args, usage);
+    if (suiteRaw !== undefined) {
+      if (suiteRaw !== "quick" && suiteRaw !== "full") {
+        console.error(`Unknown suite "${suiteRaw}" (use quick|full)`);
         usage();
       }
-      suite = raw;
+      suite = suiteRaw;
       continue;
     }
-    if (arg === "--runs" || arg.startsWith("--runs=")) {
-      const raw = arg.includes("=") ? arg.slice("--runs=".length) : takeValue(args, "--runs");
-      runs = Math.max(1, Math.trunc(parseNumberFlag(raw, "--runs")));
+    const runsRaw = takeFlag(arg, "--runs", args, usage);
+    if (runsRaw !== undefined) {
+      runs = Math.max(1, Math.trunc(parseNumberFlag(runsRaw, "--runs", usage)));
       continue;
     }
-    if (arg === "--num-predict" || arg.startsWith("--num-predict=")) {
-      const raw = arg.includes("=")
-        ? arg.slice("--num-predict=".length)
-        : takeValue(args, "--num-predict");
-      throughputNumPredict = Math.trunc(parseNumberFlag(raw, "--num-predict"));
+    const predictRaw = takeFlag(arg, "--num-predict", args, usage);
+    if (predictRaw !== undefined) {
+      throughputNumPredict = Math.trunc(parseNumberFlag(predictRaw, "--num-predict", usage));
       continue;
     }
-    if (arg === "--num-ctx" || arg.startsWith("--num-ctx=")) {
-      const raw = arg.includes("=") ? arg.slice("--num-ctx=".length) : takeValue(args, "--num-ctx");
-      settings.num_ctx = Math.trunc(parseNumberFlag(raw, "--num-ctx"));
-      continue;
-    }
-    if (arg === "--keep-alive" || arg.startsWith("--keep-alive=")) {
-      const raw = arg.includes("=")
-        ? arg.slice("--keep-alive=".length)
-        : takeValue(args, "--keep-alive");
-      const asNum = Number(raw);
-      settings.keep_alive =
-        raw.trim() !== "" && Number.isFinite(asNum) && String(asNum) === raw ? asNum : raw;
-      continue;
-    }
-    if (arg === "--judge-model" || arg.startsWith("--judge-model=")) {
-      judgeModel = arg.includes("=")
-        ? arg.slice("--judge-model=".length)
-        : takeValue(args, "--judge-model");
+    const judgeRaw = takeFlag(arg, "--judge-model", args, usage);
+    if (judgeRaw !== undefined) {
+      judgeModel = judgeRaw;
       continue;
     }
     if (arg.startsWith("-")) {
@@ -672,11 +627,7 @@ function pad(s: string, n: number): string {
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
   const config = await loadConfig();
-  const { hosts: targets } = await discoverHosts({
-    hosts: config.hosts,
-    discovery: config.discovery,
-  });
-  const host = resolveHost(targets, parsed.machine);
+  const host = await resolveTarget(parsed.machine, config);
   const baseUrl = ollamaBaseUrl(host);
   const machineLabel = shortName(host);
 

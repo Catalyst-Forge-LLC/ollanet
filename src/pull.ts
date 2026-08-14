@@ -10,6 +10,7 @@
 import type { AppConfig } from "./config.ts";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaPull, type PullChunk } from "./ollama-chat.ts";
+import { takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 
 /** Pull HTTP timeout (ms). 0 = none. Large models can take hours. */
@@ -38,15 +39,6 @@ Options:
   --no-stream        Wait for a single final response (no progress chunks)
   --json             Emit result JSON on stdout`);
   process.exit(1);
-}
-
-function takeValue(args: string[], flag: string): string {
-  const value = args.shift();
-  if (!value) {
-    console.error(`${flag} requires a value`);
-    usage();
-  }
-  return value;
 }
 
 function parseArgs(argv: string[]): {
@@ -80,12 +72,14 @@ function parseArgs(argv: string[]): {
       json = true;
       continue;
     }
-    if (arg === "--machine") {
-      machineFlag = takeValue(args, "--machine");
+    const machine = takeFlag(arg, "--machine", args, usage);
+    if (machine !== undefined) {
+      machineFlag = machine;
       continue;
     }
-    if (arg === "--model") {
-      modelFlag = takeValue(args, "--model");
+    const model = takeFlag(arg, "--model", args, usage);
+    if (model !== undefined) {
+      modelFlag = model;
       continue;
     }
     if (arg.startsWith("-")) {

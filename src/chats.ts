@@ -13,6 +13,7 @@ import {
   responsesDir,
   type ChatTranscript,
 } from "./chat-store.ts";
+import { takeFlag } from "./argv.ts";
 
 function usage(): never {
   console.error(`Usage: ollanet chats [--json] [--id <hash>]
@@ -38,12 +39,9 @@ function parseArgs(argv: string[]): { json: boolean; id?: string } {
       json = true;
       continue;
     }
-    if (arg === "--id" || arg.startsWith("--id=")) {
-      id = arg.includes("=") ? arg.slice("--id=".length) : args.shift();
-      if (!id) {
-        console.error("--id requires a value");
-        usage();
-      }
+    const idFlag = takeFlag(arg, "--id", args, usage);
+    if (idFlag !== undefined) {
+      id = idFlag;
       continue;
     }
     console.error(`Unknown flag: ${arg}`);

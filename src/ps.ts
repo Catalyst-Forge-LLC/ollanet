@@ -14,6 +14,7 @@ import {
   type HostTarget,
 } from "./hosts.ts";
 import { ollamaPs, ollamaPsRequired, type PsModel } from "./ollama-chat.ts";
+import { takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import { looksTuned } from "./tuned.ts";
 
@@ -39,15 +40,6 @@ Options:
   process.exit(1);
 }
 
-function takeValue(args: string[], flag: string): string {
-  const value = args.shift();
-  if (!value) {
-    console.error(`${flag} requires a value`);
-    usage();
-  }
-  return value;
-}
-
 function parseArgs(argv: string[]): { machine?: string; json: boolean } {
   const args = [...argv];
   let machineFlag: string | undefined;
@@ -62,8 +54,9 @@ function parseArgs(argv: string[]): { machine?: string; json: boolean } {
       json = true;
       continue;
     }
-    if (arg === "--machine") {
-      machineFlag = takeValue(args, "--machine");
+    const machine = takeFlag(arg, "--machine", args, usage);
+    if (machine !== undefined) {
+      machineFlag = machine;
       continue;
     }
     if (arg.startsWith("-")) {

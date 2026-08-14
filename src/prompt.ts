@@ -37,7 +37,6 @@ import {
   type GenerateSettings,
 } from "./config.ts";
 import {
-  discoverHosts,
   envInt,
   findDiscoveredHost,
   ollamaBaseUrl,
@@ -47,6 +46,8 @@ import {
 } from "./hosts.ts";
 import { ollamaChat } from "./ollama-chat.ts";
 import { assemblePrompt, readPromptFile } from "./prompt-input.ts";
+import { consumeSettingsFlag, takeFlag, takeValue } from "./argv.ts";
+import { listTargets, resolveTarget } from "./target.ts";
 
 /** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
 function promptTimeoutMs(): number {
@@ -155,24 +156,6 @@ async function maybePeelModel(
   return { promptParts };
 }
 
-function takeValue(args: string[], flag: string): string {
-  const value = args.shift();
-  if (!value) {
-    console.error(`${flag} requires a value`);
-    usage();
-  }
-  return value;
-}
-
-function parseNumberFlag(raw: string, flag: string): number {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) {
-    console.error(`${flag} must be a number (got "${raw}")`);
-    usage();
-  }
-  return n;
-}
-
 function parseArgs(argv: string[]): {
   machine?: string;
   model?: string;
@@ -212,60 +195,37 @@ function parseArgs(argv: string[]): {
       save = false;
       continue;
     }
-    if (arg === "--think") {
-      settings.think = true;
-      continue;
-    }
-    if (arg === "--no-think") {
-      settings.think = false;
+    if (
+      consumeSettingsFlag(arg, args, settings, usage, {
+        temperature: true,
+        numPredict: true,
+        system: true,
+      })
+    ) {
       continue;
     }
 
-    if (arg === "--chat" || arg.startsWith("--chat=")) {
-      chatId = arg.includes("=") ? arg.slice("--chat=".length) : takeValue(args, "--chat");
+    const chat = takeFlag(arg, "--chat", args, usage);
+    if (chat !== undefined) {
+      chatId = chat;
       continue;
     }
-    if (arg === "--machine" || arg.startsWith("--machine=")) {
-      machineFlag = arg.includes("=") ? arg.slice("--machine=".length) : takeValue(args, "--machine");
+    const machine = takeFlag(arg, "--machine", args, usage);
+    if (machine !== undefined) {
+      machineFlag = machine;
       continue;
     }
-    if (arg === "--model" || arg.startsWith("--model=")) {
-      modelFlag = arg.includes("=") ? arg.slice("--model=".length) : takeValue(args, "--model");
+    const model = takeFlag(arg, "--model", args, usage);
+    if (model !== undefined) {
+      modelFlag = model;
       continue;
     }
-    if (arg === "--file" || arg === "-f" || arg.startsWith("--file=")) {
-      file = arg.includes("=") ? arg.slice("--file=".length) : takeValue(args, "--file");
-      continue;
-    }
-    if (arg === "--system" || arg.startsWith("--system=")) {
-      settings.system = arg.includes("=")
-        ? arg.slice("--system=".length)
-        : takeValue(args, "--system");
-      continue;
-    }
-    if (arg === "--temperature" || arg === "-t" || arg.startsWith("--temperature=")) {
-      const raw = arg.includes("=") ? arg.slice("--temperature=".length) : takeValue(args, "--temperature");
-      settings.temperature = parseNumberFlag(raw, "--temperature");
-      continue;
-    }
-    if (arg === "--num-predict" || arg.startsWith("--num-predict=")) {
-      const raw = arg.includes("=") ? arg.slice("--num-predict=".length) : takeValue(args, "--num-predict");
-      settings.num_predict = Math.trunc(parseNumberFlag(raw, "--num-predict"));
-      continue;
-    }
-    if (arg === "--num-ctx" || arg.startsWith("--num-ctx=")) {
-      const raw = arg.includes("=") ? arg.slice("--num-ctx=".length) : takeValue(args, "--num-ctx");
-      settings.num_ctx = Math.trunc(parseNumberFlag(raw, "--num-ctx"));
-      continue;
-    }
-    if (arg === "--keep-alive" || arg.startsWith("--keep-alive=")) {
-      const raw = arg.includes("=") ? arg.slice("--keep-alive=".length) : takeValue(args, "--keep-alive");
-      const asNum = Number(raw);
-      settings.keep_alive = raw.trim() !== "" && Number.isFinite(asNum) && String(asNum) === raw ? asNum : raw;
+    if (arg === "-f" || arg === "--file" || arg.startsWith("--file=")) {
+      file = arg === "-f" ? takeValue(args, "--file", usage) : takeFlag(arg, "--file", args, usage);
       continue;
     }
     if (arg === "--format" || arg.startsWith("--format=")) {
-      const raw = arg.includes("=") ? arg.slice("--format=".length) : takeValue(args, "--format");
+      const raw = takeFlag(arg, "--format", args, usage) ?? "";
       const format = parseFormat(raw);
       if (format !== undefined) settings.format = format;
       continue;
@@ -408,10 +368,6 @@ export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult
   let promptParts = opts.prompt ? [opts.prompt] : [];
 
   const config = opts.config ? configFromPartial(opts.config) : await loadConfig();
-  const { hosts: targets } = await discoverHosts({
-    hosts: config.hosts,
-    discovery: config.discovery,
-  });
 
   let chat: ChatTranscript | undefined;
   let isNewChat = false;
@@ -426,10 +382,7 @@ export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult
     throw new Error("Machine is required for a new chat (or pass chatId).");
   }
 
-  const host: HostTarget = resolveHost(targets, machineQuery);
-  if (!host.online && !host.isSelf && host.source === "tailscale") {
-    throw new Error(`Machine "${shortName(host)}" appears offline.`);
-  }
+  const host: HostTarget = await resolveTarget(machineQuery, config);
 
   let peeledModel: string | undefined;
   if (!opts.chatId && !opts.model) {
@@ -568,10 +521,7 @@ export async function main(): Promise<void> {
   }
 
   const config = await loadConfig();
-  const { hosts: targets } = await discoverHosts({
-    hosts: config.hosts,
-    discovery: config.discovery,
-  });
+  const targets = await listTargets(config);
 
   let machineQuery = parsed.machine;
 

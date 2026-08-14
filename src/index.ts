@@ -58,6 +58,8 @@ export type { PsOptions, PsResult, LoadedHost, LoadedModel } from "./ps.ts";
 
 export { looksTuned } from "./tuned.ts";
 
+export { resolveTarget, listTargets } from "./target.ts";
+
 export {
   ollamaChat,
   ollamaTags,

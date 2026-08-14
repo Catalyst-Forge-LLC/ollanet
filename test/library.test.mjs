@@ -62,6 +62,8 @@ describe("package entry", () => {
     assert.equal(typeof mod.removeModel, "function");
     assert.equal(typeof mod.listLoaded, "function");
     assert.equal(typeof mod.looksTuned, "function");
+    assert.equal(typeof mod.resolveTarget, "function");
+    assert.equal(typeof mod.listTargets, "function");
     assert.equal(typeof mod.ollamaPull, "function");
     assert.equal(typeof mod.ollamaDelete, "function");
     assert.equal(typeof mod.ollamaChat, "function");

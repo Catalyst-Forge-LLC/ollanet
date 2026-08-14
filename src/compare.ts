@@ -14,7 +14,9 @@ import {
   type AppConfig,
   type GenerateSettings,
 } from "./config.ts";
-import { discoverHosts, envInt, ollamaBaseUrl, resolveHost, shortName } from "./hosts.ts";
+import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
+import { consumeSettingsFlag, takeFlag, takeValue } from "./argv.ts";
+import { resolveTarget } from "./target.ts";
 import {
   ollamaChat,
   ollamaTags,
@@ -72,24 +74,6 @@ Options:
   process.exit(1);
 }
 
-function takeValue(args: string[], flag: string): string {
-  const value = args.shift();
-  if (!value) {
-    console.error(`${flag} requires a value`);
-    usage();
-  }
-  return value;
-}
-
-function parseNumberFlag(raw: string, flag: string): number {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) {
-    console.error(`${flag} must be a number (got "${raw}")`);
-    usage();
-  }
-  return n;
-}
-
 function parseArgs(argv: string[]): {
   machine?: string;
   models: string[];
@@ -125,48 +109,21 @@ function parseArgs(argv: string[]): {
       unload = true;
       continue;
     }
-    if (arg === "--think") {
-      settings.think = true;
+    if (
+      consumeSettingsFlag(arg, args, settings, usage, {
+        temperature: true,
+        numPredict: true,
+        system: true,
+      })
+    ) {
       continue;
     }
-    if (arg === "--no-think") {
-      settings.think = false;
+    if (arg === "-p" || arg === "--prompt" || arg.startsWith("--prompt=")) {
+      prompt = arg === "-p" ? takeValue(args, "--prompt", usage) : takeFlag(arg, "--prompt", args, usage);
       continue;
     }
-    if (arg === "--prompt" || arg === "-p" || arg.startsWith("--prompt=")) {
-      prompt = arg.includes("=") ? arg.slice("--prompt=".length) : takeValue(args, "--prompt");
-      continue;
-    }
-    if (arg === "--file" || arg === "-f" || arg.startsWith("--file=")) {
-      file = arg.includes("=") ? arg.slice("--file=".length) : takeValue(args, "--file");
-      continue;
-    }
-    if (arg === "--system" || arg.startsWith("--system=")) {
-      settings.system = arg.includes("=")
-        ? arg.slice("--system=".length)
-        : takeValue(args, "--system");
-      continue;
-    }
-    if (arg === "--temperature" || arg === "-t" || arg.startsWith("--temperature=")) {
-      const raw = arg.includes("=") ? arg.slice("--temperature=".length) : takeValue(args, "--temperature");
-      settings.temperature = parseNumberFlag(raw, "--temperature");
-      continue;
-    }
-    if (arg === "--num-predict" || arg.startsWith("--num-predict=")) {
-      const raw = arg.includes("=") ? arg.slice("--num-predict=".length) : takeValue(args, "--num-predict");
-      settings.num_predict = Math.trunc(parseNumberFlag(raw, "--num-predict"));
-      continue;
-    }
-    if (arg === "--num-ctx" || arg.startsWith("--num-ctx=")) {
-      const raw = arg.includes("=") ? arg.slice("--num-ctx=".length) : takeValue(args, "--num-ctx");
-      settings.num_ctx = Math.trunc(parseNumberFlag(raw, "--num-ctx"));
-      continue;
-    }
-    if (arg === "--keep-alive" || arg.startsWith("--keep-alive=")) {
-      const raw = arg.includes("=") ? arg.slice("--keep-alive=".length) : takeValue(args, "--keep-alive");
-      const asNum = Number(raw);
-      settings.keep_alive =
-        raw.trim() !== "" && Number.isFinite(asNum) && String(asNum) === raw ? asNum : raw;
+    if (arg === "-f" || arg === "--file" || arg.startsWith("--file=")) {
+      file = arg === "-f" ? takeValue(args, "--file", usage) : takeFlag(arg, "--file", args, usage);
       continue;
     }
     if (arg.startsWith("-")) {
@@ -276,14 +233,7 @@ export async function runCompare(opts: CompareOptions): Promise<CompareRecord> {
   const prompt = assembled || DEFAULT_COMPARE_PROMPT;
 
   const config = opts.config ? configFromPartial(opts.config) : await loadConfig();
-  const { hosts } = await discoverHosts({
-    hosts: config.hosts,
-    discovery: config.discovery,
-  });
-  const host = resolveHost(hosts, opts.machine);
-  if (!host.online && !host.isSelf && host.source === "tailscale") {
-    throw new Error(`Machine "${shortName(host)}" appears offline.`);
-  }
+  const host = await resolveTarget(opts.machine, config);
 
   const baseUrl = ollamaBaseUrl(host);
   const timeoutMs = opts.timeoutMs ?? compareTimeoutMs();

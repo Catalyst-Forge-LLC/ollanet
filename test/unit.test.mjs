@@ -22,6 +22,7 @@ import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store
 import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
 import { looksTuned } from "../dist/tuned.js";
 import { assemblePrompt, assertPromptFilename } from "../dist/prompt-input.js";
+import { consumeSettingsFlag, parseKeepAlive, takeFlag } from "../dist/argv.js";
 
 /** Minimal HostTarget literal for resolution tests. */
 function host(partial) {
@@ -209,6 +210,42 @@ describe("topic helpers", () => {
     assert.equal(cleanTopic('"Ferret Haiku"', "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("Title: Ferret Haiku", "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("   ", "fb"), "fb");
+  });
+});
+
+describe("argv helpers", () => {
+  const usage = () => {
+    throw new Error("usage");
+  };
+
+  it("parses keep_alive numbers vs duration strings", () => {
+    assert.equal(parseKeepAlive("0"), 0);
+    assert.equal(parseKeepAlive("-1"), -1);
+    assert.equal(parseKeepAlive("5m"), "5m");
+    assert.equal(parseKeepAlive("  "), "  ");
+  });
+
+  it("reads --flag value and --flag=value", () => {
+    assert.equal(takeFlag("--id", "--id", ["abc"], usage), "abc");
+    assert.equal(takeFlag("--id=xyz", "--id", [], usage), "xyz");
+    assert.equal(takeFlag("--other", "--id", ["abc"], usage), undefined);
+  });
+
+  it("consumes shared generate-settings flags", () => {
+    const settings = {};
+    const args = ["0.2", "128", "5m"];
+    assert.equal(
+      consumeSettingsFlag("--temperature", args, settings, usage, { temperature: true }),
+      true,
+    );
+    assert.equal(
+      consumeSettingsFlag("--num-predict", args, settings, usage, { numPredict: true }),
+      true,
+    );
+    assert.equal(consumeSettingsFlag("--keep-alive", args, settings, usage), true);
+    assert.equal(consumeSettingsFlag("--think", [], settings, usage), true);
+    assert.deepEqual(settings, { temperature: 0.2, num_predict: 128, keep_alive: "5m", think: true });
+    assert.equal(consumeSettingsFlag("--hot", [], settings, usage), false);
   });
 });
 
