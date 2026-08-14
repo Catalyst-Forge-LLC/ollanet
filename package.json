@@ -29,6 +29,7 @@
     "ollanet": "tsx src/cli.ts",
     "scan": "tsx src/cli.ts scan",
     "prompt": "tsx src/cli.ts prompt",
+    "compare": "tsx src/cli.ts compare",
     "pull": "tsx src/cli.ts pull",
     "show": "tsx src/cli.ts show",
     "rm": "tsx src/cli.ts rm",

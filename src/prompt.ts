@@ -46,6 +46,7 @@ import {
   type HostTarget,
 } from "./hosts.ts";
 import { ollamaChat } from "./ollama-chat.ts";
+import { assemblePrompt, readPromptFile } from "./prompt-input.ts";
 
 /** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
 function promptTimeoutMs(): number {
@@ -62,6 +63,7 @@ Examples:
   ollanet prompt localhost "Explain MagicDNS"
   ollanet prompt --chat a1b2c3d4e5f6 "Give an example"
   ollanet prompt localhost --temperature 0.2 --num-predict 64 "2+2?"
+  ollanet prompt localhost --file ./notes.md
   ollanet chats
 
 Each reply is saved under responses/<hash>.json and the hash is printed so you
@@ -83,6 +85,7 @@ Options:
   --format <json|schema> Force JSON mode or a JSON schema string
   --think                Enable model thinking (qwen3 etc.); streams to stderr
   --no-think             Disable thinking (default) so tokens go to the reply
+  --file <path>          Prompt from a .txt or .md file (joins argv / stdin)
   --no-stream            Wait for the full response
   --json                 Emit final response JSON (implies --no-stream)`);
   process.exit(1);
@@ -174,6 +177,7 @@ function parseArgs(argv: string[]): {
   machine?: string;
   model?: string;
   promptParts: string[];
+  file?: string;
   stream: boolean;
   json: boolean;
   save: boolean;
@@ -184,6 +188,7 @@ function parseArgs(argv: string[]): {
   let machineFlag: string | undefined;
   let modelFlag: string | undefined;
   let chatId: string | undefined;
+  let file: string | undefined;
   let stream = true;
   let json = false;
   let save = true;
@@ -226,6 +231,10 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--model" || arg.startsWith("--model=")) {
       modelFlag = arg.includes("=") ? arg.slice("--model=".length) : takeValue(args, "--model");
+      continue;
+    }
+    if (arg === "--file" || arg === "-f" || arg.startsWith("--file=")) {
+      file = arg.includes("=") ? arg.slice("--file=".length) : takeValue(args, "--file");
       continue;
     }
     if (arg === "--system" || arg.startsWith("--system=")) {
@@ -284,7 +293,7 @@ function parseArgs(argv: string[]): {
   // Continue (--chat): all positionals are the prompt. Optional machine override
   // via --machine, or a leading discovered-host name peeled in main().
 
-  return { machine, model, promptParts, stream, json, save, chatId, settings };
+  return { machine, model, promptParts, file, stream, json, save, chatId, settings };
 }
 
 async function readStdinIfPiped(): Promise<string> {
@@ -310,7 +319,7 @@ async function readStdinIfPiped(): Promise<string> {
     const onEnd = (): void => done(true);
     stdinStream.once("readable", onReadable);
     stdinStream.once("end", onEnd);
-    const timer = setTimeout(() => done(stdinStream.readableLength > 0), 25);
+    const timer = setTimeout(() => done(stdinStream.readableLength > 0), 100);
   });
   if (!hasData) return "";
 
@@ -547,6 +556,17 @@ export async function main(): Promise<void> {
 
   const fromStdin = await readStdinIfPiped();
 
+  let fromFile = "";
+  if (parsed.file) {
+    try {
+      fromFile = await readPromptFile(parsed.file);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exitCode = 1;
+      return;
+    }
+  }
+
   const config = await loadConfig();
   const { hosts: targets } = await discoverHosts({
     hosts: config.hosts,
@@ -574,14 +594,18 @@ export async function main(): Promise<void> {
       usage();
     }
     const host = resolveHost(targets, machineQuery);
-    const peeled = await maybePeelModel(host, promptParts, fromStdin);
+    const peeled = await maybePeelModel(host, promptParts, fromStdin || fromFile);
     peeledModel = peeled.model;
     promptParts = peeled.promptParts;
   }
 
-  const promptText = [promptParts.join(" ").trim(), fromStdin].filter(Boolean).join("\n\n").trim();
+  const promptText = assemblePrompt({
+    argv: promptParts.join(" "),
+    file: fromFile,
+    stdin: fromStdin,
+  });
   if (!promptText) {
-    console.error("No prompt provided (pass args and/or pipe stdin).");
+    console.error("No prompt provided (pass args, --file, and/or pipe stdin).");
     usage();
   }
 

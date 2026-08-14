@@ -20,6 +20,8 @@ Usage:
   ollanet scan [--json] [--all] [--lan] [--last]
   ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
+  ollanet prompt <machine|ip> --file <path.txt|.md>
+  ollanet compare <machine> <model> <model> [model...] --prompt <text> | --file <path>
   ollanet pull <machine|ip> <model>
   ollanet show <machine|ip> <model>
   ollanet rm <machine|ip> <model> --yes
@@ -33,7 +35,8 @@ Examples:
   ollanet scan --lan
   ollanet scan --last            # print the last saved scan (no network)
   ollanet prompt localhost "What is MagicDNS?"
-  ollanet prompt 192.168.1.50 gemma4:12b "Hello"
+  ollanet prompt localhost --file ./notes.md
+  ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
   ollanet pull studio gemma3:12b
   ollanet show studio gemma4-ctx32k
@@ -116,6 +119,13 @@ async function main(): Promise<void> {
     case "ps":
     case "loaded": {
       const { main: run } = await import("./ps.ts");
+      await run();
+      return;
+    }
+    case "compare":
+    case "vs":
+    case "h2h": {
+      const { main: run } = await import("./compare.ts");
       await run();
       return;
     }

@@ -39,6 +39,11 @@ export type { AppConfig, DiscoveryConfig, GenerateSettings } from "./config.ts";
 export { runPrompt } from "./prompt.ts";
 export type { PromptRunOptions, PromptRunResult } from "./prompt.ts";
 
+export { runCompare } from "./compare.ts";
+export type { CompareOptions, CompareRecord, CompareModelResult } from "./compare.ts";
+
+export { assemblePrompt, readPromptFile } from "./prompt-input.ts";
+
 export { pullModel } from "./pull.ts";
 export type { PullOptions, PullResult } from "./pull.ts";
 

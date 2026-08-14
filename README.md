@@ -32,11 +32,12 @@ They share the same Ollama API; Finetuna shapes the models, ollanet finds and ch
 - **Discover** Ollama hosts from localhost, `config.hosts`, `OLLANET_HOSTS`, optional Tailscale, and optional LAN scan (`--lan`, off by default)
 - **Pull** a library model onto a named host (`ollanet pull studio gemma3:12b`) — the server downloads; re-pull updates
 - **Show / rm / ps** — inspect a Modelfile, delete a model (`--yes`), see what’s in VRAM. Scan marks Finetuna-style `[tuned]` names
-- **Prompt** any hostname/IP/model with streaming replies
+- **Prompt** any hostname/IP/model with streaming replies (`--file` for `.txt` / `.md`)
+- **Compare** 2–5 models on one host with the same prompt; summary table + `compares/<id>.md`
 - **Persist** chats as `responses/<hash>.json` with topic, machine, model, timestamps
 - **Continue** any thread with `--chat <hash>`
 - **Configure** per-machine defaults (model, temperature, context, …)
-- **MCP** — `ollanet mcp` exposes scan/prompt/pull/show/rm/ps/chats as Model Context Protocol tools for agents
+- **MCP** — `ollanet mcp` exposes scan/prompt/compare/pull/show/rm/ps/chats as Model Context Protocol tools for agents
 - **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
 
 ## Use cases
@@ -125,6 +126,8 @@ ollanet ps studio
 
 # Talk to a machine by name, MagicDNS name, or IP
 ollanet prompt localhost "What is MagicDNS?"
+ollanet prompt localhost --file ./notes.md
+ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
 ollanet prompt 192.168.1.50 gemma4:12b "Hello from the LAN"
 
 # Continue later
@@ -190,7 +193,8 @@ optimizeDeps: { exclude: ["ollanet"] },
 | `ollanet show <machine> <model>` | Inspect Modelfile / params / capabilities (`[tuned]` when it looks like Finetuna) |
 | `ollanet rm <machine> <model> --yes` | Delete a model from that host’s disk |
 | `ollanet ps [machine]` | Models loaded in VRAM (omit machine = every discovered host) |
-| `ollanet prompt …` | Send a prompt / continue a chat |
+| `ollanet prompt …` | Send a prompt / continue a chat (`--file` for `.txt` / `.md`) |
+| `ollanet compare …` | Same prompt on 2–5 models; summary + `compares/<id>.md` |
 | `ollanet chats` | List or inspect saved transcripts |
 | `ollanet bench …` | Benchmark models for tok/s + lightweight quality checks |
 | `ollanet mcp` | Stdio [MCP](https://modelcontextprotocol.io) server for agents |
@@ -221,11 +225,34 @@ ollanet prompt --chat <hash> <prompt...>
 | `--keep-alive <value>` | Keep model loaded (`5m`, `0`, `-1`, …) |
 | `--format json\|<schema>` | JSON mode / schema |
 | `--think` / `--no-think` | Enable/disable model thinking (default **off** so replies aren’t empty on qwen3-style models) |
+| `--file <path>` | Prompt from a `.txt` or `.md` file (joins argv / stdin) |
 | `--no-stream` | Buffer the full reply |
 | `--no-save` | Do not write a transcript |
 | `--json` | Emit JSON (includes chat id when saved) |
 
 Machine can be a discovered name, hostname, FQDN, or IP (`192.168.1.50`, `host:11434`). Direct addresses work even if they were never scanned.
+
+### `compare` options
+
+```text
+ollanet compare <machine> <model> <model> [model...] --prompt <text>
+ollanet compare <machine> <model> <model> [model...] --file <path.txt|.md>
+```
+
+Same prompt on **2–5 models** on one host. Prints a tok/s table and writes `compares/<id>.md` (readable) plus `.json`. This is not `bench` (no fixed suite / repeats).
+
+| Flag | Meaning |
+|---|---|
+| `--prompt` / `-p` | Prompt text |
+| `--file` / `-f` | Prompt from `.txt` or `.md` |
+| `--system` | System prompt |
+| `--temperature` / `--num-predict` / `--num-ctx` / `--keep-alive` | Same as `prompt` |
+| `--think` / `--no-think` | Thinking (default off) |
+| `--unload` | Unload each model before the next (fairer tok/s) |
+| `--no-save` | Do not write `compares/*` |
+| `--json` | Full record on stdout |
+
+Override dir with `OLLANET_COMPARES_DIR`.
 
 ### `pull` options
 
@@ -277,7 +304,8 @@ Runs a **stdio MCP server** (no extra npm deps). Cursor / Claude Desktop / any M
 | Tool | What it does |
 |---|---|
 | `ollanet_scan` | Discover hosts + models (`lan`, `all`, `last` optional) |
-| `ollanet_prompt` | Prompt a host or continue with `chat_id` |
+| `ollanet_prompt` | Prompt a host or continue with `chat_id` (`file` optional) |
+| `ollanet_compare` | Same prompt on 2–5 models (`machine`, `models`, `prompt` or `file`) |
 | `ollanet_pull` | Pull / update a model on a host (`machine`, `model`) |
 | `ollanet_show` | Inspect a model (`machine`, `model`) |
 | `ollanet_rm` | Delete a model (`machine`, `model`, `confirm: true`) |

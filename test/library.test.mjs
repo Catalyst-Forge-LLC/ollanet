@@ -54,6 +54,8 @@ describe("package entry", () => {
     assert.equal(typeof mod.lastScan, "function");
     assert.equal(typeof mod.discoverHosts, "function");
     assert.equal(typeof mod.runPrompt, "function");
+    assert.equal(typeof mod.runCompare, "function");
+    assert.equal(typeof mod.readPromptFile, "function");
     assert.equal(typeof mod.pullModel, "function");
     assert.equal(typeof mod.showModel, "function");
     assert.equal(typeof mod.removeModel, "function");

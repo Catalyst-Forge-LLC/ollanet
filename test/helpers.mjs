@@ -318,6 +318,7 @@ export async function makeSandbox(config = {}) {
     responsesDir: path.join(dir, "responses"),
     benchmarksDir: path.join(dir, "benchmarks"),
     lastScanFile: path.join(dir, "last-scan.json"),
+    comparesDir: path.join(dir, "compares"),
     cleanup: () => rm(dir, { recursive: true, force: true }),
   };
 }
@@ -343,6 +344,7 @@ export function runCli(args, opts = {}) {
             OLLANET_RESPONSES_DIR: sandbox.responsesDir,
             OLLANET_BENCHMARKS_DIR: sandbox.benchmarksDir,
             OLLANET_LAST_SCAN: sandbox.lastScanFile,
+            OLLANET_COMPARES_DIR: sandbox.comparesDir,
           }
         : {}),
       // Don't let a developer's real settings leak into assertions.

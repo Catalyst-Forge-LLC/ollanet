@@ -38,3 +38,8 @@ export function defaultBenchmarksDir(): string {
 export function defaultLastScanPath(): string {
   return IS_INSTALLED ? path.join(USER_DIR, "last-scan.json") : projectPath("last-scan.json");
 }
+
+/** Head-to-head compare records (markdown + JSON). */
+export function defaultComparesDir(): string {
+  return IS_INSTALLED ? path.join(USER_DIR, "compares") : projectPath("compares");
+}

@@ -21,6 +21,7 @@ import {
 import { cleanTopic, normalizeChatId, topicFromPrompt } from "../dist/chat-store.js";
 import { mergeSettings, normalizeSettings, parseFormat } from "../dist/config.js";
 import { looksTuned } from "../dist/tuned.js";
+import { assemblePrompt, assertPromptFilename } from "../dist/prompt-input.js";
 
 /** Minimal HostTarget literal for resolution tests. */
 function host(partial) {
@@ -208,6 +209,21 @@ describe("topic helpers", () => {
     assert.equal(cleanTopic('"Ferret Haiku"', "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("Title: Ferret Haiku", "fb"), "Ferret Haiku");
     assert.equal(cleanTopic("   ", "fb"), "fb");
+  });
+});
+
+describe("prompt-input", () => {
+  it("assembles argv, file, and stdin with blank lines", () => {
+    assert.equal(assemblePrompt({ argv: "hi", file: "FILE", stdin: "IN" }), "hi\n\nFILE\n\nIN");
+    assert.equal(assemblePrompt({ file: "  only file  " }), "only file");
+    assert.equal(assemblePrompt({}), "");
+  });
+
+  it("allows only .txt and .md prompt files", () => {
+    assert.ok(assertPromptFilename("notes.md").endsWith("notes.md"));
+    assert.ok(assertPromptFilename("a.TXT").toLowerCase().endsWith(".txt"));
+    assert.throws(() => assertPromptFilename("x.json"), /\.txt or \.md/);
+    assert.throws(() => assertPromptFilename("noext"), /\.txt or \.md/);
   });
 });
 

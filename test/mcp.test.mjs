@@ -11,6 +11,7 @@ function startMcp(sandbox) {
       OLLANET_RESPONSES_DIR: sandbox.responsesDir,
       OLLANET_BENCHMARKS_DIR: sandbox.benchmarksDir,
       OLLANET_LAST_SCAN: sandbox.lastScanFile,
+      OLLANET_COMPARES_DIR: sandbox.comparesDir,
       OLLANET_HOSTS: "",
       OLLAMA_KEEP_ALIVE: "",
       OLLAMA_TEMPERATURE: "",
@@ -68,7 +69,7 @@ describe("ollanet mcp", () => {
   let sandbox;
 
   before(async () => {
-    mock = await startMock({ models: ["fake:1b"], reply: "mcp-ok" });
+    mock = await startMock({ models: ["fake:1b", "qwen3:0.6b"], reply: "mcp-ok" });
     sandbox = await makeSandbox({
       discovery: { localhost: false, tailscale: false, lan: false },
       hosts: [{ name: "mockhost", host: "127.0.0.1", port: mock.port }],
@@ -96,6 +97,7 @@ describe("ollanet mcp", () => {
       const listed = await mcp.rpc("tools/list", {}, 2);
       const names = listed.result.tools.map((t) => t.name).sort();
       assert.deepEqual(names, [
+        "ollanet_compare",
         "ollanet_get_chat",
         "ollanet_list_chats",
         "ollanet_prompt",
@@ -240,6 +242,24 @@ describe("ollanet mcp", () => {
       assert.equal(ps.result.isError, undefined);
       const psBody = JSON.parse(ps.result.content[0].text);
       assert.equal(psBody.hosts[0].machine, "mockhost");
+
+      const compared = await mcp.rpc(
+        "tools/call",
+        {
+          name: "ollanet_compare",
+          arguments: {
+            machine: "mockhost",
+            models: ["fake:1b", "qwen3:0.6b"],
+            prompt: "head to head",
+            save: false,
+          },
+        },
+        24,
+      );
+      assert.equal(compared.result.isError, undefined, compared.result?.content?.[0]?.text);
+      const cmp = JSON.parse(compared.result.content[0].text);
+      assert.equal(cmp.results.length, 2);
+      assert.equal(cmp.prompt, "head to head");
     } finally {
       mcp.close();
     }

@@ -2,6 +2,7 @@ node_modules/
 dist/
 responses/
 benchmarks/
+compares/
 last-scan.json
 *.log
 .DS_Store

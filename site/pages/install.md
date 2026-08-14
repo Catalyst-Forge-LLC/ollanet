@@ -42,7 +42,7 @@ Point your MCP host at the stdio server:
 }
 ```
 
-Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_pull`, `ollanet_show`, `ollanet_rm`, `ollanet_ps`, `ollanet_list_chats`, `ollanet_get_chat`.
+Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_compare`, `ollanet_pull`, `ollanet_show`, `ollanet_rm`, `ollanet_ps`, `ollanet_list_chats`, `ollanet_get_chat`.
 
 ### Library (apps)
 

@@ -14,8 +14,10 @@ import { readFile } from "node:fs/promises";
 import { listChats, loadChat } from "./chat-store.ts";
 import type { GenerateSettings } from "./config.ts";
 import { projectPath } from "./paths.ts";
+import { runCompare } from "./compare.ts";
 import { listLoaded } from "./ps.ts";
 import { pullModel } from "./pull.ts";
+import { assemblePrompt, readPromptFile } from "./prompt-input.ts";
 import { runPrompt } from "./prompt.ts";
 import { removeModel } from "./rm.ts";
 import { lastScan } from "./scan-store.ts";
@@ -110,8 +112,48 @@ const TOOLS: ToolDef[] = [
           type: "boolean",
           description: "Persist the transcript (default true)",
         },
+        file: {
+          type: "string",
+          description: "Read prompt body from a local .txt or .md file (joined with prompt if both set)",
+        },
       },
-      required: ["prompt"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "ollanet_compare",
+    description:
+      "Head-to-head: run the same prompt on 2–5 models on one Ollama host. " +
+      "Returns a summary plus saved markdown/JSON paths. " +
+      "Machine is a discovered name, MagicDNS name, hostname, or IP[:port].",
+    inputSchema: {
+      type: "object",
+      properties: {
+        machine: { type: "string", description: "Host name/IP" },
+        models: {
+          type: "array",
+          items: { type: "string" },
+          minItems: 2,
+          maxItems: 5,
+          description: "2–5 model names on that host",
+        },
+        prompt: { type: "string", description: "Prompt text" },
+        file: {
+          type: "string",
+          description: "Read prompt from a local .txt or .md file",
+        },
+        system: { type: "string" },
+        temperature: { type: "number" },
+        num_predict: { type: "integer" },
+        num_ctx: { type: "integer" },
+        think: { type: "boolean" },
+        unload: {
+          type: "boolean",
+          description: "Unload each model before the next (fairer tok/s)",
+        },
+        save: { type: "boolean", description: "Write compares/*.md and .json (default true)" },
+      },
+      required: ["machine", "models"],
       additionalProperties: false,
     },
   },
@@ -273,9 +315,20 @@ async function callTool(
       return textResult(payload);
     }
     case "ollanet_prompt": {
-      const prompt = typeof args.prompt === "string" ? args.prompt : "";
+      let fileText = "";
+      if (typeof args.file === "string" && args.file.trim()) {
+        try {
+          fileText = await readPromptFile(args.file);
+        } catch (err) {
+          return textResult({ error: err instanceof Error ? err.message : String(err) }, true);
+        }
+      }
+      const prompt = assemblePrompt({
+        argv: typeof args.prompt === "string" ? args.prompt : "",
+        file: fileText,
+      });
       if (!prompt.trim()) {
-        return textResult({ error: "prompt is required" }, true);
+        return textResult({ error: "prompt or file is required" }, true);
       }
       const settings: GenerateSettings = {};
       if (typeof args.system === "string") settings.system = args.system;
@@ -301,6 +354,46 @@ async function callTool(
         settings,
         writeStdout: false,
         stream: false,
+        quiet: true,
+      });
+      return textResult(result);
+    }
+    case "ollanet_compare": {
+      const machine = typeof args.machine === "string" ? args.machine : "";
+      const models = Array.isArray(args.models)
+        ? args.models.filter((m): m is string => typeof m === "string")
+        : [];
+      if (!machine.trim()) return textResult({ error: "machine is required" }, true);
+      if (models.length < 2 || models.length > 5) {
+        return textResult({ error: "models must be an array of 2–5 names" }, true);
+      }
+      let fileText = "";
+      if (typeof args.file === "string" && args.file.trim()) {
+        try {
+          fileText = await readPromptFile(args.file);
+        } catch (err) {
+          return textResult({ error: err instanceof Error ? err.message : String(err) }, true);
+        }
+      }
+      const prompt = assemblePrompt({
+        argv: typeof args.prompt === "string" ? args.prompt : "",
+        file: fileText,
+      });
+      if (!prompt) return textResult({ error: "prompt or file is required" }, true);
+      const settings: GenerateSettings = {};
+      if (typeof args.system === "string") settings.system = args.system;
+      if (typeof args.temperature === "number") settings.temperature = args.temperature;
+      if (typeof args.num_predict === "number") settings.num_predict = Math.trunc(args.num_predict);
+      if (typeof args.num_ctx === "number") settings.num_ctx = Math.trunc(args.num_ctx);
+      if (typeof args.think === "boolean") settings.think = args.think;
+      const result = await runCompare({
+        machine,
+        models,
+        prompt,
+        settings,
+        save: args.save === undefined ? true : Boolean(args.save),
+        unload: args.unload === true,
+        writeStdout: false,
         quiet: true,
       });
       return textResult(result);
