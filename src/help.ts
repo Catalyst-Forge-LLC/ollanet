@@ -12,6 +12,7 @@ const LOADERS: Record<string, () => Promise<{ helpText: () => string }>> = {
   ps: () => import("./ps.ts"),
   compare: () => import("./compare.ts"),
   bench: () => import("./bench.ts"),
+  alias: () => import("./alias.ts"),
   mcp: () => import("./mcp.ts"),
 };
 
@@ -28,6 +29,7 @@ const ALIASES: Record<string, string> = {
   vs: "compare",
   h2h: "compare",
   benchmark: "bench",
+  aliases: "alias",
 };
 
 export function canonicalCommand(name: string): string | undefined {

@@ -8,6 +8,7 @@
 import {
   configFromPartial,
   loadConfig,
+  lookupAlias,
   machineSettingsForHost,
   mergeSettings,
   settingsFromEnv,
@@ -344,6 +345,15 @@ export async function main(): Promise<void> {
     usage();
   }
 
+  const config = await loadConfig();
+  const alias = lookupAlias(config, parsed.machine);
+  const machine = alias ? alias.machine : parsed.machine;
+  let models = [...parsed.models];
+  if (alias && models.length === 1) {
+    // `compare desk other:7b` → alias model vs other on alias host
+    models = [alias.model, models[0]!];
+  }
+
   const { stdin: stdinStream } = await import("node:process");
   let fromStdin = "";
   if (!stdinStream.isTTY) {
@@ -366,14 +376,15 @@ export async function main(): Promise<void> {
   const prompt = assemblePrompt({ argv: parsed.prompt, file: fileText, stdin: fromStdin });
 
   const record = await runCompare({
-    machine: parsed.machine,
-    models: parsed.models,
+    machine,
+    models,
     prompt: prompt || undefined,
     settings: parsed.settings,
     save: parsed.save,
     unload: parsed.unload,
     writeStdout: !parsed.json,
     quiet: parsed.json,
+    config,
   });
 
   if (record.default_prompt) {

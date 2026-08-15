@@ -8,6 +8,7 @@
  */
 
 import type { AppConfig } from "./config.ts";
+import { expandMachineModel, loadConfig } from "./config.ts";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaPull, type PullChunk } from "./ollama-chat.ts";
 import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
@@ -21,16 +22,18 @@ function pullTimeoutMs(): number {
 export function helpText(): string {
   return `Usage:
   ollanet pull <machine> <model>
+  ollanet pull <alias>
   ollanet pull --machine <name> --model <name>
 
 Examples:
   ollanet pull studio gemma3:12b
+  ollanet pull desk
   ollanet pull localhost llama3.2:1b
   ollanet pull 192.168.1.50 gemma3:12b --json
 
 The named machine downloads the model onto its own disk. ollanet does not
 upload weights. Re-pulling the same name updates it when the registry has a
-newer digest.
+newer digest. A single alias name expands to that alias's machine + model.
 
 Options:
   --machine <name>   Host (discovered name, MagicDNS, hostname, or IP[:port])
@@ -217,19 +220,22 @@ export async function pullModel(opts: PullOptions): Promise<PullResult> {
 
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
-  if (!parsed.machine || !parsed.model) {
-    if (!parsed.machine) console.error("Machine is required.");
+  const config = await loadConfig();
+  const expanded = expandMachineModel(config, parsed.machine, parsed.model);
+  if (!expanded.machine || !expanded.model) {
+    if (!expanded.machine) console.error("Machine is required.");
     else console.error("Model is required.");
     usage();
   }
 
   const result = await pullModel({
-    machine: parsed.machine,
-    model: parsed.model,
+    machine: expanded.machine,
+    model: expanded.model,
     insecure: parsed.insecure,
     stream: parsed.stream,
     writeStdout: true,
     quiet: false,
+    config,
   });
 
   if (parsed.json) {

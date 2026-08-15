@@ -25,17 +25,17 @@ Or one-off: `npx ollanet scan`
 
 ```bash
 ollanet scan
-ollanet pull studio gemma3:12b
-ollanet prompt studio "What is MagicDNS?"
-ollanet bench studio gemma3:12b --hot
+ollanet alias add desk studio gemma3:12b
+ollanet prompt desk "What is MagicDNS?"
+ollanet bench desk --hot
 ollanet mcp
 ```
 
-Host-first: `ollanet <cmd> <machine> …` — the machine is MagicDNS / config name / IP, not a model.
+Host-first: `ollanet <cmd> <machine> …` — the machine is MagicDNS / config name / IP, or an alias for a machine+model pair.
 
 ## What you get
 
-Discover hosts · pull / show / rm / ps · prompt + hash-addressed chats · compare · bench · MCP · Node library. Full flags and configuration live in the [docs](https://ollanet.dev/docs).
+Discover hosts · pull / show / rm / ps · aliases · prompt + hash-addressed chats · compare · bench · MCP · Node library. Full flags and configuration live in the [docs](https://ollanet.dev/docs).
 
 ## Finetuna
 

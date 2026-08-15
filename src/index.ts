@@ -33,8 +33,10 @@ export {
   defaultModelForHost,
   mergeSettings,
   configFromPartial,
+  lookupAlias,
+  expandMachineModel,
 } from "./config.ts";
-export type { AppConfig, DiscoveryConfig, GenerateSettings } from "./config.ts";
+export type { AppConfig, DiscoveryConfig, GenerateSettings, ModelAlias } from "./config.ts";
 
 export { runPrompt } from "./prompt.ts";
 export type { PromptRunOptions, PromptRunResult } from "./prompt.ts";

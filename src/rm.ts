@@ -9,7 +9,7 @@ import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaDelete } from "./ollama-chat.ts";
 import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
-import type { AppConfig } from "./config.ts";
+import { expandMachineModel, loadConfig, type AppConfig } from "./config.ts";
 
 function rmTimeoutMs(): number {
   return envInt("OLLAMA_RM_TIMEOUT_MS", 30_000);
@@ -18,14 +18,17 @@ function rmTimeoutMs(): number {
 export function helpText(): string {
   return `Usage:
   ollanet rm <machine> <model> --yes
+  ollanet rm <alias> --yes
   ollanet rm --machine <name> --model <name> --yes
 
 Examples:
   ollanet rm studio llama3.2:1b --yes
+  ollanet rm desk --yes
   ollanet rm localhost old-model:7b --yes --json
 
 Deletes the named model from that host's disk (POST /api/delete).
 Non-interactive use (pipes, MCP, CI) requires --yes / confirm: true.
+A single alias name expands to that alias's machine + model.
 
 Options:
   --machine <name>   Host (discovered name, MagicDNS, hostname, or IP[:port])
@@ -138,15 +141,18 @@ export async function removeModel(opts: RemoveOptions): Promise<RemoveResult> {
 
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
-  if (!parsed.machine || !parsed.model) {
-    if (!parsed.machine) console.error("Machine is required.");
+  const config = await loadConfig();
+  const expanded = expandMachineModel(config, parsed.machine, parsed.model);
+  if (!expanded.machine || !expanded.model) {
+    if (!expanded.machine) console.error("Machine is required.");
     else console.error("Model is required.");
     usage();
   }
   const result = await removeModel({
-    machine: parsed.machine,
-    model: parsed.model,
+    machine: expanded.machine,
+    model: expanded.model,
     yes: parsed.yes,
+    config,
   });
   if (parsed.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);

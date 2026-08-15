@@ -13,6 +13,9 @@ Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or set
   "defaultModels": {
     "studio": "gemma3:12b"
   },
+  "aliases": {
+    "desk": { "machine": "studio", "model": "gemma3:12b" }
+  },
   "defaults": {
     "temperature": 0.7,
     "num_ctx": 8192
@@ -24,6 +27,19 @@ Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or set
   }
 }
 ```
+
+## Aliases
+
+Frequent machine + model pairs:
+
+```bash
+ollanet alias add desk studio gemma3:12b
+ollanet alias list
+ollanet prompt desk "hello"
+ollanet alias rm desk
+```
+
+`aliases` in the JSON is the same store. An alias used as the first token expands both host and model (unless you pass an explicit model).
 
 ## Environment
 

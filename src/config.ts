@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import {
   shortName,
   type DiscoveryConfig,
@@ -27,6 +28,12 @@ export interface GenerateSettings {
   think?: boolean;
 }
 
+/** Named shortcut for a frequent machine + model pair. */
+export interface ModelAlias {
+  machine: string;
+  model: string;
+}
+
 export interface AppConfig {
   /** Explicit hosts/IPs to probe (LAN, VPN, MagicDNS, etc.). */
   hosts: HostConfigEntry[];
@@ -36,6 +43,8 @@ export interface AppConfig {
   defaults: GenerateSettings;
   /** Per-machine overrides (keyed by short name / hostname / DNS / IP). */
   machineDefaults: Record<string, GenerateSettings & { model?: string }>;
+  /** Shortcuts: `ollanet prompt <alias> "…"` expands to machine + model. */
+  aliases: Record<string, ModelAlias>;
 }
 
 function emptyConfig(): AppConfig {
@@ -45,6 +54,7 @@ function emptyConfig(): AppConfig {
     defaultModels: {},
     defaults: {},
     machineDefaults: {},
+    aliases: {},
   };
 }
 
@@ -57,6 +67,7 @@ export function configFromPartial(partial: Partial<AppConfig> = {}): AppConfig {
     defaultModels: partial.defaultModels ?? empty.defaultModels,
     defaults: partial.defaults ?? empty.defaults,
     machineDefaults: partial.machineDefaults ?? empty.machineDefaults,
+    aliases: partial.aliases ?? empty.aliases,
   };
 }
 
@@ -88,6 +99,7 @@ export async function loadConfig(): Promise<AppConfig> {
       defaultModels,
       defaults: normalizeSettings(parsed.defaults),
       machineDefaults,
+      aliases: normalizeAliases(parsed.aliases),
     };
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
@@ -98,6 +110,35 @@ export async function loadConfig(): Promise<AppConfig> {
       `Failed to read config at ${CONFIG_PATH}: ${err instanceof Error ? err.message : err}`,
     );
   }
+}
+
+/**
+ * Read-modify-write the config JSON on disk. Preserves unknown keys.
+ * Creates the parent directory when missing (installed `~/.ollanet/`).
+ */
+export async function mutateConfigFile(
+  mutate: (file: Record<string, unknown>) => void,
+): Promise<void> {
+  let file: Record<string, unknown> = {};
+  try {
+    const raw = await readFile(CONFIG_PATH, "utf8");
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      file = parsed as Record<string, unknown>;
+    }
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== "ENOENT") {
+      throw new Error(
+        `Failed to read config at ${CONFIG_PATH}: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+  }
+
+  mutate(file);
+
+  await mkdir(path.dirname(CONFIG_PATH), { recursive: true });
+  await writeFile(CONFIG_PATH, `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 
 function normalizeDiscovery(input: unknown): DiscoveryConfig {
@@ -120,6 +161,54 @@ function normalizeStringMap(map: Record<string, string> | undefined): Record<str
     out[key.trim().toLowerCase()] = value.trim();
   }
   return out;
+}
+
+function normalizeAliases(map: unknown): Record<string, ModelAlias> {
+  if (!map || typeof map !== "object" || Array.isArray(map)) return {};
+  const out: Record<string, ModelAlias> = {};
+  for (const [key, value] of Object.entries(map as Record<string, unknown>)) {
+    const name = key.trim().toLowerCase();
+    if (!name || !value || typeof value !== "object" || Array.isArray(value)) continue;
+    const row = value as Record<string, unknown>;
+    const machine = typeof row.machine === "string" ? row.machine.trim() : "";
+    const model = typeof row.model === "string" ? row.model.trim() : "";
+    if (!machine || !model) continue;
+    out[name] = { machine, model };
+  }
+  return out;
+}
+
+/** Alias names: letter start, then letters/digits/_/- (no colons — those look like models). */
+export function isValidAliasName(name: string): boolean {
+  return /^[a-z][a-z0-9_-]*$/i.test(name.trim());
+}
+
+export function lookupAlias(config: AppConfig, name: string | undefined): ModelAlias | undefined {
+  if (!name?.trim()) return undefined;
+  return config.aliases[name.trim().toLowerCase()];
+}
+
+/**
+ * If `machine` is an alias name, expand to that alias's host.
+ * When `model` is omitted, fill it from the alias too.
+ */
+export function expandMachineModel(
+  config: AppConfig,
+  machine: string | undefined,
+  model: string | undefined,
+): { machine?: string; model?: string } {
+  if (!machine?.trim()) return { machine, model };
+  const alias = lookupAlias(config, machine);
+  if (!alias) {
+    return {
+      machine: machine.trim(),
+      model: model?.trim() ? model.trim() : undefined,
+    };
+  }
+  return {
+    machine: alias.machine,
+    model: model?.trim() ? model.trim() : alias.model,
+  };
 }
 
 function normalizeMachineDefaults(

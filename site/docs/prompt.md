@@ -3,12 +3,17 @@ title: Prompt and chats
 ---
 
 ```bash
-ollanet prompt <machine|ip> [model] <prompt...>
+ollanet prompt <machine|ip|alias> [model] <prompt...>
 ollanet prompt --chat <hash> <prompt...>
 ollanet prompt <machine|ip> --file <path.txt|.md>
 ```
 
-Machine can be a discovered name, hostname, FQDN, or IP (`192.168.1.50`, `host:11434`). Direct addresses work even if they were never scanned.
+Machine can be a discovered name, hostname, FQDN, IP (`192.168.1.50`, `host:11434`), or an **alias** from `ollanet alias` / `config.aliases`. Direct addresses work even if they were never scanned.
+
+```bash
+ollanet alias add desk studio gemma3:12b
+ollanet prompt desk "hello"
+```
 
 ## Common flags
 

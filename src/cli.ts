@@ -31,6 +31,7 @@ Usage:
   ollanet ps [machine]
   ollanet chats [--json] [--id <hash>]
   ollanet bench <machine|ip> [model...] [--all] [options]
+  ollanet alias list|add|rm …
   ollanet mcp
   ollanet help [command]
 
@@ -48,6 +49,8 @@ Examples:
   ollanet rm studio llama3.2:1b --yes
   ollanet ps studio
   ollanet chats
+  ollanet alias add desk studio gemma3:12b
+  ollanet prompt desk "hello"  # expands machine + model
   ollanet bench localhost --all
   ollanet bench localhost llama3.2:1b --runs 3
   ollanet bench localhost gemma3:12b --hot --runs 5
@@ -57,6 +60,7 @@ Examples:
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
         (override with OLLANET_CONFIG)
 Hosts:  config.hosts, OLLANET_HOSTS, optional Tailscale + --lan
+Aliases: config.aliases — ollanet alias add|list|rm
 Chats:  ~/.ollanet/responses or ./responses (override with OLLANET_RESPONSES_DIR)
 Scan:   ~/.ollanet/last-scan.json or ./last-scan.json (override with OLLANET_LAST_SCAN)
 `;
@@ -172,6 +176,12 @@ async function main(): Promise<void> {
     }
     case "mcp": {
       const { main: run } = await import("./mcp.ts");
+      await run();
+      return;
+    }
+    case "alias":
+    case "aliases": {
+      const { main: run } = await import("./alias.ts");
       await run();
       return;
     }

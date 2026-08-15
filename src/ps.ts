@@ -5,7 +5,7 @@
  *   ollanet ps studio
  */
 
-import { configFromPartial, loadConfig, type AppConfig } from "./config.ts";
+import { configFromPartial, expandMachineModel, loadConfig, type AppConfig } from "./config.ts";
 import {
   discoverHosts,
   envInt,
@@ -30,10 +30,11 @@ export function helpText(): string {
 Examples:
   ollanet ps
   ollanet ps studio
+  ollanet ps desk
   ollanet ps studio --json
 
 scan lists models on disk. ps lists what is loaded and the CPU/GPU split
-(same rule as ollama ps: size_vram / size).
+(same rule as ollama ps: size_vram / size). An alias name resolves to its machine.
 
 Options:
   --machine <name>   One host (default: every discovered host)
@@ -221,7 +222,11 @@ function printPs(result: PsResult): void {
 
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
-  const result = await listLoaded({ machine: parsed.machine });
+  const config = await loadConfig();
+  const machine = parsed.machine
+    ? expandMachineModel(config, parsed.machine, undefined).machine
+    : undefined;
+  const result = await listLoaded({ machine, config });
   if (parsed.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     return;

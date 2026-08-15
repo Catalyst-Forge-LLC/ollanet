@@ -13,6 +13,7 @@ title: Commands
 | `ollanet compare …` | Same prompt on 2–5 models |
 | `ollanet chats` | List or inspect saved transcripts |
 | `ollanet bench …` | Benchmark tok/s + light quality checks |
+| `ollanet alias …` | Add / list / remove machine+model shortcuts |
 | `ollanet mcp` | Stdio MCP server for agents |
 | `ollanet help [command]` | Overview, or one command’s flags |
 

@@ -9,7 +9,7 @@ import { ollamaShow, type OllamaShowInfo } from "./ollama-chat.ts";
 import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import { looksTuned } from "./tuned.ts";
-import type { AppConfig } from "./config.ts";
+import { expandMachineModel, loadConfig, type AppConfig } from "./config.ts";
 
 function showTimeoutMs(): number {
   return envInt("OLLAMA_SHOW_TIMEOUT_MS", 30_000);
@@ -18,14 +18,17 @@ function showTimeoutMs(): number {
 export function helpText(): string {
   return `Usage:
   ollanet show <machine> <model>
+  ollanet show <alias>
   ollanet show --machine <name> --model <name>
 
 Examples:
   ollanet show studio gemma4-ctx32k
+  ollanet show desk
   ollanet show localhost llama3.2:1b --json
 
 Reads /api/show on that host — Modelfile, parameters, capabilities.
 Tuned Finetuna-style names are marked [tuned].
+A single alias name expands to that alias's machine + model.
 
 Options:
   --machine <name>   Host (discovered name, MagicDNS, hostname, or IP[:port])
@@ -140,12 +143,18 @@ function printShow(result: ShowResult): void {
 
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
-  if (!parsed.machine || !parsed.model) {
-    if (!parsed.machine) console.error("Machine is required.");
+  const config = await loadConfig();
+  const expanded = expandMachineModel(config, parsed.machine, parsed.model);
+  if (!expanded.machine || !expanded.model) {
+    if (!expanded.machine) console.error("Machine is required.");
     else console.error("Model is required.");
     usage();
   }
-  const result = await showModel({ machine: parsed.machine, model: parsed.model });
+  const result = await showModel({
+    machine: expanded.machine,
+    model: expanded.model,
+    config,
+  });
   if (parsed.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     return;

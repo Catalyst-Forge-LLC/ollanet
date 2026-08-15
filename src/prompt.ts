@@ -27,6 +27,7 @@ import {
   configPath,
   defaultModelForHost,
   loadConfig,
+  lookupAlias,
   machineSettingsForHost,
   mergeSettings,
   parseFormat,
@@ -62,13 +63,19 @@ export function helpText(): string {
 
 Examples:
   ollanet prompt localhost "Explain MagicDNS"
+  ollanet prompt desk "hello"              # alias → machine + model
   ollanet prompt --chat a1b2c3d4e5f6 "Give an example"
   ollanet prompt localhost --temperature 0.2 --num-predict 64 "2+2?"
   ollanet prompt localhost --file ./notes.md
   ollanet chats
+  ollanet alias add desk studio gemma3:12b
 
 Each reply is saved under responses/<hash>.json and the hash is printed so you
 can continue later with --chat. Use --no-save to skip persistence.
+
+The first token may be an alias from config (\`ollanet alias\`) instead of a
+machine name — that fills both host and model unless you pass --model / a
+positional model.
 
 Config: ${configPath()}
 Precedence: CLI > env > machineDefaults > defaults
@@ -385,6 +392,9 @@ export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult
     throw new Error("Machine is required for a new chat (or pass chatId).");
   }
 
+  const alias = lookupAlias(config, machineQuery);
+  if (alias) machineQuery = alias.machine;
+
   const host: HostTarget = await resolveTarget(machineQuery, config);
 
   let peeledModel: string | undefined;
@@ -400,7 +410,11 @@ export async function runPrompt(opts: PromptRunOptions): Promise<PromptRunResult
   }
 
   const model =
-    opts.model ?? peeledModel ?? chat?.model ?? defaultModelForHost(config, host);
+    opts.model ??
+    peeledModel ??
+    alias?.model ??
+    chat?.model ??
+    defaultModelForHost(config, host);
   if (!model) {
     throw new Error(
       `No model specified for "${shortName(host)}" and no default in ${configPath()}.\n` +
@@ -527,6 +541,8 @@ export async function main(): Promise<void> {
   const targets = await listTargets(config);
 
   let machineQuery = parsed.machine;
+  const alias = machineQuery ? lookupAlias(config, machineQuery) : undefined;
+  if (alias) machineQuery = alias.machine;
 
   if (parsed.chatId) {
     // Allow `ollanet prompt <host> --chat HASH "follow-up"` only when the
@@ -564,7 +580,9 @@ export async function main(): Promise<void> {
 
   try {
     const result = await runPrompt({
-      machine: machineQuery,
+      // Pass the original alias name when present so runPrompt can apply alias.model
+      // after peel; otherwise pass the resolved machine.
+      machine: alias ? parsed.machine : machineQuery,
       model: parsed.model ?? peeledModel,
       prompt: promptText,
       chatId: parsed.chatId,
@@ -573,6 +591,7 @@ export async function main(): Promise<void> {
       writeStdout: !json,
       stream: json ? false : stream,
       quiet: json,
+      config,
     });
 
     if (json) {

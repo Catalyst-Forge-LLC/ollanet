@@ -4,6 +4,7 @@
 import {
   defaultModelForHost,
   loadConfig,
+  lookupAlias,
   machineSettingsForHost,
   mergeSettings,
   settingsFromEnv,
@@ -685,7 +686,16 @@ function pad(s: string, n: number): string {
 export async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
   const config = await loadConfig();
-  const host = await resolveTarget(parsed.machine, config);
+  const alias = lookupAlias(config, parsed.machine);
+  let machineQuery = parsed.machine;
+  let models = [...parsed.models];
+  if (alias) {
+    machineQuery = alias.machine;
+    if (models.length === 0 && !parsed.all) {
+      models = [alias.model];
+    }
+  }
+  const host = await resolveTarget(machineQuery, config);
   const baseUrl = ollamaBaseUrl(host);
   const machineLabel = shortName(host);
 
@@ -714,8 +724,8 @@ export async function main(): Promise<void> {
       }
       selected.push(t.name);
     }
-  } else if (parsed.models.length > 0) {
-    for (const q of parsed.models) {
+  } else if (models.length > 0) {
+    for (const q of models) {
       const resolved = resolveModelName(tags, q);
       if (!resolved) {
         console.error(`Unknown model "${q}". Available: ${tagNames.join(", ")}`);
@@ -734,7 +744,7 @@ export async function main(): Promise<void> {
     const def = defaultModelForHost(config, host);
     if (!def) {
       console.error(
-        `No model specified for "${machineLabel}". Pass model names, use --all, or set defaultModels.`,
+        `No model specified for "${machineLabel}". Pass model names, use --all, set defaultModels, or use an alias.`,
       );
       process.exit(1);
     }

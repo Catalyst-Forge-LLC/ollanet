@@ -1,6 +1,6 @@
 {
   "name": "ollanet",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Discover and talk to Ollama on any reachable network — CLI, MCP, and a Node library",
   "type": "module",
   "bin": {
@@ -36,6 +36,7 @@
     "ps": "tsx src/cli.ts ps",
     "chats": "tsx src/cli.ts chats",
     "bench": "tsx src/cli.ts bench",
+    "alias": "tsx src/cli.ts alias",
     "mcp": "tsx src/cli.ts mcp",
     "start": "tsx src/cli.ts scan",
     "typecheck": "tsc --noEmit",
