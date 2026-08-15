@@ -46,7 +46,7 @@ Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_compare`, `ollanet_pull`, `oll
 
 ### Library (apps)
 
-Node 20+ only (not the browser). Requires ollanet **0.4.0+**. `pullModel` / `showModel` / `removeModel` / `listLoaded` need **0.5.0+**. `runCompare` / `lastScan` / bench `--hot` need **0.6.0+**. `resolveTarget` / `listTargets` need **0.6.1+**.
+Node 20+ only (not the browser). Requires ollanet **0.4.0+**. `pullModel` / `showModel` / `removeModel` / `listLoaded` need **0.5.0+**. `runCompare` / `lastScan` / bench `--hot` need **0.6.0+**. `resolveTarget` / `listTargets` need **0.6.1+**. Aliases (`lookupAlias` / `expandMachineModel`) need **0.6.4+**.
 
 ```ts
 import { scanNetwork } from "ollanet";

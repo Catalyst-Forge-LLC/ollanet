@@ -1,6 +1,6 @@
 {
   "name": "ollanet",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Private Ollama operations for any reachable network — CLI for humans, MCP for agents, Node for apps",
   "type": "module",
   "bin": {

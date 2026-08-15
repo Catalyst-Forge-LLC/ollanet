@@ -18,6 +18,7 @@ Node **20+** only. Not for the browser. LAN scan is opt-in.
 | `pull` / `show` / `rm` / `ps` | ≥ 0.5.0 |
 | Compare, `lastScan`, bench `--hot` | ≥ 0.6.0 |
 | `resolveTarget` / `listTargets` | ≥ 0.6.1 |
+| Aliases (`lookupAlias` / `expandMachineModel`) | ≥ 0.6.4 |
 
 ## Bundlers (Vite / SvelteKit SSR)
 
