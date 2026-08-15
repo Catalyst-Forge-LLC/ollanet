@@ -6,7 +6,9 @@
 
 Find the models. Talk to them. Keep the thread.
 
-Chat with **Ollama** servers on **any network you can reach** — LAN, localhost, Tailscale, VPN, or a raw IP. CLI for humans, MCP for agents, **Node library for apps**.
+Chat with **Ollama** servers on **any network you can reach** — LAN, localhost, Tailscale, VPN, or a raw IP.
+
+**CLI** for humans · **MCP** for agents · **Node** for apps. Same mesh.
 
 Scan for models, fire prompts, and continue conversations later by a short hash. No browser UI required. **Node 20+ · zero runtime deps.**
 

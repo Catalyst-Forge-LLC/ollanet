@@ -2,9 +2,9 @@
 title: Introduction
 ---
 
-**ollanet** is the client for a private [Ollama](https://ollama.com) mesh: find hosts on any network you can reach, manage models, talk to them, and hand the same mesh to agents and apps.
+**ollanet** is how humans, agents, and applications address a private [Ollama](https://ollama.com) fleet: find hosts on any network you can reach, manage models, talk to them, and keep the thread.
 
-CLI for humans, MCP for agents, Node library for apps. **Node 20+ · zero runtime deps.** Nothing leaves the networks you already trust.
+**CLI** for humans · **MCP** for agents · **Node** for apps. **Node 20+ · zero runtime deps.** Nothing leaves the networks you already trust.
 
 ## What it is
 

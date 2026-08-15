@@ -3,9 +3,9 @@ import { defineFilepressConfig } from 'getfilepress';
 export default defineFilepressConfig({
 	title: 'ollanet',
 	description:
-		'Chat with Ollama servers on any network you can reach — LAN, Tailscale, VPN, or a raw IP. Discover hosts, prompt models, continue chats by hash, and expose them to agents over MCP.',
+		'Private Ollama operations for any network you can reach. CLI for humans, MCP for agents, Node for apps — same mesh.',
 	tagline: 'Find the models. Talk to them. Keep the thread.',
-	lede: 'CLI · MCP · your network',
+	lede: 'CLI for humans · MCP for agents · Node for apps',
 	url: 'https://ollanet.dev',
 	author: 'Catalyst Forge LLC',
 	logo: '/logo.png',

@@ -22,7 +22,8 @@ ollanet ps studio
 ## Talk
 
 ```bash
-ollanet prompt localhost "What is MagicDNS?"
+ollanet alias add desk studio gemma3:12b
+ollanet prompt desk "What is MagicDNS?"
 ollanet prompt studio gemma3:12b "Summarize Tailscale ACL tips"
 ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
 ```
@@ -43,4 +44,4 @@ ollanet mcp
 
 Point your MCP host at that stdio server — see [MCP](/docs/mcp).
 
-Host-first CLI: `ollanet <cmd> <machine> …` — `studio` is the **machine** (MagicDNS / config name / IP), not a model.
+Host-first CLI: `ollanet <cmd> <machine> …` — `studio` is the **machine** (MagicDNS / config name / IP), or an **alias** for a machine + model pair.

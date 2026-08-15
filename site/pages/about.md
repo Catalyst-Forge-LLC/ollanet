@@ -1,10 +1,12 @@
 ---
 title: Ollama over your network.
-description: Discover Ollama hosts, prompt models, continue chats by hash, and hand the mesh to agents over MCP.
+description: CLI for humans, MCP for agents, Node for apps. Discover Ollama hosts, prompt models, continue chats by hash — same private mesh.
 order: 1
 ---
 
-AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** finds Ollama hosts, manages models, talks to them, and keeps conversations alive across machines — CLI for you, MCP for agents, Node library for apps. Nothing leaves the networks you already trust.
+AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** is how humans, agents, and applications address a private inference fleet. Nothing leaves the networks you already trust.
+
+**CLI** for humans · **MCP** for agents · **Node** for apps. Same mesh.
 
 <div class="cta-row">
   <a class="cta cta-primary" href="/docs">Read the docs →</a>
@@ -19,7 +21,8 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 - **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents. `--last` reprints the previous scan with no network.
 - **Pull** — `ollanet pull studio gemma3:12b` asks that machine to download (or update) a library model. The server fetches it; ollanet does not upload weights.
 - **Manage** — `show` a Modelfile, `ps` what’s in VRAM, `rm` leftovers (`--yes`). Scan marks Finetuna-style names `[tuned]`.
-- **Prompt** — any host by name or IP, streaming replies, sane defaults per machine. `--file` for a `.txt` or `.md` prompt.
+- **Aliases** — `ollanet alias add desk studio gemma3:12b` then `ollanet prompt desk "…"`. A logical name over a machine + model pair.
+- **Prompt** — any host by name, IP, or alias; streaming replies; sane defaults per machine. `--file` for a `.txt` or `.md` prompt.
 - **Compare** — same prompt on 2–5 models; summary table plus a saved markdown file.
 - **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
 - **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks
@@ -31,9 +34,10 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 ```bash
 npm install -g ollanet
 ollanet scan
-ollanet pull studio gemma3:12b
-ollanet show studio gemma3:12b
-ollanet prompt localhost "What is MagicDNS?"
+ollanet alias add desk studio gemma3:12b
+ollanet prompt desk "What is MagicDNS?"
+ollanet bench desk --hot
+ollanet mcp
 ```
 
 Full flags and guides live in the [docs](/docs). Quick install notes below.
@@ -64,7 +68,7 @@ Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_compare`, `ollanet_pull`, `oll
 
 ## For apps
 
-Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh — any machine you can already reach. The app does not own the GPUs; it discovers them. Requires **ollanet ≥ 0.4.0**. Node only; keep LAN opt-in.
+Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh — any machine you can already reach. The app does not own the GPUs; it discovers them. Same inventory the CLI and MCP wrap. Requires **ollanet ≥ 0.4.0**. Node only; keep LAN opt-in.
 
 ```ts
 import { scanNetwork } from "ollanet";

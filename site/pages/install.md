@@ -4,7 +4,7 @@ description: Install ollanet from npm or GitHub.
 order: 1
 ---
 
-Requires **Node.js 20+**.
+Requires **Node.js 20+**. CLI for humans, MCP for agents, Node for apps.
 
 ### From npm
 
