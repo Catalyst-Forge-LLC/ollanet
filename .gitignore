@@ -13,3 +13,7 @@ CHAT_RESTORE.md
 
 # Drop-zone for other-agent patches/tests — not part of the repo
 patch/
+
+# Compiled docs mount (built by site/scripts/build-docs.mjs)
+site/docs/dist/
+

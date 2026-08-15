@@ -56,4 +56,4 @@ const { servers } = await scanNetwork({ lanScan: false });
 
 ### Config
 
-Installed copies use `~/.ollanet/config.json` and store chats under `~/.ollanet/responses/`. Full flag reference lives in the [GitHub README](https://github.com/Catalyst-Forge-LLC/ollanet#readme).
+Installed copies use `~/.ollanet/config.json` and store chats under `~/.ollanet/responses/`. Full guides live in the [docs](/docs).

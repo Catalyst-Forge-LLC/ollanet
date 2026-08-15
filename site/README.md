@@ -1,18 +1,21 @@
 # ollanet.dev
 
-Marketing + notes site for [ollanet](https://github.com/Catalyst-Forge-LLC/ollanet), built with [FilePress](https://getfilepress.com) (`getfilepress` on npm).
+Marketing + docs site for [ollanet](https://github.com/Catalyst-Forge-LLC/ollanet), built with [FilePress](https://getfilepress.com) (`getfilepress` on npm).
 
 ```bash
 pnpm install
-pnpm dev          # local preview
-pnpm build        # → build/
+pnpm docs:build    # Markdown → docs/dist (Svelte-style shell)
+pnpm dev           # docs build + FilePress preview
+pnpm build         # → build/ (includes /docs mount)
 ```
+
+Docs source: `docs/*.md` + `_nav.json`. FilePress mounts `docs/dist` at `/docs` via `paths` in `filepress.config.ts` (requires getfilepress **≥ 0.1.3**). Local pin: `link:../../filepress`.
 
 Optional: edit `theme.css` next to `filepress.config.ts`.
 
 ## Deploy (Cloudflare Pages)
 
-**Use one pipeline only.** Dual deploys overwrite each other and can surface intermittent SvelteKit `500 Internal Error` pages when asset hashes disagree mid-rollout.
+**Use one pipeline only.** Dual deploys overwrite each other.
 
 ```bash
 pnpm ship
@@ -30,8 +33,4 @@ Then attach **ollanet.dev** in the Cloudflare dashboard.
 | Output directory | `build` |
 | Node | 20+ |
 
-Engine pin (already in `package.json`):
-
-```json
-"getfilepress": "^0.1.2"
-```
+Pin `getfilepress` to a published `^0.1.3` or a git tag that includes path mounts (a `link:` dependency will not resolve on CF Pages).

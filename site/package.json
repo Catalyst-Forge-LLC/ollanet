@@ -4,15 +4,16 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "filepress dev",
-		"build": "filepress build",
+		"docs:build": "node scripts/build-docs.mjs",
+		"dev": "pnpm docs:build && filepress dev",
+		"build": "pnpm docs:build && filepress build",
 		"preview": "filepress preview",
 		"check": "filepress check",
 		"ship": "pnpm build && wrangler pages deploy build --project-name=ollanet",
 		"deploy": "pnpm ship"
 	},
 	"devDependencies": {
-		"getfilepress": "^0.1.2",
+		"getfilepress": "link:../../filepress",
 		"wrangler": "^4.28.0"
 	}
 }

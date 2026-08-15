@@ -17,8 +17,10 @@ export default defineFilepressConfig({
 	],
 	nav: [
 		{ label: 'Home', href: '/' },
+		{ label: 'Docs', href: '/docs' },
 		{ label: 'Posts', href: '/writing' },
 		{ label: 'Install', href: '/install' },
 		{ label: 'GitHub', href: 'https://github.com/Catalyst-Forge-LLC/ollanet', icon: 'github' }
-	]
+	],
+	paths: [{ url: '/docs', dir: 'docs/dist' }]
 });

@@ -7,7 +7,8 @@ order: 1
 AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** finds Ollama hosts, manages models, talks to them, and keeps conversations alive across machines — CLI for you, MCP for agents, Node library for apps. Nothing leaves the networks you already trust.
 
 <div class="cta-row">
-  <a class="cta cta-primary" href="/install">Install ollanet →</a>
+  <a class="cta cta-primary" href="/docs">Read the docs →</a>
+  <a class="cta cta-secondary" href="/install">Install ollanet</a>
   <a class="cta cta-secondary" href="https://github.com/Catalyst-Forge-LLC/ollanet">View on GitHub</a>
 </div>
 
@@ -35,7 +36,7 @@ ollanet show studio gemma3:12b
 ollanet prompt localhost "What is MagicDNS?"
 ```
 
-Full flags and config live on the [install](/install) page.
+Full flags and guides live in the [docs](/docs). Quick install notes below.
 
 ## The Finetuna loop
 

@@ -1,0 +1,34 @@
+{
+	"sections": [
+		{
+			"title": "Getting started",
+			"items": [
+				{ "id": "introduction", "title": "Introduction" },
+				{ "id": "install", "title": "Install" },
+				{ "id": "quick-start", "title": "Quick start" }
+			]
+		},
+		{
+			"title": "Using ollanet",
+			"items": [
+				{ "id": "scan", "title": "Scan" },
+				{ "id": "prompt", "title": "Prompt and chats" },
+				{ "id": "models", "title": "Models" },
+				{ "id": "compare", "title": "Compare" },
+				{ "id": "bench", "title": "Bench" },
+				{ "id": "config", "title": "Configuration" }
+			]
+		},
+		{
+			"title": "Agents and apps",
+			"items": [
+				{ "id": "mcp", "title": "MCP" },
+				{ "id": "library", "title": "Library" }
+			]
+		},
+		{
+			"title": "Reference",
+			"items": [{ "id": "commands", "title": "Commands" }]
+		}
+	]
+}
