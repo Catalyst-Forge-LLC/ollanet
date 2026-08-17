@@ -41,6 +41,7 @@
     "start": "tsx src/cli.ts scan",
     "typecheck": "tsc --noEmit",
     "test": "tsc -p tsconfig.build.json && node scripts/fix-dts-extensions.mjs && node --test test/*.test.mjs",
+    "prepublishOnly": "node scripts/publish-gate.mjs && pnpm test",
     "test:only": "node --test test/*.test.mjs",
     "ship": "pnpm --dir site run ship",
     "site:dev": "pnpm --dir site dev",
