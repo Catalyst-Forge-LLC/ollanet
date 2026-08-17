@@ -28,4 +28,4 @@ ssr: { external: ["ollanet"] },
 optimizeDeps: { exclude: ["ollanet"] },
 ```
 
-Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh — any machine you can already reach.
+Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh: any machine you can already reach.

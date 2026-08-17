@@ -10,7 +10,7 @@ ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
 ollanet compare studio gemma3:12b llama3.2:3b --file ./notes.md
 ```
 
-Prints a tok/s table and writes `compares/<id>.md` plus `.json`. Omit `--prompt` / `--file` to use the built-in mesh-host tasting prompt.
+Prints a tok/s table and writes `compares/<id>.md` plus `.json`. Omit `--prompt` / `--file` to use the built-in default prompt.
 
 | Flag | Meaning |
 |---|---|

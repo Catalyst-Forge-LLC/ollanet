@@ -1,7 +1,7 @@
 {
   "name": "ollanet",
   "version": "0.6.5",
-  "description": "Private Ollama operations for any reachable network — CLI for humans, MCP for agents, Node for apps",
+  "description": "Talk to Ollama on any reachable network. CLI for humans, MCP for agents, Node for apps",
   "type": "module",
   "bin": {
     "ollanet": "./dist/cli.js"

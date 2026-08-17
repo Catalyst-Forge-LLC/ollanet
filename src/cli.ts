@@ -17,7 +17,7 @@
 const HELP = `ollanet — Ollama over your network
 
 Discover hosts, manage models, prompt and compare, bench tok/s, and continue
-chats by hash. CLI, MCP, and a Node library — same mesh.
+chats by hash. CLI for humans, MCP for agents, Node for apps.
 
 Usage:
   ollanet scan [--json] [--all] [--lan] [--last]

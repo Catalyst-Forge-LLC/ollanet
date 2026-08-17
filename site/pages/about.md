@@ -1,12 +1,12 @@
 ---
-title: Ollama over your network.
-description: CLI for humans, MCP for agents, Node for apps. Discover Ollama hosts, prompt models, continue chats by hash — same private mesh.
+title: Ollama on any host you can reach.
+description: CLI for humans, MCP for agents, Node for apps. Discover hosts, prompt models, continue chats by hash.
 order: 1
 ---
 
-AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening a browser. **ollanet** is how humans, agents, and applications address a private inference fleet. Nothing leaves the networks you already trust.
+You have Ollama on a laptop, a studio box, maybe a closet PC. **ollanet** finds those hosts, manages models, and talks to them without babysitting IPs or opening a browser.
 
-**CLI** for humans · **MCP** for agents · **Node** for apps. Same mesh.
+**CLI** for humans · **MCP** for agents · **Node** for apps.
 
 <div class="cta-row">
   <a class="cta cta-primary" href="/docs">Read the docs →</a>
@@ -18,16 +18,19 @@ AI models on your LAN and Tailscale shouldn’t mean babysitting IPs or opening 
 
 ## What you get
 
-- **Discover** — config, env, and Tailscale first. `--lan` is opt-in: a TCP sweep of your subnet on Ollama’s usual port (`11434`), off unless you pass the flag. Dead hosts just don’t show up. JSON for routers and agents. `--last` reprints the previous scan with no network.
-- **Pull** — `ollanet pull studio gemma3:12b` asks that machine to download (or update) a library model. The server fetches it; ollanet does not upload weights.
-- **Manage** — `show` a Modelfile, `ps` what’s in VRAM, `rm` leftovers (`--yes`). Scan marks Finetuna-style names `[tuned]`.
-- **Aliases** — `ollanet alias add desk studio gemma3:12b` then `ollanet prompt desk "…"`. A logical name over a machine + model pair.
-- **Prompt** — any host by name, IP, or alias; streaming replies; sane defaults per machine. `--file` for a `.txt` or `.md` prompt.
-- **Compare** — same prompt on 2–5 models; summary table plus a saved markdown file.
-- **Continue** — short chat hashes that survive laptops, desktops, and agent handoffs
-- **Bench** — median tok/s across runs (early-stopped samples dropped) plus light quality checks
-- **MCP** — `ollanet mcp` exposes scan / prompt / compare / pull / show / rm / ps / chats over stdio
-- **Library** — `import { scanNetwork } from "ollanet"` for apps (Node 20+, not the browser)
+Discover hosts from config, env, and Tailscale. `--lan` is an opt-in TCP sweep of your subnet on port `11434`. Dead hosts stay off the list. JSON for routers and agents. `--last` reprints the previous scan with no network.
+
+`ollanet pull studio gemma3:12b` asks that machine to download or update a library model. The server fetches it; ollanet does not upload weights.
+
+`show` a Modelfile, `ps` what’s in VRAM (CPU/GPU split, same rule as `ollama ps`), `rm` leftovers (`--yes`). Scan marks Finetuna-style names `[tuned]`.
+
+Aliases map a short name to a machine and model: `ollanet alias add desk studio gemma3:12b`, then `ollanet prompt desk "…"`.
+
+Prompt any host by name, IP, or alias. Stream replies. Defaults per machine. `--file` takes a `.txt` or `.md` prompt. Continue a chat by hash from another laptop.
+
+Compare runs the same prompt on 2–5 models on one host and writes a markdown file. Bench reports median tok/s (early-stops dropped) plus a few quality checks.
+
+`ollanet mcp` exposes scan, prompt, compare, pull, show, rm, ps, and chats over stdio. Apps `import { scanNetwork } from "ollanet"` (Node 20+, not the browser).
 
 ## Quick start
 
@@ -40,18 +43,17 @@ ollanet bench desk --hot
 ollanet mcp
 ```
 
-Full flags and guides live in the [docs](/docs). Quick install notes below.
+Full flags live in the [docs](/docs).
 
-## The Finetuna loop
+## Finetuna
 
 <div class="mesh-panel">
-  <p>On the machine that <em>runs</em> Ollama, <a href="https://finetuna.net"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. ollanet <code>scan</code> / <code>show</code> / <code>prompt</code> it from anywhere on the network. After <code>pull</code>, ollanet prints the next step.</p>
-  <p>Host tunes the model. Network finds and uses it. Same API, closed loop.</p>
+  <p>On the machine that <em>runs</em> Ollama, <a href="https://finetuna.net"><strong>Finetuna</strong></a> shapes a GPU-tuned named variant. From another machine: <code>ollanet scan</code>, then <code>show</code> or <code>prompt</code> that name. After <code>pull</code>, ollanet prints the next step.</p>
 </div>
 
 ## For agents
 
-Point your MCP host at the stdio server — then route work to whatever’s alive on the mesh:
+Point your MCP host at the stdio server, then route work to whatever is up:
 
 ```json
 {
@@ -68,7 +70,7 @@ Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_compare`, `ollanet_pull`, `oll
 
 ## For apps
 
-Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh — any machine you can already reach. The app does not own the GPUs; it discovers them. Same inventory the CLI and MCP wrap. Requires **ollanet ≥ 0.4.0**. Node only; keep LAN opt-in.
+Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet treats it like a private inference mesh: any machine you can already reach. The app discovers the GPUs; it does not own them. Requires **ollanet ≥ 0.4.0**. Node only; keep LAN opt-in.
 
 ```ts
 import { scanNetwork } from "ollanet";
@@ -76,7 +78,7 @@ import { scanNetwork } from "ollanet";
 const { servers } = await scanNetwork({ lanScan: false });
 ```
 
-Same inventory MCP wraps. Health checks can stay on localhost; scan is a user action.
+Health checks can stay on localhost. Scan is a user action.
 
 <div class="cta-row">
   <a class="cta cta-primary" href="/install">Get started →</a>

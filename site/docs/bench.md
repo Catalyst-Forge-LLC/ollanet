@@ -2,7 +2,7 @@
 title: Bench
 ---
 
-Fixed suite for **credible speed** plus a lightweight quality signal. Primary use: Finetuna before/after on one host.
+Fixed suite for speed plus a light quality check. Primary use: Finetuna before/after on one host.
 
 ```bash
 ollanet bench <machine> [model...]
