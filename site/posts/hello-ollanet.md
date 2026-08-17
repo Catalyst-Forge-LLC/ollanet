@@ -1,7 +1,7 @@
 ---
 title: "Hello from ollanet.dev"
 date: 2026-08-10
-description: The site is live: CLI, MCP, and a place for notes as the mesh grows.
+description: "The site is live: CLI, MCP, and a place for notes as the mesh grows."
 tags: [meta, releases]
 ---
 
