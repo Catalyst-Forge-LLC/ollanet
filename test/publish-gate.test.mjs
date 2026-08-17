@@ -7,6 +7,7 @@ import {
 	applyVersion,
 	bumpPatch,
 	compareSemver,
+	isGitHubActions,
 	nextPublishVersion,
 } from "../scripts/publish-gate.mjs";
 
@@ -35,7 +36,28 @@ test("applyVersion keeps package.json formatting", () => {
 	);
 });
 
-test("prepublishOnly runs the login and bump gate", () => {
+test("prepublishOnly runs the publish gate", () => {
 	const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 	assert.match(pkg.scripts.prepublishOnly, /publish-gate/);
+});
+
+test("isGitHubActions follows CI env", () => {
+	const prev = {
+		GITHUB_ACTIONS: process.env.GITHUB_ACTIONS,
+		CI: process.env.CI,
+		GITHUB_WORKFLOW: process.env.GITHUB_WORKFLOW,
+	};
+	delete process.env.GITHUB_ACTIONS;
+	delete process.env.CI;
+	delete process.env.GITHUB_WORKFLOW;
+	assert.equal(isGitHubActions(), false);
+	process.env.GITHUB_ACTIONS = "true";
+	assert.equal(isGitHubActions(), true);
+	delete process.env.GITHUB_ACTIONS;
+	process.env.CI = "true";
+	assert.equal(isGitHubActions(), true);
+	for (const [k, v] of Object.entries(prev)) {
+		if (v === undefined) delete process.env[k];
+		else process.env[k] = v;
+	}
 });

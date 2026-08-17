@@ -100,7 +100,47 @@ async function bumpIfNeeded() {
 	);
 }
 
+export function isGitHubActions() {
+	return (
+		process.env.GITHUB_ACTIONS === "true" ||
+		process.env.CI === "true" ||
+		Boolean(process.env.GITHUB_WORKFLOW)
+	);
+}
+
+export function allowLaptopPublish() {
+	return process.env.OLLANET_PUBLISH_LOCAL === "1";
+}
+
 export async function runPublishGate() {
+	if (isGitHubActions()) {
+		const raw = readFileSync(packageJsonPath, "utf8");
+		const pkg = JSON.parse(raw);
+		const published = await publishedVersion(pkg.name);
+		const next = nextPublishVersion(pkg.version, published);
+		if (next) {
+			console.error(
+				`${pkg.version} is already on npm (latest ${published}). ` +
+					`Bump package.json on the default branch, then re-run the Publish workflow.`,
+			);
+			process.exit(1);
+		}
+		console.log(`CI publish ${pkg.version} (npm latest: ${published ?? "none"}).`);
+		return;
+	}
+
+	if (!allowLaptopPublish()) {
+		const pkg = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+		console.error(
+			"Provenance only works in GitHub Actions (OIDC). A laptop publish " +
+				"fails with: Automatic provenance generation not supported for provider: null.\n\n" +
+				`Ship ${pkg.version} from CI: push, then cut GitHub Release v${pkg.version} ` +
+				"(or run workflow_dispatch on publish.yml).\n\n" +
+				"Emergency, no attestations: OLLANET_PUBLISH_LOCAL=1 pnpm publish",
+		);
+		process.exit(1);
+	}
+
 	ensureLogin();
 	await bumpIfNeeded();
 }

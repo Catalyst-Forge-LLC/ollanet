@@ -43,6 +43,10 @@ jobs:
 
       - run: pnpm test
 
-      # OIDC auth + provenance are automatic with trusted publishing (npm ≥ 11.5.1).
-      # Do not set NODE_AUTH_TOKEN here — a token makes npm skip OIDC.
-      - run: npm publish --access public
+      # Version check only (no npm login). OIDC is the credential.
+      - run: node scripts/publish-gate.mjs
+
+      # --ignore-scripts: do not re-run prepublishOnly (that path opens
+      # `pnpm login` on a laptop). No NODE_AUTH_TOKEN — a token skips OIDC.
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public --ignore-scripts

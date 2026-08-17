@@ -50,4 +50,4 @@ Requirements: Node 24 on the runner (ships a new enough npm), or `npm install -g
 
 ## Local publish (escape hatch)
 
-Before “disallow tokens” is enabled, you can still publish locally with your npm login + 2FA. After disallowing tokens, only the trusted workflow (and interactive 2FA flows npm still allows for maintainers, if any) apply — prefer the Actions path.
+Do not `npm publish` from a laptop. The gate refuses unless `OLLANET_PUBLISH_LOCAL=1` (no provenance). After “disallow tokens” is on, only the trusted workflow can publish.
