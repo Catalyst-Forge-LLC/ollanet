@@ -1,11 +1,11 @@
 {
-	"name": "ollanet",
+	"name": "ollanet-site",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
 		"docs:build": "node scripts/build-docs.mjs",
-		"dev": "pnpm docs:build && filepress dev",
+		"dev": "pnpm docs:build && node ../scripts/ensure-lease.mjs ollanet-site 5182 && filepress dev",
 		"build": "pnpm docs:build && filepress build",
 		"preview": "filepress preview",
 		"check": "filepress check",
@@ -13,7 +13,12 @@
 		"deploy": "pnpm ship"
 	},
 	"devDependencies": {
-		"getfilepress": "link:../../filepress",
+		"getfilepress": "^0.1.6",
 		"wrangler": "^4.28.0"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"getfilepress"
+		]
 	}
 }

@@ -11,6 +11,8 @@ pnpm build         # → build/ (includes /docs mount)
 
 Docs source: `docs/*.md` + `_nav.json`. FilePress mounts `docs/dist` at `/docs` via `paths` in `filepress.config.ts` (requires getfilepress **≥ 0.1.3**). Local pin: `link:../../filepress`.
 
+If [LocalBerth](https://www.npmjs.com/package/localberth) is installed, this site stays on **5182** as `ollanet-site` (loopback; not ollanet `--lan`).
+
 Optional: edit `theme.css` next to `filepress.config.ts`.
 
 ## Deploy (Cloudflare Pages)
