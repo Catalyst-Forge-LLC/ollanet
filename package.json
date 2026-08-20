@@ -44,7 +44,7 @@
     "prepublishOnly": "node scripts/publish-gate.mjs && pnpm test",
     "test:only": "node --test test/*.test.mjs",
     "ship": "pnpm --dir site run ship",
-    "site:dev": "pnpm --dir site dev -- --host",
+    "site:dev": "pnpm --dir site dev",
     "site:build": "pnpm --dir site build",
     "site:deploy": "pnpm --dir site run ship"
   },
