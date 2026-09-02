@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       getfilepress:
-        specifier: ^0.1.23
-        version: 0.1.23(esbuild@0.28.2)(picomatch@4.0.5)
+        specifier: ^0.1.27
+        version: 0.1.27(esbuild@0.28.2)(picomatch@4.0.5)
       wrangler:
         specifier: ^4.28.0
         version: 4.120.1
@@ -978,8 +978,8 @@ packages:
     resolution: {integrity: sha512-g/Q1aTSDOxFpchXC4i8ZWvxA1lnPqx/JHqcpIw0/LX9T8x/GBbi6YnlN5nhaKIFkT8oFsscUKgDJYxfwfS6QsQ==}
     engines: {node: '>=8'}
 
-  getfilepress@0.1.23:
-    resolution: {integrity: sha512-F3iRcYNtD25gIi7eLaj6yAJZwjRk1N3hkSTW+0pVSSgHBaGlgbOGcU5tYyKkRH9th5GAuRhZXCp9GIM4tWnrFw==}
+  getfilepress@0.1.27:
+    resolution: {integrity: sha512-EjN3dAbs9cy4OJYiJiNs6rWLMeTaD4yrSL6Wo//aPhrArRe2pO/Xz/pA4/MdI34Axvs5O6zPFzEycdkuQCEJaA==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -2305,7 +2305,7 @@ snapshots:
 
   get-port@5.1.1: {}
 
-  getfilepress@0.1.23(esbuild@0.28.2)(picomatch@4.0.5):
+  getfilepress@0.1.27(esbuild@0.28.2)(picomatch@4.0.5):
     dependencies:
       '@fontsource-variable/inter': 5.3.0
       '@fontsource-variable/newsreader': 5.3.0
