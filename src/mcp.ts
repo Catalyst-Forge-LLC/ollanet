@@ -49,9 +49,10 @@ const TOOLS: ToolDef[] = [
   {
     name: "ollanet_scan",
     description:
-      "Discover reachable Ollama hosts and list their models. " +
-      "Use this before routing work to pick a host/model. " +
-      "Optional LAN TCP scan (off unless lan=true; equivalent to CLI --lan) and include offline Tailscale peers.",
+      "Discover configured or selected Ollama hosts and list their models. " +
+      "A responding host is reachable, not automatically trusted. " +
+      "Optional LAN TCP scan is off unless lan=true (CLI --lan). " +
+      "all=true also probes offline Tailscale peers.",
     inputSchema: {
       type: "object",
       properties: {

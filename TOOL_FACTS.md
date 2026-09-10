@@ -15,10 +15,12 @@ credentials:
   required: []
 egress:
   telemetry: none
-  destinations: []
+  destinations:
+    - "User-selected Ollama hosts (prompt text, compare, bench, scan, pull, show, rm, ps)"
+    - "Remote Ollama registry fetch on pull (performed by the selected host, not by this client)"
 tools:
   - name: ollanet_scan
-    purpose: "Discover reachable Ollama hosts and list their models; optional LAN TCP scan"
+    purpose: "Discover configured or selected Ollama hosts and list their models. Optional LAN TCP scan. Reachable is not trusted."
     side_effects: read
     reach:
       filesystem: none
@@ -26,7 +28,7 @@ tools:
       processes: false
     idempotent: true
   - name: ollanet_prompt
-    purpose: "Send a prompt to an Ollama host or continue a saved chat; may persist transcript locally"
+    purpose: "Send prompt text to a selected Ollama host or continue a saved chat. Transcripts stay on this machine unless --no-save."
     side_effects: write
     reach:
       filesystem: scoped
@@ -34,7 +36,7 @@ tools:
       processes: false
     idempotent: false
   - name: ollanet_compare
-    purpose: "Run the same prompt on 2-5 models on one Ollama host; may write compares/*.md and .json"
+    purpose: "Run the same prompt on 2-5 models on one Ollama host. May write compares/*.md and .json locally."
     side_effects: write
     reach:
       filesystem: scoped
@@ -42,7 +44,7 @@ tools:
       processes: false
     idempotent: false
   - name: ollanet_pull
-    purpose: "Pull (download) a model onto a remote Ollama host"
+    purpose: "Ask a remote Ollama host to fetch a model from the registry onto that host"
     side_effects: write
     reach:
       filesystem: none
@@ -123,7 +125,9 @@ None required.
 | | |
 |---|---|
 | Telemetry | none |
-| Destinations | (none) |
+| Destinations | User-selected Ollama hosts. On pull, that host may fetch from the Ollama registry. |
+
+No vendor telemetry is configured in this package. Commands still send traffic to the hosts you name. Prompt text goes to the selected host. Chats are stored locally (`responses/`). Other machines see a chat only if they share that directory. This list covers inspected operations. It does not prove every data path is absent.
 
 ## Tools (9)
 
@@ -143,10 +147,10 @@ None required.
 
 | Tool | Purpose |
 |---|---|
-| `ollanet_scan` | Discover reachable Ollama hosts and list their models; optional LAN TCP scan |
-| `ollanet_prompt` | Send a prompt to an Ollama host or continue a saved chat; may persist transcript locally |
-| `ollanet_compare` | Run the same prompt on 2-5 models on one Ollama host; may write compares/*.md and .json |
-| `ollanet_pull` | Pull (download) a model onto a remote Ollama host |
+| `ollanet_scan` | Discover configured or selected Ollama hosts and list their models. Optional LAN TCP scan. Reachable is not trusted. |
+| `ollanet_prompt` | Send prompt text to a selected Ollama host or continue a saved chat. Transcripts stay on this machine unless --no-save. |
+| `ollanet_compare` | Run the same prompt on 2-5 models on one Ollama host. May write compares/*.md and .json locally. |
+| `ollanet_pull` | Ask a remote Ollama host to fetch a model from the registry onto that host |
 | `ollanet_show` | Show model metadata from an Ollama host |
 | `ollanet_rm` | Remove a model from an Ollama host |
 | `ollanet_ps` | List models currently loaded on an Ollama host |

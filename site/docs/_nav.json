@@ -5,7 +5,8 @@
 			"items": [
 				{ "id": "introduction", "title": "Introduction" },
 				{ "id": "install", "title": "Install" },
-				{ "id": "quick-start", "title": "Quick start" }
+				{ "id": "quick-start", "title": "Quick start" },
+				{ "id": "network", "title": "Network" }
 			]
 		},
 		{

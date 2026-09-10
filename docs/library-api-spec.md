@@ -7,7 +7,7 @@
 
 ollanet’s discovery and prompt logic already exist (`scanNetwork`, `discoverHosts`, `runPrompt`, `ollamaChat`), but npm advertises a CLI only: `bin`, no `exports`, no `main`, no `.d.ts`. Apps (FilePress) had to import `ollanet/dist/scan.js`. Vite then failed on `import('ollanet')` because there is no package entry.
 
-MCP is the agent version of the same idea. A public `import` surface is the app version. Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet should treat it like a **private inference mesh** — any machine the process can already reach.
+MCP is the agent version of the same idea. A public `import` surface is the app version. Hard-coding `http://127.0.0.1:11434` treats Ollama like a local daemon. ollanet should discover hosts you configure or select. Reachable is not trusted.
 
 ## Goals
 
@@ -49,7 +49,7 @@ If `config` is passed to `scanNetwork`, skip the config file. If omitted, keep `
 
 ### Positioning (apps)
 
-The app does not own the GPUs; it **discovers** them. Same shape as AirPlay / printers / Chromecast, not “set an API key.” Privacy: nothing leaves networks the user already trusts. LAN stays opt-in so apps do not look like a port scanner.
+The app does not own the GPUs; it **discovers** them. Same shape as AirPlay / printers / Chromecast, not “set an API key.” Prompt text goes to the Ollama hosts you configure or select. Reachable is not trusted. This package does not include vendor telemetry, which is not the same as no network traffic. LAN stays opt-in so apps do not look like a port scanner.
 
 Concrete use cases: design/authoring tools (FilePress), devtools/CLIs, agents (MCP wraps the same scan), routing/failover, team/lab mesh + Finetuna, “bring your own Ollama” products, honest empty states (“localhost down, studio has 8 models”).
 

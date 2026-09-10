@@ -2,7 +2,7 @@
 title: Models
 ---
 
-Manage models on a named host — the server downloads; ollanet does not upload weights.
+Manage models on a named host. `pull` and `rm` change that host. `show` and `ps` only read. The server downloads on `pull`. ollanet does not upload weights.
 
 ```bash
 ollanet pull <machine> <model>

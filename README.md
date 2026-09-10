@@ -4,11 +4,11 @@
 
 # ollanet
 
-Talk to **Ollama** on any network you can reach: LAN, localhost, Tailscale, VPN, or a raw IP.
+Find, manage, and use Ollama models on the hosts you choose.
 
 **CLI** for humans · **MCP** for agents · **Node** for apps.
 
-Scan for hosts, send a prompt, continue a chat by a short hash. No browser UI. **Node 20+ · zero runtime deps.**
+Discover hosts, give models convenient aliases, and prompt or compare them. A reachable host is not a trusted host. LAN scan is opt-in. Node 20+, zero runtime deps.
 
 **Docs:** [ollanet.dev/docs](https://ollanet.dev/docs) · **Site:** [ollanet.dev](https://ollanet.dev)
 
@@ -27,19 +27,57 @@ Or one-off: `npx ollanet scan`
 ollanet scan
 ollanet alias add desk studio gemma3:12b
 ollanet prompt desk "What is MagicDNS?"
-ollanet bench desk --hot
-ollanet mcp
 ```
+
+`alias` writes local config. `prompt` sends that text to the selected host. `pull` and `rm` change models on the remote host. `scan`, `show`, `ps`, and `alias` do not install or delete models.
 
 Host-first: `ollanet <cmd> <machine> …`. The machine is a MagicDNS name, a config name, an IP, or an alias for a machine + model pair.
 
-## What you get
+## Three jobs
 
-Discover hosts. `pull` / `show` / `rm` / `ps`. Aliases. Prompt and hash-addressed chats. Compare. Bench. MCP. Node library. Flags and config live in the [docs](https://ollanet.dev/docs).
+**Discover.** Probe localhost, config, env, and Tailscale. `--lan` is an opt-in TCP sweep of your subnet on port `11434`.
+
+**Manage.** `pull`, `show`, `rm`, and `ps` on a named machine. Comparisons and benches are deeper workflows on [ollanet.dev/docs](https://ollanet.dev/docs).
+
+**Use.** Prompt, continue a chat by hash, or call the same inventory from MCP and the Node library.
+
+## Reachability and trust
+
+ollanet talks to Ollama endpoints you configure or select. A scan that gets an answer means the port responded. It does not mean you should send prompts or pull models there. Authentication and network protection depend on how that Ollama host is deployed. Discovery is not a security boundary, and a LAN is not inherently safe.
+
+## Network effects
+
+This package does not include vendor telemetry. Commands still cause network traffic to the hosts you name.
+
+| Operation | Client sends | Remote host may do | Stored where |
+| --- | --- | --- | --- |
+| `scan` | Health and model-list probes to discovered or configured hosts | Answer with tags | Last scan on this machine (`last-scan.json`) |
+| `scan --lan` | Extra TCP probes on local `/24`s, port `11434` | Same, if something answers | Same |
+| `prompt`, `compare`, `bench` | Prompt text, and prior turns when you continue a chat | Run inference | Chats, compares, or benches on this machine unless you pass `--no-save` |
+| `pull` | `POST /api/pull` | Fetch the model from the Ollama registry onto that host | Model files on the remote host |
+| `show`, `ps` | Read requests | Return metadata or loaded-model rows | Nothing new on disk |
+| `rm` | Delete request (`--yes`) | Remove that model from the host | Model removed on the remote host |
+| `alias` | None to Ollama | None | Local `config.json` |
+| `chats` | None to Ollama | None | Reads local transcripts |
+
+Other machines see a saved chat only if they share the responses directory (or the same `~/.ollanet/` when installed). This table covers the operations inspected in this repo. It does not prove every possible data path is listed.
 
 ## Finetuna
 
-On the machine that *runs* Ollama, **[Finetuna](https://finetuna.net)** shapes a GPU-tuned named variant. ollanet finds that name from anywhere on the network.
+[Finetuna](https://finetuna.net) can shape a GPU-tuned named variant on the machine that runs Ollama. That pairing is optional. Each tool works alone.
+
+| Role | Tool | Where |
+| --- | --- | --- |
+| Host-side runtime settings | Finetuna | The GPU box |
+| Client-side discover, manage, use | ollanet | Any machine that can reach that host |
+
+```bash
+ollanet show studio gemma4-ctx32k
+ollanet prompt studio gemma4-ctx32k "What is MagicDNS?"
+ollanet bench studio gemma4-ctx32k --hot --runs 5
+```
+
+`bench` `quick` reports median tok/s on a 256-token counted decode, plus ping, math, and haiku checks, for that host, model, suite, and run count. Those checks are not a general quality ranking and do not compare across hardware without the same conditions.
 
 <!-- xfacts-nutrition-label -->
 

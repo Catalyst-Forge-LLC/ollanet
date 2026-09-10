@@ -1,6 +1,6 @@
 /**
- * ollanet — Node library for discovering and talking to Ollama on any
- * reachable network (loopback, LAN, Tailscale, VPN).
+ * ollanet: Node library for discovering and talking to Ollama on hosts
+ * you configure or select (loopback, LAN, Tailscale, VPN).
  *
  * Node 20+ only. Not for the browser. LAN scan is opt-in.
  *

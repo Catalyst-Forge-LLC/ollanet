@@ -2,7 +2,7 @@
 title: Scan
 ---
 
-`ollanet scan` probes reachable Ollama hosts and lists models.
+`ollanet scan` probes Ollama hosts you can contact and lists models. A response means the port answered. It does not mean the host is trusted. `--lan` is an opt-in TCP sweep.
 
 ```bash
 ollanet scan

@@ -27,4 +27,6 @@ ollanet bench help
 
 Intentional help prints to stdout and exits 0. Usage errors go to stderr with exit 1.
 
-Deep pages: [Scan](/docs/scan), [Prompt](/docs/prompt), [Models](/docs/models), [Compare](/docs/compare), [Bench](/docs/bench), [MCP](/docs/mcp), [Library](/docs/library), [Configuration](/docs/config).
+`pull` and `rm` modify the remote host. `prompt`, `compare`, and `bench` send prompt text to that host. See [Network](/docs/network).
+
+Deep pages: [Scan](/docs/scan), [Prompt](/docs/prompt), [Models](/docs/models), [Compare](/docs/compare), [Bench](/docs/bench), [Network](/docs/network), [MCP](/docs/mcp), [Library](/docs/library), [Configuration](/docs/config).

@@ -14,10 +14,11 @@
  *   ollanet mcp
  */
 
-const HELP = `ollanet — Ollama over your network
+const HELP = `ollanet: find, manage, and use Ollama on hosts you choose
 
 Discover hosts, manage models, prompt and compare, bench tok/s, and continue
 chats by hash. CLI for humans, MCP for agents, Node for apps.
+A reachable host is not a trusted host. pull and rm change the remote host.
 
 Usage:
   ollanet scan [--json] [--all] [--lan] [--last]

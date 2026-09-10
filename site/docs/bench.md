@@ -2,7 +2,9 @@
 title: Bench
 ---
 
-Fixed suite for speed plus a light quality check. Primary use: Finetuna before/after on one host.
+Fixed suite for speed plus a light quality check on one host, model list, suite, and run count. Those checks are not a general model-quality ranking. Results do not compare across hardware without the same conditions.
+
+A common use is a Finetuna before and after on one host. Finetuna is optional. You can bench any named model already on the machine.
 
 ```bash
 ollanet bench <machine> [model...]

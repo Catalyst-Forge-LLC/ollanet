@@ -27,8 +27,10 @@ ollanet prompt desk "hello"
 | `--file <path>` | Prompt from `.txt` or `.md` |
 | `--no-stream` / `--no-save` / `--json` | Output / persistence |
 
+The selected host receives the prompt text, and the prior turns when you continue a chat. This package does not include vendor telemetry. Prompt traffic still goes to that Ollama endpoint.
+
 ## Transcripts
 
-Chats are stored as `responses/<hash>.json` with topic, machine, model, and timestamps. List them with `ollanet chats` (`--id <hash>`, `--json`).
+Chats are stored as `responses/<hash>.json` with topic, machine, model, and timestamps. List them with `ollanet chats` (`--id <hash>`, `--json`). Use `--no-save` to skip writing a transcript.
 
-Continue from any device that shares the responses dir (or the same `~/.ollanet/` when installed).
+Continue from any device that shares the responses dir (or the same `~/.ollanet/` when installed). Other machines do not receive chats automatically.

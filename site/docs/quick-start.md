@@ -2,6 +2,14 @@
 title: Quick start
 ---
 
+Discover, then alias, then prompt. `alias` is local. `prompt` sends text to the selected host. `pull` and `rm` change that host.
+
+```bash
+ollanet scan
+ollanet alias add desk studio gemma3:12b
+ollanet prompt desk "What is MagicDNS?"
+```
+
 ## Find hosts
 
 ```bash
@@ -11,7 +19,11 @@ ollanet scan --json
 ollanet scan --last         # replay last scan, no network
 ```
 
+`--lan` is opt-in. A host that answers is reachable. It is not automatically trusted.
+
 ## Put a model on a machine
+
+`pull` asks the named machine to download or update a library model. That host fetches it. `rm` deletes a model on that host.
 
 ```bash
 ollanet pull studio gemma3:12b
@@ -42,6 +54,6 @@ ollanet bench studio --suite full
 ollanet mcp
 ```
 
-Point your MCP host at that stdio server — see [MCP](/docs/mcp).
+Point your MCP host at that stdio server. See [MCP](/docs/mcp).
 
-Host-first CLI: `ollanet <cmd> <machine> …` — `studio` is the **machine** (MagicDNS / config name / IP), or an **alias** for a machine + model pair.
+Host-first CLI: `ollanet <cmd> <machine> …`. `studio` is the **machine** (MagicDNS / config name / IP), or an **alias** for a machine + model pair.

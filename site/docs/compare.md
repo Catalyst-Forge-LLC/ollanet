@@ -2,7 +2,7 @@
 title: Compare
 ---
 
-Same prompt on **2–5 models** on one host. Not a fixed bench suite.
+Same prompt on **2–5 models** on one host. Not a fixed bench suite, and not a general quality ranking. Tok/s is for that host, those models, and that prompt.
 
 ```bash
 ollanet compare <machine> <model> <model> [model...]

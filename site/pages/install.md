@@ -56,4 +56,4 @@ const { servers } = await scanNetwork({ lanScan: false });
 
 ### Config
 
-Installed copies use `~/.ollanet/config.json` and store chats under `~/.ollanet/responses/`. Full guides live in the [docs](/docs).
+Installed copies use `~/.ollanet/config.json` and store chats under `~/.ollanet/responses/`. Other machines do not receive those chats unless they share that directory. Full guides live in the [docs](/docs). Network effects: [Network](/docs/network).
