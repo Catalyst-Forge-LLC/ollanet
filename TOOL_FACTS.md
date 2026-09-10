@@ -2,9 +2,9 @@
 tool_facts_version: "0.1.0"
 name: ollanet MCP Server
 developer: Catalyst Forge
-version: "0.6.6"
+version: "0.6.8"
 status: active
-license: Apache-2.0
+license: MIT
 kind: mcp-server
 homepage: https://ollanet.dev
 repository: https://github.com/Catalyst-Forge-LLC/ollanet
@@ -34,7 +34,7 @@ tools:
       processes: false
     idempotent: false
   - name: ollanet_compare
-    purpose: "Run the same prompt against multiple hosts/models and return a comparison"
+    purpose: "Run the same prompt on 2-5 models on one Ollama host; may write compares/*.md and .json"
     side_effects: write
     reach:
       filesystem: scoped
@@ -90,8 +90,8 @@ tools:
       processes: false
     idempotent: true
 generated:
-  date: 2026-08-20
-  generator: hand-authored (tools inventory from ollanet mcp 0.6.6)
+  date: 2026-09-10
+  generator: hand-authored (tools inventory from ollanet mcp 0.6.8)
 credits:
   generated_with: https://toolfacts.dev
   built_by: "Catalyst Forge - https://www.catalystforge.com/"
@@ -102,9 +102,9 @@ credits:
 | | |
 |---|---|
 | **Developer** | Catalyst Forge |
-| **Version** | 0.6.6 |
+| **Version** | 0.6.8 |
 | **Status** | active |
-| **License** | Apache-2.0 |
+| **License** | MIT |
 | **Kind** | mcp-server |
 
 ## Runtime
@@ -145,7 +145,7 @@ None required.
 |---|---|
 | `ollanet_scan` | Discover reachable Ollama hosts and list their models; optional LAN TCP scan |
 | `ollanet_prompt` | Send a prompt to an Ollama host or continue a saved chat; may persist transcript locally |
-| `ollanet_compare` | Run the same prompt against multiple hosts/models and return a comparison |
+| `ollanet_compare` | Run the same prompt on 2-5 models on one Ollama host; may write compares/*.md and .json |
 | `ollanet_pull` | Pull (download) a model onto a remote Ollama host |
 | `ollanet_show` | Show model metadata from an Ollama host |
 | `ollanet_rm` | Remove a model from an Ollama host |
@@ -156,4 +156,4 @@ None required.
 ---
 *Generated with [ToolFacts](https://toolfacts.dev) · Built by [Catalyst Forge](https://www.catalystforge.com/)*
 
-[toolfacts-label]: https://toolfacts.dev/v#tf1.eNrFlstuUzEQhl_F8gqkXAqLLtJVVcQqQNWwq6rKtSc5Vn052OOEKOq78_vkBHoJ0KKi7CJ7Lv83M2fijVzKybuBDMqTnMjonArE4tPZuZhRWlKSA2loSS62-D2RZ4qVW2cWH2NaEC5hkm0MuDoaHY-OcZJZcck4UJrtsto4qynkGv-0Vbqh4fvREY5vbTA487od5l2uVALbKmUj6TvpwtvYLmrlhm2KmnKGGScVchsT4y6zsVHeDaROZAjuyuXqn-hbsTiSk8sr3NIiVV9cMDnyxGkN5xADdYiZbVA1W-7tOcYa53LzqDbXyVdIa-ia5nPSXFGrfyo73kSgrJnm1lFGtcj_SoUQq5hucVBCqm5WM0QOZE9HiDcHAkEDkvg2MqD6M1iV1Maulhfk45KEEj4acmKeohcqiC-Q6ZVoYmYU5Yl6ZPEtPyVYJcu_1541-m9eU_2MgoH2rRzB8ZF0EZPQEc0MpSJmtSQjdKP4RHi1Fm2dOlh1c6CTRYhuRNx6H7NGDpXo8NAXJQhuCDieduhqoWwAii-Obeuow8_jrqkZVTEiEZcUUIUth834JPZ1tjj3UsTXnslzaBBvTFwFF5V5-3M40Ul0GCQenn8b0axVeAoCAPO_OPDtPsD4YNF7LCTRZVM37oHmbVdcN38N2bRlzCcitnWBKCemp5_FV6zQjmQfYRNXhyWcQUHfG6xCZbDWn71B8mGlT2vh-89Dl5Rg5NaizhtWRAzPIKitu67L5KUkezZCD_cvDP3Gurfc7u2zvE_4gra6DyYbRUaJ6c_Sxc1aWCPvrgayiZ5atai-DXObJ-NxzzLCq6ITjNCWY_dnvDNZWG7KzQjrbrx7bwy798ZwOj3bBeheASVoVYeoU3r3Azp1G68
+[toolfacts-label]: https://toolfacts.dev/v#tf1.eNrFlm9v5EQMxr-K5VeAsltAAqHcK1SEhNSD6nrvTqfKnfFuhpsZDx4ny6ra744mm4XedeH-6FBfJhrbz89-4sw9Tth_02GmxNijxEiZDZ5fXsMN68SKHXqeOEphxR4vySjuq8HPolvGDifWGiRjj1-vv1__gB1WIxsr9kjOwtTOxOA415b_-S8vscM3IXvsMbmyqqciOmYLTcM98p_sRjsmjeIoroqK41qxQ1PKtYga9ljNB8FDh07Zc7ZAsbZ45T_GoOyxf_X60CFvtcX292gcObHpHnvMknlmqxYytWp1OW8iLc-r-3eacqup0QXPt7zZsLPG2OJ1PIEqkxtapU2IXPfVOP1TKrPtRN9gj2PWFhacsccOFzqu2G8oVj50GDynIsbZlncdllGLzE18wUkmBoIkniNsVBJQht9ipEQwSDU8dI_UF5VU7DHBToP9u_bqpMwiP5v6G84eCI5ywOQd6SAKTrKFPDbEShN7cAPZM0i0h9LsVg1mHzgNxWC2SNyfY3aSCik_PfSLMYMNDJUSn9Alw7er745DrO1JMj_sxBF4VgoLSL34ap08UPaw_r1KPjvnMcaPBf7cDr0eY4QvvOxyFPJf_m1VyW3eoJzE-H2GrY7yYxBl8v8Xh-n4FsZPoTqZWGGuRnfxLc11nkOc3Thw0GWSz0BKWycU4erHX-Hl5TXMJOcIB9k9LeHNILtlNomNPBl98D6pTyv9qjV--XjcqMrZ4h6a39i3r-n9BG10t221fCzJmf2wwH0Kw7K_Hqy6B9utnhO-5aPuJ5Mt5Odt9Z_S4W4PwePhdYeDJC60bbGDWan9xcXCsvY8zYKL1GAy_5pPR7bBhvFu7SRdnK4dq_nasbq6ujwlmO8EY3bUTDQrPfwFHLIcOA
