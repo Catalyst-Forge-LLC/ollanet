@@ -9,6 +9,7 @@ import {
   discoverHosts,
   envInt,
   findDiscoveredHost,
+  foldLocalHosts,
   ollamaBaseUrl,
   resolveHost,
   shortName,
@@ -106,6 +107,49 @@ describe("resolveHost", () => {
 
   it("rejects an empty query", () => {
     assert.throws(() => resolveHost(TARGETS, "   "), /empty/);
+  });
+});
+
+describe("foldLocalHosts", () => {
+  it("merges localhost and Tailscale Self into one host", () => {
+    const folded = foldLocalHosts([
+      {
+        ...host({ hostname: "localhost", dnsName: "localhost", ip: "127.0.0.1" }),
+        source: "localhost",
+        isSelf: true,
+      },
+      {
+        ...host({
+          hostname: "sams-macbook-pro",
+          dnsName: "sams-macbook-pro.tail1234.ts.net",
+          ip: "100.64.0.8",
+        }),
+        isSelf: true,
+        source: "tailscale",
+      },
+    ]);
+    assert.equal(folded.length, 1);
+    assert.equal(folded[0].isSelf, true);
+    assert.equal(folded[0].ip, "127.0.0.1");
+    assert.deepEqual(folded[0].also, ["100.64.0.8"]);
+    assert.equal(shortName(folded[0]), "sams-macbook-pro");
+    assert.equal(resolveHost(folded, "localhost").ip, "127.0.0.1");
+    assert.equal(resolveHost(folded, "sams-macbook-pro").ip, "127.0.0.1");
+    assert.equal(resolveHost(folded, "100.64.0.8").ip, "127.0.0.1");
+  });
+
+  it("leaves a remote Tailscale peer alone", () => {
+    const remote = host({
+      hostname: "studio",
+      dnsName: "studio.tail1234.ts.net",
+      ip: "100.64.0.2",
+    });
+    const folded = foldLocalHosts([
+      host({ hostname: "here", dnsName: "localhost", ip: "127.0.0.1" }),
+      { ...remote, source: "tailscale" },
+    ]);
+    assert.equal(folded.length, 2);
+    assert.equal(resolveHost(folded, "studio").ip, "100.64.0.2");
   });
 });
 

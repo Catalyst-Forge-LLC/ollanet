@@ -47,6 +47,12 @@ export interface HostTarget {
   hostname: string;
   dnsName: string;
   ip: string;
+  /**
+   * Other IPs that reach this same instance. Used when loopback and Tailscale
+   * Self (or a LAN NIC) are the same machine — we probe once and keep both
+   * addresses for resolve / display.
+   */
+  also?: string[];
   online: boolean;
   os: string;
   isSelf: boolean;
@@ -110,15 +116,18 @@ function makeHost(partial: {
   ip: string;
   source: HostSource;
   dnsName?: string;
+  also?: string[];
   online?: boolean;
   os?: string;
   isSelf?: boolean;
   port?: number;
 }): HostTarget {
+  const also = [...new Set((partial.also ?? []).filter((ip) => ip && ip !== partial.ip))];
   return {
     hostname: partial.hostname,
     dnsName: partial.dnsName ?? "",
     ip: partial.ip,
+    ...(also.length > 0 ? { also } : {}),
     online: partial.online ?? true,
     os: partial.os ?? "unknown",
     isSelf: partial.isSelf ?? false,
@@ -150,12 +159,104 @@ function mergeHosts(hosts: HostTarget[]): HostTarget[] {
       dnsName: existing.dnsName || host.dnsName,
       online: existing.online || host.online,
       os: existing.os !== "unknown" ? existing.os : host.os,
-      isSelf: existing.isSelf || host.isSelf,
+        isSelf: existing.isSelf || host.isSelf,
       source: existing.source === "direct" ? host.source : existing.source,
+      also: [...new Set([...(existing.also ?? []), ...(host.also ?? [])])].filter(
+        (ip) => ip !== existing.ip && ip !== host.ip,
+      ),
     });
   }
 
   return [...byKey.values()].sort((a, b) => {
+    if (a.isSelf !== b.isSelf) return a.isSelf ? -1 : 1;
+    return shortName(a).localeCompare(shortName(b));
+  });
+}
+
+function isIpv4Literal(value: string): boolean {
+  return /^\d{1,3}(\.\d{1,3}){3}$/.test(value);
+}
+
+function localIdentityIps(): Set<string> {
+  const ips = new Set(["127.0.0.1", "::1"]);
+  for (const entries of Object.values(os.networkInterfaces())) {
+    for (const entry of entries ?? []) {
+      if (entry.family === "IPv4") ips.add(entry.address);
+    }
+  }
+  return ips;
+}
+
+function isThisDevice(host: HostTarget, localIps: Set<string>): boolean {
+  return host.isSelf || localIps.has(host.ip);
+}
+
+function nameQuality(host: HostTarget): number {
+  const n = host.hostname;
+  if (!n || isIpv4Literal(n) || n.toLowerCase() === "localhost") return 0;
+  if (host.source === "config" || host.source === "env") return 3;
+  if (host.source === "tailscale") return 2;
+  return 1;
+}
+
+function dnsQuality(dns: string): number {
+  if (!dns || dns.toLowerCase() === "localhost" || isIpv4Literal(dns)) return 0;
+  if (dns.includes(".")) return 2;
+  return 1;
+}
+
+function pickFoldSource(group: HostTarget[], probeIsLoopback: boolean): HostSource {
+  const sources = new Set(group.map((h) => h.source));
+  if (sources.has("config")) return "config";
+  if (sources.has("env")) return "env";
+  if (sources.has("localhost") && probeIsLoopback) return "localhost";
+  if (sources.has("tailscale")) return "tailscale";
+  return group[0]!.source;
+}
+
+function mergeThisDevice(group: HostTarget[]): HostTarget {
+  const ips = [...new Set(group.flatMap((h) => [h.ip, ...(h.also ?? [])]))];
+  const loopback = ips.find((ip) => ip === "127.0.0.1" || ip === "::1");
+  const ip = loopback ?? ips[0]!;
+  const named = [...group].sort((a, b) => nameQuality(b) - nameQuality(a))[0]!;
+  const dnsHost = [...group].sort((a, b) => dnsQuality(b.dnsName) - dnsQuality(a.dnsName))[0]!;
+  return makeHost({
+    hostname: named.hostname,
+    dnsName: dnsQuality(dnsHost.dnsName) > 0 ? dnsHost.dnsName : named.dnsName,
+    ip,
+    also: ips.filter((addr) => addr !== ip),
+    online: group.some((h) => h.online),
+    os: group.find((h) => h.os !== "unknown")?.os ?? named.os,
+    isSelf: true,
+    source: pickFoldSource(group, Boolean(loopback)),
+    port: group[0]!.port,
+  });
+}
+
+/**
+ * Collapse loopback, Tailscale Self, and this machine's NIC IPs into one host
+ * per port so scan does not list the same Ollama twice.
+ */
+export function foldLocalHosts(hosts: HostTarget[]): HostTarget[] {
+  const localIps = localIdentityIps();
+  const groups = new Map<number, HostTarget[]>();
+  const rest: HostTarget[] = [];
+  for (const host of hosts) {
+    if (!isThisDevice(host, localIps)) {
+      rest.push(host);
+      continue;
+    }
+    const list = groups.get(host.port) ?? [];
+    list.push(host);
+    groups.set(host.port, list);
+  }
+
+  const folded: HostTarget[] = [];
+  for (const group of groups.values()) {
+    folded.push(group.length === 1 ? { ...group[0]!, isSelf: true } : mergeThisDevice(group));
+  }
+
+  return [...folded, ...rest].sort((a, b) => {
     if (a.isSelf !== b.isSelf) return a.isSelf ? -1 : 1;
     return shortName(a).localeCompare(shortName(b));
   });
@@ -476,7 +577,7 @@ export async function discoverHosts(opts: DiscoverOptions = {}): Promise<Discove
     }
   }
 
-  const hosts = mergeHosts(collected);
+  const hosts = foldLocalHosts(mergeHosts(collected));
   const networkLabel =
     labels[0] ??
     (sources.includes("tailscale")
@@ -489,9 +590,12 @@ export async function discoverHosts(opts: DiscoverOptions = {}): Promise<Discove
 }
 
 function hostNameMatches(host: HostTarget, q: string): boolean {
-  const names = [host.hostname, host.dnsName, shortName(host), host.ip].map((n) =>
-    n.toLowerCase(),
+  const names = [host.hostname, host.dnsName, shortName(host), host.ip, ...(host.also ?? [])].map(
+    (n) => n.toLowerCase(),
   );
+  if (host.isSelf || host.ip === "127.0.0.1" || (host.also ?? []).includes("127.0.0.1")) {
+    names.push("localhost");
+  }
   return names.includes(q) || names.some((n) => n.startsWith(`${q}.`));
 }
 

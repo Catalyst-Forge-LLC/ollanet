@@ -153,8 +153,9 @@ function printPayload(payload: ScanPayload, cached?: StoredScan): void {
   for (const server of payload.servers) {
     const label = server.dnsName || server.hostname;
     const selfTag = server.self ? " [this device]" : "";
+    const also = server.also?.length ? `  also: ${server.also.join(", ")}` : "";
     console.log(`${label}${selfTag}`);
-    console.log(`  IP: ${server.ip}  source: ${server.source}  OS: ${server.os}`);
+    console.log(`  IP: ${server.ip}${also}  source: ${server.source}  OS: ${server.os}`);
     console.log(`  Endpoint: ${server.endpoint}`);
     if (server.models.length === 0) {
       console.log("  Models: (none)");
@@ -197,6 +198,8 @@ export interface ScannedServer {
   hostname: string;
   dnsName: string;
   ip: string;
+  /** Extra IPs for the same instance (loopback + Tailscale Self, etc.). */
+  also?: string[];
   port: number;
   os: string;
   source: string;
@@ -245,6 +248,7 @@ function toPayload(
         hostname: r.host.hostname,
         dnsName: r.host.dnsName,
         ip: r.host.ip,
+        ...(r.host.also?.length ? { also: r.host.also } : {}),
         port: r.host.port,
         os: r.host.os,
         source: r.host.source,

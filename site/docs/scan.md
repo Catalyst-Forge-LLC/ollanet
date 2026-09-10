@@ -22,6 +22,8 @@ ollanet scan --last         # print last saved scan (no network)
 | Tailscale | If `tailscale status --json` works |
 | LAN scan | `--lan` or `discovery.lan: true` |
 
-Deduped by `ip:port`. Last successful scan is saved for `--last` (`~/.ollanet/last-scan.json` when installed).
+Deduped by `ip:port`, then folded when several addresses are this machine (loopback, Tailscale Self, local NICs). One `[this device]` row keeps the extra IPs under `also`. `localhost`, the MagicDNS name, and either IP all resolve to that host.
+
+Last successful scan is saved for `--last` (`~/.ollanet/last-scan.json` when installed).
 
 Finetuna-style names (`*-ctx32k`, `*-flash`, `*finetuna*`) are marked `[tuned]` in scan output.

@@ -308,6 +308,8 @@ export function hostLookupKeys(host: HostTarget): string[] {
     host.dnsName,
     host.dnsName.split(".")[0] ?? "",
     host.ip,
+    ...(host.also ?? []),
+    ...(host.isSelf ? ["localhost"] : []),
   ]
     .map((k) => k.toLowerCase())
     .filter(Boolean);

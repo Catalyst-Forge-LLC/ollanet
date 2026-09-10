@@ -15,6 +15,7 @@ export type { StoredScan } from "./scan-store.ts";
 
 export {
   discoverHosts,
+  foldLocalHosts,
   resolveHost,
   ollamaBaseUrl,
   shortName,
