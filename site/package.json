@@ -17,6 +17,11 @@
 		"wrangler": "^4.28.0"
 	},
 	"pnpm": {
+		"overrides": {
+			"sharp": "0.35.4",
+			"cookie@<0.7.0": "0.7.2",
+			"js-yaml": "3.15.2"
+		},
 		"onlyBuiltDependencies": [
 			"getfilepress"
 		]
