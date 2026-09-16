@@ -39,11 +39,47 @@ interface JsonRpcRequest {
   params?: unknown;
 }
 
+interface ToolAnnotations {
+  readOnlyHint?: boolean;
+  destructiveHint?: boolean;
+  idempotentHint?: boolean;
+  openWorldHint?: boolean;
+}
+
 interface ToolDef {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
+  annotations?: ToolAnnotations;
 }
+
+const NET_READ = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true,
+} as const;
+
+const NET_WRITE = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: true,
+} as const;
+
+const NET_DESTROY = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: true,
+} as const;
+
+const LOCAL_READ = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+} as const;
 
 const TOOLS: ToolDef[] = [
   {
@@ -71,6 +107,7 @@ const TOOLS: ToolDef[] = [
       },
       additionalProperties: false,
     },
+    annotations: NET_READ,
   },
   {
     name: "ollanet_prompt",
@@ -122,6 +159,7 @@ const TOOLS: ToolDef[] = [
       },
       additionalProperties: false,
     },
+    annotations: NET_WRITE,
   },
   {
     name: "ollanet_compare",
@@ -163,6 +201,7 @@ const TOOLS: ToolDef[] = [
       required: ["machine", "models"],
       additionalProperties: false,
     },
+    annotations: NET_WRITE,
   },
   {
     name: "ollanet_pull",
@@ -189,6 +228,7 @@ const TOOLS: ToolDef[] = [
       required: ["machine", "model"],
       additionalProperties: false,
     },
+    annotations: NET_WRITE,
   },
   {
     name: "ollanet_show",
@@ -204,6 +244,7 @@ const TOOLS: ToolDef[] = [
       required: ["machine", "model"],
       additionalProperties: false,
     },
+    annotations: NET_READ,
   },
   {
     name: "ollanet_rm",
@@ -223,6 +264,7 @@ const TOOLS: ToolDef[] = [
       required: ["machine", "model", "confirm"],
       additionalProperties: false,
     },
+    annotations: NET_DESTROY,
   },
   {
     name: "ollanet_ps",
@@ -239,6 +281,7 @@ const TOOLS: ToolDef[] = [
       },
       additionalProperties: false,
     },
+    annotations: NET_READ,
   },
   {
     name: "ollanet_list_chats",
@@ -248,6 +291,7 @@ const TOOLS: ToolDef[] = [
       properties: {},
       additionalProperties: false,
     },
+    annotations: LOCAL_READ,
   },
   {
     name: "ollanet_get_chat",
@@ -263,6 +307,7 @@ const TOOLS: ToolDef[] = [
       required: ["chat_id"],
       additionalProperties: false,
     },
+    annotations: LOCAL_READ,
   },
 ];
 
