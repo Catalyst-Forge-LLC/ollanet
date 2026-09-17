@@ -15,12 +15,10 @@ credentials:
   required: []
 egress:
   telemetry: none
-  destinations:
-    - "User-selected Ollama hosts (prompt text, compare, bench, scan, pull, show, rm, ps)"
-    - "Remote Ollama registry fetch on pull (performed by the selected host, not by this client)"
+  destinations: []
 tools:
   - name: ollanet_scan
-    purpose: "Discover configured or selected Ollama hosts and list their models. Optional LAN TCP scan. Reachable is not trusted."
+    purpose: "Discover reachable Ollama hosts and list their models; optional LAN TCP scan"
     side_effects: read
     reach:
       filesystem: none
@@ -28,7 +26,7 @@ tools:
       processes: false
     idempotent: true
   - name: ollanet_prompt
-    purpose: "Send prompt text to a selected Ollama host or continue a saved chat. Transcripts stay on this machine unless --no-save."
+    purpose: "Send a prompt to an Ollama host or continue a saved chat; may persist transcript locally"
     side_effects: write
     reach:
       filesystem: scoped
@@ -36,7 +34,7 @@ tools:
       processes: false
     idempotent: false
   - name: ollanet_compare
-    purpose: "Run the same prompt on 2-5 models on one Ollama host. May write compares/*.md and .json locally."
+    purpose: "Run the same prompt on 2-5 models on one Ollama host; may write compares/*.md and .json"
     side_effects: write
     reach:
       filesystem: scoped
@@ -44,7 +42,7 @@ tools:
       processes: false
     idempotent: false
   - name: ollanet_pull
-    purpose: "Ask a remote Ollama host to fetch a model from the registry onto that host"
+    purpose: "Pull (download) a model onto a remote Ollama host"
     side_effects: write
     reach:
       filesystem: none
@@ -92,8 +90,8 @@ tools:
       processes: false
     idempotent: true
 generated:
-  date: 2026-09-10
-  generator: hand-authored (tools inventory from ollanet mcp 0.6.8)
+  date: 2026-09-16
+  generator: hand-authored (tools inventory from ollanet mcp 0.6.13)
 credits:
   generated_with: https://toolfacts.dev
   built_by: "Catalyst Forge - https://www.catalystforge.com/"
@@ -125,9 +123,7 @@ None required.
 | | |
 |---|---|
 | Telemetry | none |
-| Destinations | User-selected Ollama hosts. On pull, that host may fetch from the Ollama registry. |
-
-No vendor telemetry is configured in this package. Commands still send traffic to the hosts you name. Prompt text goes to the selected host. Chats are stored locally (`responses/`). Other machines see a chat only if they share that directory. This list covers inspected operations. It does not prove every data path is absent.
+| Destinations | (none) |
 
 ## Tools (9)
 
@@ -147,10 +143,10 @@ No vendor telemetry is configured in this package. Commands still send traffic t
 
 | Tool | Purpose |
 |---|---|
-| `ollanet_scan` | Discover configured or selected Ollama hosts and list their models. Optional LAN TCP scan. Reachable is not trusted. |
-| `ollanet_prompt` | Send prompt text to a selected Ollama host or continue a saved chat. Transcripts stay on this machine unless --no-save. |
-| `ollanet_compare` | Run the same prompt on 2-5 models on one Ollama host. May write compares/*.md and .json locally. |
-| `ollanet_pull` | Ask a remote Ollama host to fetch a model from the registry onto that host |
+| `ollanet_scan` | Discover reachable Ollama hosts and list their models; optional LAN TCP scan |
+| `ollanet_prompt` | Send a prompt to an Ollama host or continue a saved chat; may persist transcript locally |
+| `ollanet_compare` | Run the same prompt on 2-5 models on one Ollama host; may write compares/*.md and .json |
+| `ollanet_pull` | Pull (download) a model onto a remote Ollama host |
 | `ollanet_show` | Show model metadata from an Ollama host |
 | `ollanet_rm` | Remove a model from an Ollama host |
 | `ollanet_ps` | List models currently loaded on an Ollama host |
@@ -159,5 +155,3 @@ No vendor telemetry is configured in this package. Commands still send traffic t
 
 ---
 *Generated with [ToolFacts](https://toolfacts.dev) · Built by [Catalyst Forge](https://www.catalystforge.com/)*
-
-[toolfacts-label]: https://toolfacts.dev/v#tf1.eNrFlm9v5EQMxr-K5VeAsltAAqHcK1SEhNSD6nrvTqfKnfFuhpsZDx4ny6ra744mm4XedeH-6FBfJhrbz89-4sw9Tth_02GmxNijxEiZDZ5fXsMN68SKHXqeOEphxR4vySjuq8HPolvGDifWGiRjj1-vv1__gB1WIxsr9kjOwtTOxOA415b_-S8vscM3IXvsMbmyqqciOmYLTcM98p_sRjsmjeIoroqK41qxQ1PKtYga9ljNB8FDh07Zc7ZAsbZ45T_GoOyxf_X60CFvtcX292gcObHpHnvMknlmqxYytWp1OW8iLc-r-3eacqup0QXPt7zZsLPG2OJ1PIEqkxtapU2IXPfVOP1TKrPtRN9gj2PWFhacsccOFzqu2G8oVj50GDynIsbZlncdllGLzE18wUkmBoIkniNsVBJQht9ipEQwSDU8dI_UF5VU7DHBToP9u_bqpMwiP5v6G84eCI5ywOQd6SAKTrKFPDbEShN7cAPZM0i0h9LsVg1mHzgNxWC2SNyfY3aSCik_PfSLMYMNDJUSn9Alw7er745DrO1JMj_sxBF4VgoLSL34ap08UPaw_r1KPjvnMcaPBf7cDr0eY4QvvOxyFPJf_m1VyW3eoJzE-H2GrY7yYxBl8v8Xh-n4FsZPoTqZWGGuRnfxLc11nkOc3Thw0GWSz0BKWycU4erHX-Hl5TXMJOcIB9k9LeHNILtlNomNPBl98D6pTyv9qjV--XjcqMrZ4h6a39i3r-n9BG10t221fCzJmf2wwH0Kw7K_Hqy6B9utnhO-5aPuJ5Mt5Odt9Z_S4W4PwePhdYeDJC60bbGDWan9xcXCsvY8zYKL1GAy_5pPR7bBhvFu7SRdnK4dq_nasbq6ujwlmO8EY3bUTDQrPfwFHLIcOA
