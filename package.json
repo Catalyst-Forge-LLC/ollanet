@@ -1,6 +1,6 @@
 {
   "name": "ollanet",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "description": "Find, manage, and use Ollama models on the hosts you choose. CLI for humans, MCP for agents, Node for apps",
   "type": "module",
   "bin": {
