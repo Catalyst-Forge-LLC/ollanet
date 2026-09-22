@@ -43,7 +43,7 @@ Host-first: `ollanet <cmd> <machine> …`. The machine is a MagicDNS name, a con
 
 ## Reachability and trust
 
-ollanet talks to Ollama endpoints you configure or select. A scan that gets an answer means the port responded. It does not mean you should send prompts or pull models there. Authentication and network protection depend on how that Ollama host is deployed. Discovery is not a security boundary, and a LAN is not inherently safe.
+ollanet talks to Ollama endpoints you configure or select. Prompts go only to the host you pick, and ollanet sends no telemetry. A scan lists any Ollama host that answers on your network, including ones someone else runs, so only use hosts you set up or know. A scan that gets an answer means the port responded. It does not mean you should send prompts or pull models there. Authentication and network protection depend on how that Ollama host is deployed. Discovery is not a security boundary, and a LAN is not inherently safe.
 
 ## Network effects
 
