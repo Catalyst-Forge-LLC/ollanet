@@ -99,3 +99,5 @@ Site (FilePress + docs mount): `pnpm --dir site ship`
 ## License
 
 MIT · [Catalyst Forge LLC](https://www.catalystforge.com)
+
+[See the rest of the Catalyst Forge shelf.](https://catalystforge.com/tools/)
