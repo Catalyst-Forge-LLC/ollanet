@@ -87,6 +87,22 @@ html body {
 	margin: 0 auto;
 }
 
+/* Reading column sits a little inside the header shell. */
+main.wrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: transparent;
+}
+
+.home-page,
+.static-page,
+main.wrap > article {
+	width: min(var(--measure), 100%);
+	max-width: var(--measure);
+	background: transparent;
+}
+
 /* ----- Chrome ----- */
 
 header.site-header {
@@ -200,7 +216,7 @@ header.site-header .wrap {
 	line-height: 1.05;
 	color: var(--ink);
 	margin: 0;
-	max-width: 12ch;
+	max-width: none;
 }
 
 .home-page .prose {
