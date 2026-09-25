@@ -4,7 +4,7 @@ export default defineFilepressConfig({
 	title: 'ollanet',
 	description:
 		'Find, manage, and use Ollama models on the hosts you choose. CLI, MCP, and Node library.',
-	tagline: 'Your prompts go only to the hosts you pick.',
+	tagline: 'The models on your machines, from one place.',
 	lede: 'CLI for humans · MCP for agents · Node for apps',
 	url: 'https://ollanet.dev',
 	author: 'Catalyst Forge LLC',
