@@ -2,7 +2,7 @@
 tool_facts_version: "0.1.0"
 name: ollanet MCP Server
 developer: Catalyst Forge
-version: "0.6.16"
+version: "0.6.17"
 status: active
 license: MIT
 kind: mcp-server
@@ -102,7 +102,7 @@ credits:
 | | |
 |---|---|
 | **Developer** | Catalyst Forge |
-| **Version** | 0.6.16 |
+| **Version** | 0.6.17 |
 | **Status** | active |
 | **License** | MIT |
 | **Kind** | mcp-server |
