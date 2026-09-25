@@ -1,5 +1,5 @@
 ---
-title: Find, manage, and use Ollama on the hosts you choose.
+title: One client for the Ollama hosts you run.
 description: Discover hosts, manage models, and prompt them through a CLI, MCP server, or Node library.
 order: 1
 ---
