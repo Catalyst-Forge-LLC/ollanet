@@ -4,7 +4,7 @@ title: Introduction
 
 **ollanet** finds [Ollama](https://ollama.com) hosts you configure or select, manages models on those machines, and talks to them through a CLI, MCP server, or Node library.
 
-**CLI** for humans · **MCP** for agents · **Node** for apps. **Node 20+ · zero runtime deps.**
+Use the CLI at a terminal, MCP inside an agent, or the Node library in your application. All three work with the hosts you configure. **Node 20+ · zero runtime deps.** Prompts run on the selected Ollama host. That may be this computer or another host you configured.
 
 ## Three jobs
 
