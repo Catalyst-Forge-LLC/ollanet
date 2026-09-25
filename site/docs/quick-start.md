@@ -4,6 +4,8 @@ title: Quick start
 
 Discover, then alias, then prompt. `alias` is local. `prompt` sends text to the selected host. `pull` and `rm` change that host.
 
+Choose a host and installed model from your scan results. In the commands below, replace `studio` and `gemma3:12b` with those values. If you create an alias, use that alias only after the add step succeeds.
+
 ```bash
 ollanet scan
 ollanet alias add desk studio gemma3:12b
