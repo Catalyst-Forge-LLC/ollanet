@@ -266,7 +266,7 @@ function parseArgs(argv: string[]): {
   return { machine, model, promptParts, file, stream, json, save, chatId, settings };
 }
 
-async function readStdinIfPiped(): Promise<string> {
+export async function readStdinIfPiped(): Promise<string> {
   if (stdinStream.isTTY) return "";
 
   // Under npm/pnpm/CI, stdin is often a pipe that never gets EOF. Only drain it
@@ -291,7 +291,13 @@ async function readStdinIfPiped(): Promise<string> {
     stdinStream.once("end", onEnd);
     const timer = setTimeout(() => done(stdinStream.readableLength > 0), 100);
   });
-  if (!hasData) return "";
+  if (!hasData) {
+    // The readable listener started a read on the pipe; stop it so the open
+    // handle doesn't keep the process alive after we're done.
+    stdinStream.pause();
+    stdinStream.destroy();
+    return "";
+  }
 
   const chunks: Buffer[] = [];
   for await (const chunk of stdinStream) {

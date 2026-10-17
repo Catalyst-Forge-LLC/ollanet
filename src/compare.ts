@@ -1,3 +1,4 @@
+import { readStdinIfPiped } from "./prompt.ts";
 /**
  * Head-to-head: one prompt, 2–5 models on the same host.
  *
@@ -354,13 +355,9 @@ export async function main(): Promise<void> {
     models = [alias.model, models[0]!];
   }
 
-  const { stdin: stdinStream } = await import("node:process");
-  let fromStdin = "";
-  if (!stdinStream.isTTY) {
-    const chunks: Buffer[] = [];
-    for await (const chunk of stdinStream) chunks.push(chunk as Buffer);
-    fromStdin = Buffer.concat(chunks).toString("utf8").trim();
-  }
+  // Same guarded read as prompt: a never-closing pipe (agents, CI) must not hang.
+  const fromStdin = await readStdinIfPiped();
+
 
   let fileText: string | undefined;
   if (parsed.file) {
