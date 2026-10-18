@@ -1,22 +1,10 @@
 ---
-title: Find, manage, and use Ollama hosts you choose.
-description: Discover hosts, manage models, and prompt them through a CLI, MCP server, or Node library.
+title: "Use the models on the machines you choose."
+description: "Ollama on a laptop, a studio box, and a spare PC? ollanet discovers your selected hosts, manages their models, and gives people, agents, and apps one way to prompt them."
 order: 1
 ---
 
-You have Ollama on a laptop, a studio box, maybe a closet PC. **ollanet** discovers the hosts you configure or select, manages models on those machines, and lets you prompt, compare, or bench them.
-
-**CLI** for humans · **MCP** for agents · **Node** for apps.
-
-A reachable host is not a trusted host. `--lan` stays opt-in.
-
-<div class="cta-row">
-  <a class="cta cta-primary" href="/docs">Read the docs →</a>
-  <a class="cta cta-secondary" href="/install">Install ollanet</a>
-  <a class="cta cta-secondary" href="https://github.com/Catalyst-Forge-LLC/ollanet">View on GitHub</a>
-</div>
-
-<p class="kicker">npm · npx · Node 20+ · zero runtime deps</p>
+<section class="value-hero" aria-label="ollanet overview"><div class="value-intro"><p class="value-kind">CLI, MCP server, and Node library for Ollama</p><h1>Use the models on the machines you choose.</h1><p class="value-lede">Ollama on a laptop, a studio box, and a spare PC? ollanet discovers your selected hosts, manages their models, and gives people, agents, and apps one way to prompt them.</p><div class="cta-row"><a class="cta cta-primary" href="/install">Install ollanet</a><a class="cta cta-secondary" href="#quick-start">See a named-host example</a></div><p class="value-limit">Prompts go to the host you select. A reachable host is not automatically trusted. LAN scanning stays opt-in.</p></div><figure class="value-proof"><figcaption>Illustrative example</figcaption><p><strong>Starting point</strong><br>You want to use the model on your studio computer from your laptop.</p><div class="value-result"><p><strong>What you get</strong><br>An alias names the machine and model: <code>desk → studio / gemma3:12b</code>.</p></div><p>Prompt that alias without keeping a separate host URL in every command.</p><p class="value-note">Illustrative configuration. The named host must already be available and trusted.</p></figure></section>
 
 ## Three jobs
 
