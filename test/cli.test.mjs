@@ -542,6 +542,12 @@ describe("command help", () => {
     }
   });
 
+  it("describes scan --all as listing offline peers, not probing them", async () => {
+    const res = await runCli(["help", "scan"]);
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /--all\s+Also list offline Tailscale peers \(marked offline, not probed\)/);
+  });
+
   it("accepts a command alias on ollanet help", async () => {
     const res = await runCli(["help", "benchmark"]);
     assert.equal(res.code, 0, res.stderr);

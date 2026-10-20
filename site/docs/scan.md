@@ -7,7 +7,7 @@ title: Scan
 ```bash
 ollanet scan
 ollanet scan --json
-ollanet scan --all          # also probe offline Tailscale peers
+ollanet scan --all          # also list offline Tailscale peers (not probed)
 ollanet scan --lan          # scan local LAN CIDRs
 ollanet scan --last         # print last saved scan (no network)
 ```

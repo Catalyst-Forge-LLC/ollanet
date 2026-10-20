@@ -88,7 +88,7 @@ const TOOLS: ToolDef[] = [
       "Discover configured or selected Ollama hosts and list their models. " +
       "A responding host is reachable, not automatically trusted. " +
       "Optional LAN TCP scan is off unless lan=true (CLI --lan). " +
-      "all=true also probes offline Tailscale peers.",
+      "all=true also lists offline Tailscale peers as offline (they are not probed).",
     inputSchema: {
       type: "object",
       properties: {
@@ -98,7 +98,7 @@ const TOOLS: ToolDef[] = [
         },
         all: {
           type: "boolean",
-          description: "Also probe offline Tailscale peers (default false)",
+          description: "Also list offline Tailscale peers, marked offline and not probed (default false)",
         },
         last: {
           type: "boolean",

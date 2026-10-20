@@ -264,6 +264,7 @@ function printPayload(payload: ScanPayload, cached?: StoredScan): void {
 }
 
 export interface ScanOptions {
+  /** List offline Tailscale peers as `offline` failures (they are not probed). */
   includeOffline?: boolean;
   /** TCP-scan local /24s for Ollama (port 11434 by default). Off unless set. */
   lanScan?: boolean;
@@ -425,7 +426,7 @@ models. --lan is an opt-in TCP sweep of local /24s on port 11434.
 
 Options:
   --json     Machine-readable output
-  --all      Also probe offline Tailscale peers
+  --all      Also list offline Tailscale peers (marked offline, not probed)
   --lan      TCP-scan local LAN CIDRs for open Ollama ports
   --last     Reprint the last saved scan (no network)
   --cached   Same as --last`;
