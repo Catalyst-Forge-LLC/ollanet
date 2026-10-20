@@ -4,6 +4,8 @@ responses/
 benchmarks/
 compares/
 last-scan.json
+# Checkout-local config (machine names, aliases). Start from config.example.json.
+/config.json
 *.log
 .DS_Store
 *.tsbuildinfo

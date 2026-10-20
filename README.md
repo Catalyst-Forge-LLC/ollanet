@@ -94,6 +94,8 @@ pnpm test
 pnpm ollanet -- help
 ```
 
+A checkout reads `./config.json` (gitignored, optional). Copy `config.example.json` to start.
+
 Site (FilePress + docs mount): `pnpm --dir site ship`
 
 ## License

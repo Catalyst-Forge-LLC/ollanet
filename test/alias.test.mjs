@@ -4,6 +4,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { after, before, describe, it } from "node:test";
 
 import { makeSandbox, runCli, startMock } from "./helpers.mjs";
@@ -96,5 +97,28 @@ describe("alias expansion", () => {
     const body = JSON.parse(res.stdout);
     assert.equal(body.model, "qwen3:0.6b");
     assert.equal(body.machine, "mockhost");
+  });
+});
+
+describe("config file", () => {
+  it("works with no config file (built-in defaults)", async () => {
+    const sandbox = await makeSandbox();
+    try {
+      const res = await runCli(["alias", "list"], {
+        env: { OLLANET_CONFIG: path.join(sandbox.dir, "missing.json") },
+      });
+      assert.equal(res.code, 0, res.stderr);
+      assert.match(res.stdout, /No aliases/);
+    } finally {
+      await sandbox.cleanup();
+    }
+  });
+
+  it("ships a config.example.json that loads", async () => {
+    const example = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "config.example.json");
+    JSON.parse(await readFile(example, "utf8"));
+    const res = await runCli(["alias", "list"], { env: { OLLANET_CONFIG: example } });
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /desk/);
   });
 });

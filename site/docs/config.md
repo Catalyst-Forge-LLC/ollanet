@@ -4,6 +4,8 @@ title: Configuration
 
 Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or set `OLLANET_CONFIG`.
 
+No config file is required: without one, ollanet probes localhost and Tailscale with built-in defaults. In a checkout, `config.json` is gitignored; copy `config.example.json` to start.
+
 ```json
 {
   "hosts": [
