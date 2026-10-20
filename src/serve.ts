@@ -49,6 +49,7 @@ export function helpText(): string {
   ollanet serve token list [--json]
   ollanet serve token rm [name]           (no name: pick from a list in a terminal)
   ollanet serve token prune [--expired] [--unused-days <n>] [--yes]
+                                         (no flags: expired, or unused 30+ days)
   ollanet serve label set <machine> <label>
   ollanet serve label rm <machine>
   ollanet serve label list
@@ -698,6 +699,9 @@ async function interactiveRemove(): Promise<void> {
   process.stdout.write(`Removed ${removed.join(", ")}\n`);
 }
 
+/** `token prune` with no flags removes expired tokens and these. */
+export const DEFAULT_PRUNE_UNUSED_DAYS = 30;
+
 /** Tokens `prune` would remove, with a reason each. */
 export function pruneCandidates(
   tokens: ServeToken[],
@@ -744,8 +748,9 @@ async function pruneCommand(args: string[]): Promise<void> {
     usage();
   }
   if (!expired && unusedDays === undefined) {
-    console.error("serve token prune needs --expired and/or --unused-days <n>.");
-    usage();
+    // No criterion: the everyday cleanup.
+    expired = true;
+    unusedDays = DEFAULT_PRUNE_UNUSED_DAYS;
   }
   const { tokens } = await loadServeStore();
   const candidates = pruneCandidates(tokens, { expired, unusedDays });

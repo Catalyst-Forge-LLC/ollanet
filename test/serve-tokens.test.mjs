@@ -169,41 +169,71 @@ describe("token rm (interactive helpers)", () => {
 });
 
 describe("token prune", () => {
+  // tok() tokens are created 40 days ago unless overridden.
   const seed = () =>
     writeStore(storeFile, [
       tok("fresh", { created_at: iso(DAY) }),
-      tok("expired", { expires_at: iso(1000) }),
+      tok("expired", { created_at: iso(DAY), expires_at: iso(1000) }),
       tok("stale", { last_used: iso(45 * DAY) }),
-      tok("recent", { last_used: iso(DAY) }),
+      tok("recent", { last_used: iso(29 * DAY) }),
+      tok("ghost"),
     ]);
+  const names = async () => (await readStore(storeFile)).tokens.map((t) => t.name).sort();
+  const prune = (...args) => runCli(["serve", "token", "prune", ...args], { sandbox, env: env(), keepStdinOpen: true });
 
-  it("needs a criterion", async () => {
-    const res = await runCli(["serve", "token", "prune", "--yes"], { sandbox, env: env() });
-    assert.equal(res.code, 1);
-    assert.match(res.stderr, /--expired and\/or --unused-days/);
+  it("defaults to expired or unused for 30 days", async () => {
+    await seed();
+    const res = await prune("--yes");
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /Removed /);
+    assert.deepEqual(await names(), ["fresh", "recent"]);
   });
 
   it("refuses without --yes off a terminal and removes nothing", async () => {
     await seed();
-    const res = await runCli(["serve", "token", "prune", "--expired"], { sandbox, env: env(), keepStdinOpen: true });
+    const res = await prune();
     assert.equal(res.code, 1);
+    assert.match(res.stderr, /Would remove:/);
     assert.match(res.stderr, /expired \(expired\)/);
+    assert.match(res.stderr, /stale \(unused 45d ago\)/);
+    assert.match(res.stderr, /ghost \(never used\)/);
+    assert.doesNotMatch(res.stderr, /fresh|recent/);
     assert.match(res.stderr, /without --yes/);
-    assert.equal((await readStore(storeFile)).tokens.length, 4);
+    assert.equal((await readStore(storeFile)).tokens.length, 5);
   });
 
-  it("--expired --yes removes only expired tokens", async () => {
+  it("--expired removes only expired tokens", async () => {
     await seed();
-    const res = await runCli(["serve", "token", "prune", "--expired", "--yes"], { sandbox, env: env() });
+    const res = await prune("--expired", "--yes");
     assert.equal(res.code, 0, res.stderr);
     assert.match(res.stdout, /Removed expired/);
-    assert.deepEqual((await readStore(storeFile)).tokens.map((t) => t.name), ["fresh", "stale", "recent"]);
+    assert.deepEqual(await names(), ["fresh", "ghost", "recent", "stale"]);
   });
 
-  it("--unused-days counts from last use, else creation", async () => {
+  it("--unused-days alone overrides the threshold and skips the expiry check", async () => {
     await seed();
-    const res = await runCli(["serve", "token", "prune", "--unused-days", "30", "--yes"], { sandbox, env: env() });
+    const res = await prune("--unused-days", "30", "--yes");
     assert.equal(res.code, 0, res.stderr);
-    assert.deepEqual((await readStore(storeFile)).tokens.map((t) => t.name).sort(), ["fresh", "recent"]);
+    assert.deepEqual(await names(), ["expired", "fresh", "recent"]);
+  });
+
+  it("--expired with --unused-days removes either kind", async () => {
+    await seed();
+    const res = await prune("--expired", "--unused-days", "42", "--yes");
+    assert.equal(res.code, 0, res.stderr);
+    assert.deepEqual(await names(), ["fresh", "ghost", "recent"]);
+  });
+
+  it("says so when there is nothing to prune", async () => {
+    await writeStore(storeFile, [tok("fresh", { created_at: iso(DAY) })]);
+    const res = await prune();
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /Nothing to prune/);
+  });
+
+  it("rejects a bad --unused-days", async () => {
+    const res = await prune("--unused-days", "soon");
+    assert.equal(res.code, 1);
+    assert.match(res.stderr, /--unused-days must be a number/);
   });
 });

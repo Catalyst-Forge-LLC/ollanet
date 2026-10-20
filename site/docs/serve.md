@@ -73,7 +73,13 @@ old-bot      2026-09-01 08:00Z  EXPIRED 2026-10-01 08:00Z  never
 
 `token rm` with no name, in a terminal, shows the same table numbered and asks which to remove (`1,3`, `2-4`, or `all`; Enter cancels), then confirms with `y/N`. Without a terminal it errors and asks for a name instead of waiting for input.
 
-`token prune --expired` removes expired tokens. `--unused-days <n>` removes tokens not used in `n` days, counting from creation for tokens never used. Both can be combined. `prune` lists what it would remove and asks to confirm; pass `--yes` to skip the prompt (required when not in a terminal).
+`token prune` with no flags removes tokens that have expired or have not been used in 30 days, counting from creation for tokens never used. To narrow or change that, `--expired` removes only expired tokens, `--unused-days <n>` removes only tokens unused for `n` days, and giving both removes either kind. `prune` lists what it would remove and asks to confirm; pass `--yes` to skip the prompt (required when not in a terminal).
+
+```sh
+ollanet serve token prune                   # expired, or unused 30+ days
+ollanet serve token prune --expired         # expired only
+ollanet serve token prune --unused-days 90  # unused 90+ days only
+```
 
 ## Tailscale Funnel
 
