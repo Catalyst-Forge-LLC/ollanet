@@ -8,12 +8,15 @@
  * models grouped by an opaque host label: no hostnames, IPs, ports, OS, or
  * paths. It never proxies prompts, compares, pulls, deletes, or ps.
  */
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import { isIP } from "node:net";
+import path from "node:path";
 
 import { failUsage, isHelpFlag, isQuiet, printHelp, takeFlag } from "./argv.ts";
 import { loadConfig, type ModelAlias } from "./config.ts";
 import { ollamaShow } from "./ollama-chat.ts";
+import { FUNNEL_PORTS, FunnelError, startFunnel, type FunnelHandle } from "./funnel.ts";
 import { scanNetwork, type ScannedServer } from "./scan.ts";
 import { loadLastScan } from "./scan-store.ts";
 import {
@@ -36,6 +39,8 @@ const DEFAULT_RATE = 60;
 export function helpText(): string {
   return `Usage:
   ollanet serve [--listen <host:port>] [--refresh <interval|off>] [--rate <n>]
+  ollanet serve --funnel [--funnel-port 443|8443|10000] [--keep-funnel]
+  ollanet serve status [--json]
   ollanet serve token add <name> [--expires <duration>]
   ollanet serve token list [--json]
   ollanet serve token rm <name>
@@ -63,6 +68,11 @@ Options:
                          (default ${DEFAULT_REFRESH}; starts from the last scan)
   --rate <n>             Requests per minute per token (default ${DEFAULT_RATE})
   --expires <duration>   Token lifetime for token add, e.g. 30d, 12h
+  --funnel               Publish through Tailscale Funnel (needs a token, HTTPS
+                         certificates, and the funnel node attribute); turned
+                         off again when serve exits
+  --funnel-port <n>      Public HTTPS port: 443 (default), 8443, or 10000
+  --keep-funnel          Leave the Funnel up after serve exits
   -q, --quiet            No startup or access log lines on stderr`;
 }
 
@@ -401,6 +411,55 @@ export async function startServe(opts: ServeOptions): Promise<ServeHandle> {
 }
 
 // ---------------------------------------------------------------------------
+// State file for `ollanet serve status`
+
+export interface ServeState {
+  pid: number;
+  url: string;
+  funnel_url: string | null;
+  started_at: string;
+}
+
+export function serveStatePath(): string {
+  return path.join(path.dirname(serveStorePath()), "serve-state.json");
+}
+
+function pidAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return (err as NodeJS.ErrnoException).code === "EPERM";
+  }
+}
+
+async function statusCommand(args: string[]): Promise<void> {
+  const json = args.includes("--json");
+  let state: ServeState | null = null;
+  try {
+    state = JSON.parse(await readFile(serveStatePath(), "utf8")) as ServeState;
+  } catch {
+    state = null;
+  }
+  const running = !!state && Number.isInteger(state.pid) && pidAlive(state.pid);
+  if (json) {
+    process.stdout.write(`${JSON.stringify(running ? { running, ...state } : { running: false }, null, 2)}\n`);
+    return;
+  }
+  if (!running || !state) {
+    process.stdout.write("ollanet serve is not running.\n");
+    return;
+  }
+  process.stdout.write(`ollanet serve running (pid ${state.pid}, since ${state.started_at})\n`);
+  process.stdout.write(`  local:   ${state.url}\n`);
+  process.stdout.write(
+    state.funnel_url
+      ? `  funnel:  ${state.funnel_url}\n  catalog: ${state.funnel_url}v1/catalog\n`
+      : "  funnel:  off\n",
+  );
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 
 async function tokenCommand(args: string[]): Promise<void> {
@@ -510,11 +569,15 @@ export async function main(): Promise<void> {
   if (args.some((a) => isHelpFlag(a))) printHelp(helpText());
   if (args[0] === "token") return tokenCommand(args.slice(1));
   if (args[0] === "label") return labelCommand(args.slice(1));
+  if (args[0] === "status") return statusCommand(args.slice(1));
 
   let listen = DEFAULT_LISTEN;
   let refreshRaw = DEFAULT_REFRESH;
   let rate = DEFAULT_RATE;
   let allowRemote = false;
+  let funnel = false;
+  let keepFunnel = false;
+  let funnelPort = 443;
   while (args.length > 0) {
     const arg = args.shift()!;
     const l = takeFlag(arg, "--listen", args, usage);
@@ -540,6 +603,24 @@ export async function main(): Promise<void> {
       allowRemote = true;
       continue;
     }
+    if (arg === "--funnel") {
+      funnel = true;
+      continue;
+    }
+    if (arg === "--keep-funnel") {
+      keepFunnel = true;
+      continue;
+    }
+    const fp = takeFlag(arg, "--funnel-port", args, usage);
+    if (fp !== undefined) {
+      funnelPort = Number(fp);
+      if (!(FUNNEL_PORTS as readonly number[]).includes(funnelPort)) {
+        console.error(`--funnel-port must be one of ${FUNNEL_PORTS.join(", ")} (got "${fp}")`);
+        usage();
+      }
+      funnel = true;
+      continue;
+    }
     console.error(`Unknown argument: ${arg}`);
     usage();
   }
@@ -557,6 +638,14 @@ export async function main(): Promise<void> {
     throw new Error(`--refresh must be off or a duration of at least 30s (got "${refreshRaw}")`);
   }
 
+  const activeTokens = (await loadServeStore()).tokens.filter((t) => !isExpired(t));
+  if (funnel && activeTokens.length === 0) {
+    throw new Error(
+      "Refusing --funnel: there are no active serve tokens and the Funnel URL is public. " +
+        "Create one first: ollanet serve token add <name>",
+    );
+  }
+
   const quiet = isQuiet();
   const log = (line: string): void => {
     if (!quiet) console.error(line);
@@ -570,17 +659,64 @@ export async function main(): Promise<void> {
       `${cat.scanned_at ? ` from scan at ${cat.scanned_at}` : ""}; ` +
       `refresh ${refreshMs > 0 ? `every ${refreshRaw}` : "off"}`,
   );
-  const { tokens } = await loadServeStore();
-  if (!tokens.some((t) => !isExpired(t))) {
+  if (activeTokens.length === 0) {
     log("No active tokens: /v1/* answers 401 until you run ollanet serve token add <name>");
   }
   if (!isLoopbackHost(host)) {
     log(`Warning: listening on non-loopback ${host} (--allow-remote).`);
   }
 
-  const stop = (): void => {
-    void handle.close().then(() => process.exit(0));
+  let funnelHandle: FunnelHandle | null = null;
+  if (funnel) {
+    const localHost = host === "0.0.0.0" || host === "::" ? "127.0.0.1" : host;
+    const target = `http://${localHost.includes(":") ? `[${localHost}]` : localHost}:${handle.port}`;
+    try {
+      funnelHandle = await startFunnel({ localPort: handle.port, target, funnelPort });
+    } catch (err) {
+      await handle.close();
+      if (err instanceof FunnelError) {
+        console.error(err.message);
+        process.exitCode = 1;
+        return;
+      }
+      throw err;
+    }
+    // The public URL is the result of --funnel, so it goes to stdout even with -q.
+    process.stdout.write(`Funnel:  ${funnelHandle.publicUrl}\n`);
+    process.stdout.write(`Catalog: ${funnelHandle.publicUrl}v1/catalog\n`);
+    if (!funnelHandle.added) {
+      log("Funnel was already pointing at this port; leaving it as is when serve exits.");
+    } else if (keepFunnel) {
+      log(`--keep-funnel: the Funnel stays up after exit. Turn it off with: tailscale funnel --https=${funnelPort} off`);
+    } else {
+      log("The Funnel is turned off when serve exits (Ctrl+C).");
+    }
+  }
+
+  const statePath = serveStatePath();
+  const state: ServeState = {
+    pid: process.pid,
+    url: handle.url,
+    funnel_url: funnelHandle?.publicUrl ?? null,
+    started_at: new Date().toISOString(),
   };
-  process.once("SIGINT", stop);
-  process.once("SIGTERM", stop);
+  await mkdir(path.dirname(statePath), { recursive: true })
+    .then(() => writeFile(statePath, `${JSON.stringify(state, null, 2)}\n`, "utf8"))
+    .catch(() => {});
+
+  let tornDown = false;
+  const teardown = (): void => {
+    if (tornDown) return;
+    tornDown = true;
+    if (funnelHandle && !keepFunnel) funnelHandle.stop();
+  };
+  // Sync work only in 'exit': turn off our Funnel even on an unexpected exit.
+  process.once("exit", teardown);
+  const stop = (): void => {
+    teardown();
+    void Promise.all([handle.close(), rm(statePath, { force: true })]).finally(() => process.exit(0));
+  };
+  for (const sig of ["SIGINT", "SIGTERM", "SIGHUP", "SIGBREAK"] as const) {
+    process.once(sig, stop);
+  }
 }

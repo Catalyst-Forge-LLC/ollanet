@@ -20,7 +20,7 @@ This package does not include vendor telemetry. Commands still cause network tra
 | `rm` | Delete request (`--yes`) | Remove that model | Model removed on the remote host | Yes |
 | `alias` | None to Ollama | None | Local `config.json` | No |
 | `chats` | None to Ollama | None | Reads local transcripts | No |
-| `serve` | `/api/tags` and `/api/show` probes when it refreshes | Answer with tags and model metadata | Token hashes in `~/.ollanet/serve.json`; last scan | No. It serves a read-only catalog (model names, sizes, capabilities under opaque labels) to bearer-token clients and never proxies prompts |
+| `serve` | `/api/tags` and `/api/show` probes when it refreshes; with `--funnel`, `tailscale funnel` on/off for its own port | Answer with tags and model metadata | Token hashes in `~/.ollanet/serve.json`; last scan | No. It serves a read-only catalog (model names, sizes, capabilities under opaque labels) to bearer-token clients and never proxies prompts |
 
 Other machines see a saved chat only if they share the responses directory (or the same `~/.ollanet/` when installed).
 
