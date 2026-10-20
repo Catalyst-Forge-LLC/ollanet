@@ -12,6 +12,7 @@
  *   ollanet bench <machine> [model...]
  *   ollanet chats
  *   ollanet mcp
+ *   ollanet serve
  */
 
 const HELP = `ollanet: find, manage, and use Ollama on hosts you choose
@@ -34,6 +35,8 @@ Usage:
   ollanet bench <machine|ip> [model...] [--all] [options]
   ollanet alias list|add|rm …
   ollanet mcp
+  ollanet serve [--listen 127.0.0.1:11500]   (read-only catalog for remote agents)
+  ollanet serve token add|list|rm …
   ollanet help [command]
 
 Examples:
@@ -185,6 +188,11 @@ async function main(): Promise<void> {
     }
     case "mcp": {
       const { main: run } = await import("./mcp.ts");
+      await run();
+      return;
+    }
+    case "serve": {
+      const { main: run } = await import("./serve.ts");
       await run();
       return;
     }

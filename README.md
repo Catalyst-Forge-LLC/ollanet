@@ -39,7 +39,7 @@ Host-first: `ollanet <cmd> <machine> …`. The machine is a MagicDNS name, a con
 
 **Manage.** `pull`, `show`, `rm`, and `ps` on a named machine. Comparisons and benches are deeper workflows on [ollanet.dev/docs](https://ollanet.dev/docs).
 
-**Use.** Prompt, continue a chat by hash, or call the same inventory from MCP and the Node library.
+**Use.** Prompt, continue a chat by hash, or call the same inventory from MCP and the Node library. Agents off your network can read a token-gated, read-only model catalog with `ollanet serve` (no hostnames or IPs, no prompt proxying).
 
 ## Reachability and trust
 
@@ -59,6 +59,7 @@ This package does not include vendor telemetry. Commands still cause network tra
 | `rm` | Delete request (`--yes`) | Remove that model from the host | Model removed on the remote host |
 | `alias` | None to Ollama | None | Local `config.json` |
 | `chats` | None to Ollama | None | Reads local transcripts |
+| `serve` | Tag and metadata probes when it refreshes | Answer with tags and model metadata | Token hashes in `~/.ollanet/serve.json` |
 
 Other machines see a saved chat only if they share the responses directory (or the same `~/.ollanet/` when installed). This table covers the operations inspected in this repo. It does not prove every possible data path is listed.
 

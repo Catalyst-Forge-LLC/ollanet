@@ -15,6 +15,7 @@ title: Commands
 | `ollanet bench …` | Benchmark tok/s + light quality checks |
 | `ollanet alias …` | Add / list / remove machine+model shortcuts |
 | `ollanet mcp` | Stdio MCP server for agents |
+| `ollanet serve` | Read-only, token-gated model catalog for remote agents |
 | `ollanet help [command]` | Overview, or one command’s flags |
 
 ## Per-command help
@@ -38,4 +39,4 @@ git diff | ollanet prompt desk "Review this" --stdin -q
 
 `pull` and `rm` modify the remote host. `prompt`, `compare`, and `bench` send prompt text to that host. See [Network](/docs/network).
 
-Deep pages: [Scan](/docs/scan), [Prompt](/docs/prompt), [Models](/docs/models), [Compare](/docs/compare), [Bench](/docs/bench), [Network](/docs/network), [MCP](/docs/mcp), [Library](/docs/library), [Configuration](/docs/config).
+Deep pages: [Scan](/docs/scan), [Prompt](/docs/prompt), [Models](/docs/models), [Compare](/docs/compare), [Bench](/docs/bench), [Network](/docs/network), [MCP](/docs/mcp), [Serve](/docs/serve), [Library](/docs/library), [Configuration](/docs/config).

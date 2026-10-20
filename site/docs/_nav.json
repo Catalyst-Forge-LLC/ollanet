@@ -24,6 +24,7 @@
 			"title": "Agents and apps",
 			"items": [
 				{ "id": "mcp", "title": "MCP" },
+				{ "id": "serve", "title": "Serve" },
 				{ "id": "library", "title": "Library" }
 			]
 		},

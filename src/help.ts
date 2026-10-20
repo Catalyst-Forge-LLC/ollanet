@@ -14,6 +14,7 @@ const LOADERS: Record<string, () => Promise<{ helpText: () => string }>> = {
   bench: () => import("./bench.ts"),
   alias: () => import("./alias.ts"),
   mcp: () => import("./mcp.ts"),
+  serve: () => import("./serve.ts"),
 };
 
 const ALIASES: Record<string, string> = {
