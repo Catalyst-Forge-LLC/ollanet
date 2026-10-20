@@ -58,7 +58,17 @@ ollanet serve token list [--json]
 ollanet serve token rm <name>
 ```
 
-The token is printed once. `~/.ollanet/serve.json` (override with `OLLANET_SERVE_FILE`) stores only its SHA-256 hash, plus creation and expiry times. Tokens are checked with a constant-time compare, and expired tokens never match. Removing a token takes effect on the next request; no restart needed.
+The token is printed once. `~/.ollanet/serve.json` (override with `OLLANET_SERVE_FILE`) stores only its SHA-256 hash, plus creation, expiry, and last-use times. Tokens are checked with a constant-time compare, and expired tokens never match. Removing a token takes effect on the next request; no restart needed.
+
+`token list` shows when each token was last used:
+
+```text
+NAME         CREATED            EXPIRES                    LAST USED
+cloud-agent  2026-10-20 12:50Z  2026-11-19 12:50Z          3m ago
+old-bot      2026-09-01 08:00Z  EXPIRED 2026-10-01 08:00Z  never
+```
+
+`--json` gives `last_used` as an ISO time (or `null`) and `expired` as a boolean. A running `serve` records a token's first use right away, later uses at most once a minute, and anything pending when it stops. It re-reads `serve.json` and changes only `last_used`, under a short lock file, so `token add` and `token rm` from another terminal are never undone.
 
 ## Tailscale Funnel
 

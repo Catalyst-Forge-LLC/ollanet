@@ -25,9 +25,11 @@ import {
   loadServeStore,
   matchToken,
   parseDuration,
+  recordLastUsed,
   removeLabel,
   removeToken,
   serveStorePath,
+  type ServeToken,
   setLabel,
 } from "./serve-store.ts";
 
@@ -244,6 +246,8 @@ export interface ServeOptions {
   /** Requests per minute per token. */
   rate: number;
   log?: (line: string) => void;
+  /** Minimum gap between serve.json writes of a token's last use (default 60s). */
+  lastUsedFlushMs?: number;
 }
 
 export interface ServeHandle {
@@ -305,13 +309,16 @@ export async function startServe(opts: ServeOptions): Promise<ServeHandle> {
   await refresh(false);
 
   const windows = new Map<string, { start: number; count: number }>();
+  const lastUsed = lastUsedTracker(opts.lastUsedFlushMs ?? 60_000, log);
 
   async function authenticate(req: http.IncomingMessage): Promise<string | undefined> {
     const header = req.headers.authorization ?? "";
     const m = /^Bearer\s+(\S{1,200})$/i.exec(header);
     if (!m) return undefined;
     const store = await loadServeStore();
-    return matchToken(store.tokens, m[1]!)?.name;
+    const token = matchToken(store.tokens, m[1]!);
+    if (token) lastUsed.touch(token.sha256);
+    return token?.name;
   }
 
   function rateLimited(name: string): number {
@@ -401,13 +408,58 @@ export async function startServe(opts: ServeOptions): Promise<ServeHandle> {
     port,
     catalog: () => current,
     refresh,
-    close: () =>
-      new Promise<void>((resolve) => {
-        if (timer) clearInterval(timer);
+    close: async () => {
+      if (timer) clearInterval(timer);
+      await new Promise<void>((resolve) => {
         server.close(() => resolve());
         server.closeAllConnections();
-      }),
+      });
+      await lastUsed.flush();
+    },
   };
+}
+
+/**
+ * Debounced last-use writer: the first use of a token writes right away, later
+ * uses at most once per `intervalMs` per token, and close() flushes the rest.
+ * Writes are serialized; failures are logged, never fatal.
+ */
+function lastUsedTracker(intervalMs: number, log: (line: string) => void) {
+  const pending = new Map<string, string>();
+  const written = new Map<string, number>();
+  let timer: NodeJS.Timeout | null = null;
+  let chain: Promise<void> = Promise.resolve();
+
+  function flush(): Promise<void> {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (pending.size > 0) {
+      const batch = new Map(pending);
+      pending.clear();
+      const now = Date.now();
+      for (const sha of batch.keys()) written.set(sha, now);
+      chain = chain
+        .then(() => recordLastUsed(batch))
+        .catch((err) => log(`last-used write failed: ${err instanceof Error ? err.message : String(err)}`));
+    }
+    return chain;
+  }
+
+  function touch(sha: string): void {
+    const now = Date.now();
+    pending.set(sha, new Date(now).toISOString());
+    const wait = (written.get(sha) ?? -Infinity) + intervalMs - now;
+    if (wait <= 0) {
+      void flush();
+    } else if (!timer) {
+      timer = setTimeout(() => void flush(), wait);
+      timer.unref();
+    }
+  }
+
+  return { touch, flush };
 }
 
 // ---------------------------------------------------------------------------
@@ -503,6 +555,7 @@ async function tokenCommand(args: string[]): Promise<void> {
       created_at: t.created_at,
       expires_at: t.expires_at,
       expired: isExpired(t),
+      last_used: t.last_used ?? null,
     }));
     if (json) {
       process.stdout.write(`${JSON.stringify(rows, null, 2)}\n`);
@@ -512,10 +565,7 @@ async function tokenCommand(args: string[]): Promise<void> {
       process.stdout.write("No serve tokens. Add one with: ollanet serve token add <name>\n");
       return;
     }
-    for (const r of rows) {
-      const exp = r.expires_at ? `expires ${r.expires_at}${r.expired ? " (expired)" : ""}` : "no expiry";
-      process.stdout.write(`${r.name}  created ${r.created_at}  ${exp}\n`);
-    }
+    process.stdout.write(tokenTable(tokens));
     return;
   }
   if (sub === "rm" || sub === "remove" || sub === "delete") {
@@ -530,6 +580,39 @@ async function tokenCommand(args: string[]): Promise<void> {
   }
   console.error(`Unknown token subcommand: ${sub ?? "(none)"}`);
   usage();
+}
+
+/** "never", "just now", "5m ago", "3h ago", "12d ago". */
+export function relativeTime(iso: string | null | undefined, now = Date.now()): string {
+  if (!iso) return "never";
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return "never";
+  const s = Math.max(0, Math.round((now - t) / 1000));
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 48 * 3600) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+function shortTime(iso: string): string {
+  return `${iso.slice(0, 16).replace("T", " ")}Z`;
+}
+
+/** Aligned token table: NAME, CREATED, EXPIRES, LAST USED (optionally numbered). */
+export function tokenTable(tokens: ServeToken[], opts: { numbered?: boolean; now?: number } = {}): string {
+  const now = opts.now ?? Date.now();
+  const header = ["NAME", "CREATED", "EXPIRES", "LAST USED"];
+  const rows = tokens.map((t) => [
+    t.name,
+    shortTime(t.created_at),
+    t.expires_at ? `${isExpired(t, now) ? "EXPIRED " : ""}${shortTime(t.expires_at)}` : "never",
+    relativeTime(t.last_used, now),
+  ]);
+  const all = [header, ...rows].map((r, i) =>
+    opts.numbered ? [i === 0 ? "#" : String(i), ...r] : r,
+  );
+  const widths = all[0]!.map((_, c) => Math.max(...all.map((r) => r[c]!.length)));
+  return all.map((r) => `${r.map((cell, c) => cell.padEnd(widths[c]!)).join("  ").trimEnd()}\n`).join("");
 }
 
 async function labelCommand(args: string[]): Promise<void> {
