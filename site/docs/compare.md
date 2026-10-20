@@ -16,6 +16,7 @@ Prints a tok/s table on stdout and writes `compares/<id>.md` plus `.json` (saved
 |---|---|
 | `--prompt` / `-p` | Prompt text |
 | `--file` / `-f` | Prompt from `.txt` or `.md` |
+| `--stdin` / `-` | Wait for stdin to close and use it as the prompt (default: piped stdin only if it arrives within 100ms) |
 | `--unload` | Unload each model before the next |
 | `--think` / `--no-think` | Thinking (default off) |
 | `--no-save` / `--json` | Persistence / stdout |

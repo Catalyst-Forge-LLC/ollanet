@@ -25,7 +25,16 @@ ollanet prompt desk "hello"
 | `--temperature` / `--num-predict` / `--num-ctx` / `--keep-alive` | Generate options |
 | `--think` / `--no-think` | Thinking tokens (default **off**) |
 | `--file <path>` | Prompt from `.txt` or `.md` |
+| `--stdin` / `-` | Wait for stdin to close and use it as the prompt |
 | `--no-stream` / `--no-save` / `--json` | Output / persistence |
+
+## Piped stdin
+
+Piped stdin joins the prompt (after argv and `--file`). Without a flag, ollanet uses stdin only if data arrives within 100ms, so an agent or CI pipe that never closes cannot hang the command. For a slow producer, pass `--stdin` (or `-`) to wait for end of input with no cutoff:
+
+```bash
+git diff | ollanet prompt desk "Review this diff" --stdin
+```
 
 The selected host receives the prompt text, and the prior turns when you continue a chat. This package does not include vendor telemetry. Prompt traffic still goes to that Ollama endpoint.
 

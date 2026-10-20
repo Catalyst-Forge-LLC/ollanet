@@ -110,6 +110,28 @@ describe("ollanet compare", () => {
     assert.equal(mock.chats().at(-1).messages.at(-1).content, payload.prompt);
   });
 
+  it("--stdin waits for a slow producer", async () => {
+    mock.requests.length = 0;
+    const res = await runCli(["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--stdin", "--no-save"], {
+      sandbox,
+      stdin: "slow compare prompt",
+      stdinDelayMs: 600,
+    });
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(mock.chats().length, 2);
+    assert.equal(mock.chats()[0].messages.at(-1).content, "slow compare prompt");
+  });
+
+  it("exits on a never-closing pipe without --stdin", async () => {
+    const started = Date.now();
+    const res = await runCli(
+      ["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--prompt", "hi", "--no-save"],
+      { sandbox, keepStdinOpen: true },
+    );
+    assert.equal(res.code, 0, res.stderr);
+    assert.ok(Date.now() - started < 15_000, "compare should exit without waiting for EOF");
+  });
+
   it("rejects a single model", async () => {
     const res = await runCli(["compare", "mockhost", "fake:1b", "--prompt", "hi"], { sandbox });
     assert.notEqual(res.code, 0);

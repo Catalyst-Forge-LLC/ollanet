@@ -341,9 +341,12 @@ export async function makeSandbox(config = {}) {
  * @param {object} [opts.sandbox] Result of makeSandbox().
  * @param {object} [opts.env]     Extra environment variables.
  * @param {string} [opts.stdin]   Text to pipe on stdin (default: closed, no TTY).
+ * @param {number} [opts.stdinDelayMs] Wait this long before writing stdin and closing it
+ *        (a slow producer).
+ * @param {boolean} [opts.keepStdinOpen] Never close stdin (an agent/CI pipe with no EOF).
  */
 export function runCli(args, opts = {}) {
-  const { sandbox, env = {}, stdin = "" } = opts;
+  const { sandbox, env = {}, stdin = "", stdinDelayMs = 0, keepStdinOpen = false } = opts;
 
   const child = spawn(process.execPath, [CLI, ...args], {
     env: {
@@ -372,13 +375,20 @@ export function runCli(args, opts = {}) {
   let stderr = "";
   child.stdout.on("data", (d) => (stdout += d));
   child.stderr.on("data", (d) => (stderr += d));
-  if (stdin) child.stdin.write(stdin);
-  child.stdin.end();
+  // The child may exit before a delayed write; ignore EPIPE.
+  child.stdin.on("error", () => {});
+  const feed = () => {
+    if (stdin) child.stdin.write(stdin);
+    if (!keepStdinOpen) child.stdin.end();
+  };
+  if (stdinDelayMs > 0) setTimeout(feed, stdinDelayMs);
+  else feed();
 
   return new Promise((resolve) => {
     const timer = setTimeout(() => child.kill("SIGKILL"), 60_000);
     child.on("close", (code) => {
       clearTimeout(timer);
+      child.stdin.destroy();
       resolve({ code, stdout, stderr });
     });
   });

@@ -70,6 +70,61 @@ describe("prompt assembly", () => {
     assert.notEqual(res.code, 0);
     assert.match(res.stderr, /No prompt provided/);
   });
+
+  it("--stdin waits for a slow producer", async () => {
+    mock.requests.length = 0;
+    const res = await runCli(["prompt", "mockhost", "--stdin", "--no-save"], {
+      sandbox,
+      stdin: "slow body",
+      stdinDelayMs: 600,
+    });
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(mock.chats()[0].messages.at(-1).content, "slow body");
+  });
+
+  it("- is the same as --stdin and joins argv", async () => {
+    mock.requests.length = 0;
+    const res = await runCli(["prompt", "mockhost", "summarize", "-", "--no-save"], {
+      sandbox,
+      stdin: "late body",
+      stdinDelayMs: 400,
+    });
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(mock.chats()[0].messages.at(-1).content, "summarize\n\nlate body");
+  });
+
+  it("without --stdin, ignores a producer slower than the 100ms window", async () => {
+    mock.requests.length = 0;
+    const res = await runCli(["prompt", "mockhost", "hi", "--no-save"], {
+      sandbox,
+      stdin: "too late",
+      stdinDelayMs: 600,
+    });
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(mock.chats()[0].messages.at(-1).content, "hi");
+  });
+
+  // Regression: an open pipe with no EOF (agents, CI) kept the process alive.
+  it("exits on a never-closing pipe without --stdin", async () => {
+    const started = Date.now();
+    const res = await runCli(["prompt", "mockhost", "hi", "--no-save"], {
+      sandbox,
+      keepStdinOpen: true,
+    });
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.ok(Date.now() - started < 15_000, "prompt should exit without waiting for EOF");
+  });
+
+  it("errors when --stdin gets an empty stdin", async () => {
+    const res = await runCli(["prompt", "mockhost", "--stdin", "--no-save"], { sandbox });
+
+    assert.equal(res.code, 1);
+    assert.match(res.stderr, /--stdin was given but stdin was empty/);
+  });
 });
 
 describe("model token peeling", () => {

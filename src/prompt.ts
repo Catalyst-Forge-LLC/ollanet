@@ -60,6 +60,7 @@ export function helpText(): string {
   ollanet prompt <machine> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet prompt <machine> --chat <hash> <prompt...>
+  <command> | ollanet prompt <machine> [model] --stdin
 
 Examples:
   ollanet prompt localhost "Explain MagicDNS"
@@ -94,6 +95,9 @@ Options:
   --think                Enable model thinking (qwen3 etc.); streams to stderr
   --no-think             Disable thinking (default) so tokens go to the reply
   --file <path>          Prompt from a .txt or .md file (joins argv / stdin)
+  --stdin, -             Wait for stdin to close and use it (no 100ms cutoff;
+                         for slow producers). Without it, piped stdin is used
+                         only if data arrives within 100ms.
   --no-stream            Wait for the full response
   --json                 Emit final response JSON (implies --no-stream)`;
 }
@@ -174,6 +178,7 @@ function parseArgs(argv: string[]): {
   stream: boolean;
   json: boolean;
   save: boolean;
+  stdin: boolean;
   chatId?: string;
   settings: GenerateSettings;
 } {
@@ -185,6 +190,7 @@ function parseArgs(argv: string[]): {
   let stream = true;
   let json = false;
   let save = true;
+  let stdin = false;
   const settings: GenerateSettings = {};
   const positional: string[] = [];
 
@@ -192,6 +198,10 @@ function parseArgs(argv: string[]): {
     const arg = args.shift()!;
     if (arg === "--") continue;
     if (isHelpFlag(arg)) printHelp(helpText());
+    if (arg === "--stdin" || arg === "-") {
+      stdin = true;
+      continue;
+    }
     if (arg === "--no-stream") {
       stream = false;
       continue;
@@ -263,7 +273,7 @@ function parseArgs(argv: string[]): {
   // Continue (--chat): all positionals are the prompt. Optional machine override
   // via --machine, or a leading discovered-host name peeled in main().
 
-  return { machine, model, promptParts, file, stream, json, save, chatId, settings };
+  return { machine, model, promptParts, file, stream, json, save, stdin, chatId, settings };
 }
 
 export async function readStdinIfPiped(): Promise<string> {
@@ -299,11 +309,28 @@ export async function readStdinIfPiped(): Promise<string> {
     return "";
   }
 
+  return readStdinToEnd();
+}
+
+/**
+ * `--stdin` / `-`: read stdin to EOF with no time limit, so slow producers
+ * (`slow-cmd | ollanet prompt host --stdin`) work. Waits for the writer to
+ * close the pipe (Ctrl+D / Ctrl+Z on a terminal).
+ */
+export async function readStdinToEnd(): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of stdinStream) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   return Buffer.concat(chunks).toString("utf8").trim();
+}
+
+/** Read the prompt from stdin: to EOF with --stdin, else the 100ms heuristic. */
+export async function readPromptStdin(explicit: boolean): Promise<string> {
+  if (!explicit) return readStdinIfPiped();
+  const text = await readStdinToEnd();
+  if (!text) throw new Error("--stdin was given but stdin was empty.");
+  return text;
 }
 
 async function generateTopic(opts: {
@@ -530,7 +557,14 @@ export async function main(): Promise<void> {
   const { stream, json, save } = parsed;
   let promptParts = parsed.promptParts;
 
-  const fromStdin = await readStdinIfPiped();
+  let fromStdin: string;
+  try {
+    fromStdin = await readPromptStdin(parsed.stdin);
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+    return;
+  }
 
   let fromFile = "";
   if (parsed.file) {

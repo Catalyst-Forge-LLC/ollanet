@@ -1,4 +1,4 @@
-import { readStdinIfPiped } from "./prompt.ts";
+import { readPromptStdin } from "./prompt.ts";
 /**
  * Head-to-head: one prompt, 2–5 models on the same host.
  *
@@ -59,6 +59,7 @@ export function helpText(): string {
   ollanet compare <machine> <model> <model> [model...]
   ollanet compare <machine> <model> <model> [model...] --prompt <text>
   ollanet compare <machine> <model> <model> [model...] --file <path.txt|.md>
+  <command> | ollanet compare <machine> <model> <model> [model...] --stdin
 
 Examples:
   ollanet compare studio gemma3:12b llama3.2:3b
@@ -72,6 +73,8 @@ Omit --prompt/--file to use the built-in mesh-host tasting prompt.
 Options:
   --prompt <text>        Prompt text (default: built-in mesh-host prompt)
   --file <path>          Prompt from a .txt or .md file
+  --stdin, -             Wait for stdin to close and use it as the prompt
+                         (no 100ms cutoff for slow producers)
   --system <text>        System prompt
   --temperature <n>
   --num-predict <n>
@@ -95,6 +98,7 @@ function parseArgs(argv: string[]): {
   json: boolean;
   save: boolean;
   unload: boolean;
+  stdin: boolean;
   settings: GenerateSettings;
 } {
   const args = [...argv];
@@ -103,6 +107,7 @@ function parseArgs(argv: string[]): {
   let json = false;
   let save = true;
   let unload = false;
+  let stdin = false;
   const settings: GenerateSettings = {};
   const positional: string[] = [];
 
@@ -120,6 +125,10 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--unload") {
       unload = true;
+      continue;
+    }
+    if (arg === "--stdin" || arg === "-") {
+      stdin = true;
       continue;
     }
     if (
@@ -148,7 +157,7 @@ function parseArgs(argv: string[]): {
 
   const machine = positional[0];
   const models = positional.slice(1);
-  return { machine, models, prompt, file, json, save, unload, settings };
+  return { machine, models, prompt, file, json, save, unload, stdin, settings };
 }
 
 function tokPerSec(chunk: ChatChunk): number | undefined {
@@ -364,9 +373,16 @@ export async function main(): Promise<void> {
     models = [alias.model, models[0]!];
   }
 
-  // Same guarded read as prompt: a never-closing pipe (agents, CI) must not hang.
-  const fromStdin = await readStdinIfPiped();
-
+  // Same stdin rules as prompt: --stdin waits for EOF; otherwise a guarded read
+  // so a never-closing pipe (agents, CI) cannot hang.
+  let fromStdin: string;
+  try {
+    fromStdin = await readPromptStdin(parsed.stdin);
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+    return;
+  }
 
   let fileText: string | undefined;
   if (parsed.file) {
