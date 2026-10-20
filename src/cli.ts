@@ -12,7 +12,7 @@
  *   ollanet bench <machine> [model...]
  *   ollanet chats
  *   ollanet mcp
- *   ollanet serve
+ *   ollanet serve [--funnel]
  */
 
 const HELP = `ollanet: find, manage, and use Ollama on hosts you choose
@@ -26,7 +26,8 @@ Usage:
   ollanet prompt <machine|ip> [model] <prompt...>
   ollanet prompt --chat <hash> <prompt...>
   ollanet prompt <machine|ip> --file <path.txt|.md>
-  ollanet compare <machine> <model> <model> [model...] [--prompt <text> | --file <path>]
+  <command> | ollanet prompt <machine|ip> [model] --stdin
+  ollanet compare <machine> <model> <model> [model...] [--prompt <text> | --file <path> | --stdin]
   ollanet pull <machine|ip> <model>
   ollanet show <machine|ip> <model>
   ollanet rm <machine|ip> <model> --yes
@@ -35,8 +36,10 @@ Usage:
   ollanet bench <machine|ip> [model...] [--all] [options]
   ollanet alias list|add|rm …
   ollanet mcp
-  ollanet serve [--listen 127.0.0.1:11500]   (read-only catalog for remote agents)
-  ollanet serve token add|list|rm …
+  ollanet serve [--listen <host:port>] [--funnel]  (read-only catalog)
+  ollanet serve status
+  ollanet serve token add|list|rm|prune …
+  ollanet serve label set|rm|list …
   ollanet help [command]
 
 Examples:
@@ -45,6 +48,7 @@ Examples:
   ollanet scan --last            # print the last saved scan (no network)
   ollanet prompt localhost "What is MagicDNS?"
   ollanet prompt localhost --file ./notes.md
+  git diff | ollanet prompt desk "Review this" --stdin -q
   ollanet compare studio gemma3:12b llama3.2:3b
   ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
   ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
@@ -60,15 +64,21 @@ Examples:
   ollanet bench localhost gemma3:12b --hot --runs 5
   ollanet help bench           # flags for one command (also: ollanet bench help)
   ollanet mcp                  # stdio MCP server for agents
+  ollanet serve token add cloud-agent --expires 30d
+  ollanet serve --funnel       # catalog on https://<device>.<tailnet>.ts.net/
+  ollanet serve token prune    # expired, or unused 30+ days (asks first)
 
 Quiet:  -q / --quiet on any command (or OLLANET_QUIET=1): results on stdout,
         stderr only for errors and warnings
+Progress: compare/bench progress lines only when stderr is a terminal
+        (OLLANET_PROGRESS=1 forces on, 0 off)
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
         (override with OLLANET_CONFIG)
 Hosts:  config.hosts, OLLANET_HOSTS, optional Tailscale + --lan
 Aliases: config.aliases — ollanet alias add|list|rm
 Chats:  ~/.ollanet/responses or ./responses (override with OLLANET_RESPONSES_DIR)
 Scan:   ~/.ollanet/last-scan.json or ./last-scan.json (override with OLLANET_LAST_SCAN)
+Serve:  ~/.ollanet/serve.json, token hashes and labels (override with OLLANET_SERVE_FILE)
 `;
 
 async function main(): Promise<void> {

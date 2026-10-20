@@ -4,7 +4,7 @@ title: Configuration
 
 Edit `~/.ollanet/config.json` (installed) or `config.json` (checkout) — or set `OLLANET_CONFIG`.
 
-No config file is required: without one, ollanet probes localhost and Tailscale with built-in defaults. In a checkout, `config.json` is gitignored; copy `config.example.json` to start.
+No config file is required: without one, ollanet probes localhost and Tailscale with built-in defaults. In a checkout, `config.json` is gitignored; copy `config.example.json` to start. Before 0.7.0 the checkout tracked `config.json`, so back yours up before pulling 0.7.0 and restore it afterwards.
 
 ```json
 {
@@ -54,6 +54,8 @@ ollanet alias rm desk
 | `OLLANET_COMPARES_DIR` / `OLLANET_BENCHMARKS_DIR` | Compare / bench output |
 | `OLLAMA_*_TIMEOUT_MS` | Per-operation timeouts |
 | `OLLANET_QUIET` | `1` = same as `-q` on every command: results on stdout, stderr only for errors and warnings |
+| `OLLANET_SERVE_FILE` | `ollanet serve` tokens and labels (default `~/.ollanet/serve.json`) |
+| `OLLANET_TAILSCALE_BIN` | `tailscale` binary used by `serve --funnel` and `serve status` |
 | `OLLANET_PROGRESS` | `1` forces `compare` / `bench` progress lines (`→ model (1/2)`) on, `0` off. Default: only when stderr is a terminal |
 
 Per-machine defaults in config merge under generate settings for `prompt`, `compare`, and `bench`.

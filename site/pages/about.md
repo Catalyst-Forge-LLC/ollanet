@@ -12,7 +12,7 @@ order: 1
 
 **Manage.** `pull`, `show`, `rm`, and `ps` on a named machine. `pull` asks that host to download a library model. The server fetches it. `rm` deletes a model on that host (`--yes`). `show` and `ps` only read.
 
-**Use.** Aliases map a short name to a machine and model. Prompt, continue a chat by hash, compare, or bench. MCP and the Node library use the same inventory.
+**Use.** Aliases map a short name to a machine and model. Prompt, continue a chat by hash, compare, or bench. MCP and the Node library use the same inventory. `ollanet serve` gives agents off your network a read-only list of your models.
 
 Compare and bench are existing deeper workflows. See [Compare](/docs/compare) and [Bench](/docs/bench).
 
@@ -56,6 +56,13 @@ Point your MCP host at the stdio server, then route work to whatever is up:
 ```
 
 Tools: `ollanet_scan`, `ollanet_prompt`, `ollanet_compare`, `ollanet_pull`, `ollanet_show`, `ollanet_rm`, `ollanet_ps`, `ollanet_list_chats`, `ollanet_get_chat`.
+
+An agent that runs elsewhere, such as a cloud agent, can read which models you have through `ollanet serve`: a token-gated, read-only catalog on loopback, optionally published with Tailscale Funnel. It returns model names and capabilities under opaque host labels, never hostnames or IPs, and it does not run prompts. See [Serve](/docs/serve).
+
+```bash
+ollanet serve token add cloud-agent --expires 30d
+ollanet serve --funnel
+```
 
 ## For apps
 

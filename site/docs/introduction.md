@@ -11,6 +11,7 @@ Use the CLI at a terminal, MCP inside an agent, or the Node library in your appl
 - **Discover** Ollama on localhost, config, Tailscale, or an optional LAN scan
 - **Manage** with pull / show / rm / ps on a named machine
 - **Use** prompt, hash-addressed chats, compare, bench, and the same inventory over MCP
+- **Share** a read-only, token-gated model catalog with agents off your network (`ollanet serve`)
 
 A reachable host is not a trusted host. `--lan` stays opt-in. See [Network](/docs/network) for what each command sends.
 

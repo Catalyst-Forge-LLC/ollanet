@@ -19,6 +19,7 @@ Node **20+** only. Not for the browser. LAN scan is opt-in.
 | Compare, `lastScan`, bench `--hot` | ≥ 0.6.0 |
 | `resolveTarget` / `listTargets` | ≥ 0.6.1 |
 | Aliases (`lookupAlias` / `expandMachineModel`) | ≥ 0.6.4 |
+| `ScanFailure.port` / `.code` (`ScanFailureCode`) | ≥ 0.7.0 |
 
 ## Bundlers (Vite / SvelteKit SSR)
 

@@ -39,7 +39,7 @@ Host-first: `ollanet <cmd> <machine> …`. The machine is a MagicDNS name, a con
 
 **Manage.** `pull`, `show`, `rm`, and `ps` on a named machine. Comparisons and benches are deeper workflows on [ollanet.dev/docs](https://ollanet.dev/docs).
 
-**Use.** Prompt, continue a chat by hash, or call the same inventory from MCP and the Node library. Agents off your network can read a token-gated, read-only model catalog with `ollanet serve` (no hostnames or IPs, no prompt proxying).
+**Use.** Prompt, continue a chat by hash, or call the same inventory from MCP and the Node library. Agents off your network can read a token-gated, read-only model catalog with `ollanet serve` (no hostnames or IPs, no prompt proxying). `-q` keeps stderr for errors only, and `--stdin` reads a piped prompt.
 
 ## Reachability and trust
 
@@ -95,7 +95,7 @@ pnpm test
 pnpm ollanet -- help
 ```
 
-A checkout reads `./config.json` (gitignored, optional). Copy `config.example.json` to start.
+A checkout reads `./config.json` (gitignored, optional). Copy `config.example.json` to start. `config.json` was tracked before 0.7.0: if your checkout has one with your hosts or aliases, copy it somewhere safe before pulling, since the pull removes it (or refuses if you edited it), then put it back.
 
 Site (FilePress + docs mount): `pnpm --dir site ship`
 

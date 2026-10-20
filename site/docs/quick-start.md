@@ -58,4 +58,17 @@ ollanet mcp
 
 Point your MCP host at that stdio server. See [MCP](/docs/mcp).
 
+For an agent that is not on your network, publish a read-only model catalog instead. See [Serve](/docs/serve).
+
+```bash
+ollanet serve token add cloud-agent --expires 30d
+ollanet serve --funnel
+```
+
+Scripts and agents can pipe a prompt with `--stdin` and drop informational stderr with `-q`:
+
+```bash
+git diff | ollanet prompt desk "Review this" --stdin -q
+```
+
 Host-first CLI: `ollanet <cmd> <machine> …`. `studio` is the **machine** (MagicDNS / config name / IP), or an **alias** for a machine + model pair.

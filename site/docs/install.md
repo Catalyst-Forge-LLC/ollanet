@@ -31,7 +31,7 @@ pnpm link --global   # optional
 pnpm ollanet -- help
 ```
 
-A checkout uses repo-local `config.json` and `responses/` instead of `~/.ollanet/`. `config.json` is gitignored and optional; `cp config.example.json config.json` for a starting point.
+A checkout uses repo-local `config.json` and `responses/` instead of `~/.ollanet/`. `config.json` is gitignored and optional; `cp config.example.json config.json` for a starting point. Older checkouts tracked `config.json`: copy yours aside before pulling 0.7.0, then restore it.
 
 ## Site and docs
 
