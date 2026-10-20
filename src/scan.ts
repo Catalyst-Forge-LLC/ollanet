@@ -324,9 +324,9 @@ export interface ScanFailure {
   ip: string;
   /** Human-readable reason, e.g. "timeout after 2500ms", "connection refused (ECONNREFUSED)". */
   error: string;
-  /** Port probed (added in 0.6.25; absent in older saved scans). */
+  /** Port probed (added in 0.7.0; absent in older saved scans). */
   port?: number;
-  /** Short machine-readable reason (added in 0.6.25; absent in older saved scans). */
+  /** Short machine-readable reason (added in 0.7.0; absent in older saved scans). */
   code?: ScanFailureCode;
 }
 
