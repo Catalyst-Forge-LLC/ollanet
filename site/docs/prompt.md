@@ -27,6 +27,7 @@ ollanet prompt desk "hello"
 | `--file <path>` | Prompt from `.txt` or `.md` |
 | `--stdin` / `-` | Wait for stdin to close and use it as the prompt |
 | `--no-stream` / `--no-save` / `--json` | Output / persistence |
+| `-q` / `--quiet` | Reply only on stdout; no host line, chat id, or stats on stderr |
 
 ## Piped stdin
 

@@ -58,6 +58,8 @@ Examples:
   ollanet help bench           # flags for one command (also: ollanet bench help)
   ollanet mcp                  # stdio MCP server for agents
 
+Quiet:  -q / --quiet on any command (or OLLANET_QUIET=1): results on stdout,
+        stderr only for errors and warnings
 Config: ~/.ollanet/config.json when installed, ./config.json in a checkout
         (override with OLLANET_CONFIG)
 Hosts:  config.hosts, OLLANET_HOSTS, optional Tailscale + --lan
@@ -114,8 +116,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Strip the subcommand so command modules see their own argv.
-  process.argv = [process.argv[0] ?? "node", process.argv[1] ?? "ollanet", ...argv.slice(1)];
+  // Strip the subcommand so command modules see their own argv. -q / --quiet
+  // is global: it is removed here and read through isQuiet().
+  const { takeQuietFlag } = await import("./argv.ts");
+  process.argv = [
+    process.argv[0] ?? "node",
+    process.argv[1] ?? "ollanet",
+    ...takeQuietFlag(argv.slice(1)),
+  ];
 
   switch (cmd) {
     case "scan":

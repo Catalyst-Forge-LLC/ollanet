@@ -20,5 +20,6 @@ Prints a tok/s table on stdout and writes `compares/<id>.md` plus `.json` (saved
 | `--unload` | Unload each model before the next |
 | `--think` / `--no-think` | Thinking (default off) |
 | `--no-save` / `--json` | Persistence / stdout |
+| `-q` / `--quiet` | Table only; no notices or saved paths on stderr |
 
 Override dir with `OLLANET_COMPARES_DIR`.

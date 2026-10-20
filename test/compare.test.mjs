@@ -132,6 +132,37 @@ describe("ollanet compare", () => {
     assert.ok(Date.now() - started < 15_000, "compare should exit without waiting for EOF");
   });
 
+  it("-q keeps stderr empty but still saves and prints the table", async () => {
+    const res = await runCli(
+      ["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--prompt", "hi", "-q"],
+      { sandbox, env: { OLLANET_PROGRESS: "1" } },
+    );
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(res.stderr, "");
+    assert.match(res.stdout, /tok\/s/);
+    assert.match(res.stdout, /qwen3:0.6b/);
+  });
+
+  it("OLLANET_QUIET=1 also silences the default-prompt notice", async () => {
+    const res = await runCli(["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--no-save"], {
+      sandbox,
+      env: { OLLANET_QUIET: "1" },
+    });
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(res.stderr, "");
+  });
+
+  it("prints the default-prompt notice before the run", async () => {
+    const res = await runCli(
+      ["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--no-save"],
+      { sandbox, env: { OLLANET_PROGRESS: "1" } },
+    );
+    assert.equal(res.code, 0, res.stderr);
+    const notice = res.stderr.indexOf("Using default compare prompt");
+    const firstModel = res.stderr.indexOf("→ fake:1b");
+    assert.ok(notice >= 0 && firstModel > notice, res.stderr);
+  });
+
   it("rejects a single model", async () => {
     const res = await runCli(["compare", "mockhost", "fake:1b", "--prompt", "hi"], { sandbox });
     assert.notEqual(res.code, 0);

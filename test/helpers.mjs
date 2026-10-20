@@ -366,6 +366,7 @@ export function runCli(args, opts = {}) {
       OLLAMA_TEMPERATURE: "",
       OLLAMA_SYSTEM: "",
       OLLANET_PROGRESS: "",
+      OLLANET_QUIET: "",
       ...env,
     },
     stdio: ["pipe", "pipe", "pipe"],

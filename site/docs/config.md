@@ -53,6 +53,7 @@ ollanet alias rm desk
 | `OLLANET_LAST_SCAN` | Last-scan snapshot |
 | `OLLANET_COMPARES_DIR` / `OLLANET_BENCHMARKS_DIR` | Compare / bench output |
 | `OLLAMA_*_TIMEOUT_MS` | Per-operation timeouts |
+| `OLLANET_QUIET` | `1` = same as `-q` on every command: results on stdout, stderr only for errors and warnings |
 | `OLLANET_PROGRESS` | `1` forces `compare` / `bench` progress lines (`→ model (1/2)`) on, `0` off. Default: only when stderr is a terminal |
 
 Per-machine defaults in config merge under generate settings for `prompt`, `compare`, and `bench`.

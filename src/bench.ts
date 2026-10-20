@@ -26,6 +26,7 @@ import {
   consumeSettingsFlag,
   failUsage,
   isHelpFlag,
+  isQuiet,
   parseNumberFlag,
   printHelp,
   showProgress,
@@ -138,6 +139,7 @@ Options:
   --judge               Second pass: score check answers 1–5
   --judge-model <name>  Required with --judge (no default)
   --json                Machine-readable stdout
+  -q, --quiet           Table only; no plan, notes, or saved paths on stderr
   --save / --no-save    Persist under benchmarks/ (default on)
   --fail-fast           Stop remaining models after the first hard error
   --fail-on-error       Exit 2 if any model/case errored
@@ -813,7 +815,8 @@ export async function main(): Promise<void> {
       return n + caseReps(c, parsed.runs, parsed.hot) * attemptTimeoutMs(pin);
     }, 0);
 
-  if (!parsed.json) {
+  const quiet = isQuiet();
+  if (!parsed.json && !quiet) {
     const skipBits = [
       skipped.filter((s) => s.reason === "non-completion").length
         ? `${skipped.filter((s) => s.reason === "non-completion").length} embedding/other`
@@ -845,7 +848,7 @@ export async function main(): Promise<void> {
     console.error("Proceeding…");
   }
 
-  if (parsed.hot) {
+  if (parsed.hot && !quiet) {
     console.error(
       "Hot: discarding the first throughput run; models stay loaded (no unload between models).",
     );
@@ -1017,7 +1020,7 @@ export async function main(): Promise<void> {
 
   if (parsed.save) {
     const file = await saveBenchmark(result);
-    if (!parsed.json) console.error(`saved ${file}`);
+    if (!parsed.json && !quiet) console.error(`saved ${file}`);
   }
 
   if (parsed.json) {
@@ -1035,7 +1038,7 @@ export async function main(): Promise<void> {
       parsed.coldLoad,
       parsed.hot,
     );
-    if (parsed.save) console.error(`benchmarks dir: ${benchmarksDir()}`);
+    if (parsed.save && !quiet) console.error(`benchmarks dir: ${benchmarksDir()}`);
   }
 
   if (parsed.failOnError && anyError) {

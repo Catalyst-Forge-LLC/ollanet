@@ -47,7 +47,15 @@ import {
 } from "./hosts.ts";
 import { ollamaChat } from "./ollama-chat.ts";
 import { assemblePrompt, readPromptFile } from "./prompt-input.ts";
-import { consumeSettingsFlag, failUsage, isHelpFlag, printHelp, takeFlag, takeValue } from "./argv.ts";
+import {
+  consumeSettingsFlag,
+  failUsage,
+  isHelpFlag,
+  isQuiet,
+  printHelp,
+  takeFlag,
+  takeValue,
+} from "./argv.ts";
 import { listTargets, resolveTarget } from "./target.ts";
 
 /** Prompt/chat HTTP timeout (ms). 0 = no timeout. Separate from scan's OLLAMA_TIMEOUT_MS. */
@@ -99,7 +107,8 @@ Options:
                          for slow producers). Without it, piped stdin is used
                          only if data arrives within 100ms.
   --no-stream            Wait for the full response
-  --json                 Emit final response JSON (implies --no-stream)`;
+  --json                 Emit final response JSON (implies --no-stream)
+  -q, --quiet            Reply only; no host line, chat id, or stats on stderr`;
 }
 
 function usage(): never {
@@ -630,7 +639,7 @@ export async function main(): Promise<void> {
       settings: parsed.settings,
       writeStdout: !json,
       stream: json ? false : stream,
-      quiet: json,
+      quiet: json || isQuiet(),
       config,
     });
 
@@ -659,7 +668,7 @@ export async function main(): Promise<void> {
         : "",
       chunk.total_duration ? formatDuration(Number(chunk.total_duration)) : "",
     ].filter(Boolean);
-    if (stats.length > 0) {
+    if (stats.length > 0 && !isQuiet()) {
       console.error(`(${stats.join(" · ")})`);
     }
   } catch (err) {

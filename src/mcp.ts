@@ -24,7 +24,7 @@ import { removeModel } from "./rm.ts";
 import { lastScan } from "./scan-store.ts";
 import { scanNetwork } from "./scan.ts";
 import { showModel } from "./show.ts";
-import { isHelpFlag, printHelp } from "./argv.ts";
+import { isHelpFlag, isQuiet, printHelp } from "./argv.ts";
 
 // Pin to the oldest widely-supported MCP revision. Clients may request a newer
 // date; we still answer with this — legal negotiation, max compatibility.
@@ -582,7 +582,9 @@ export async function main(): Promise<void> {
   }
 
   const version = await packageVersion();
-  console.error(`ollanet mcp ${version} (stdio) — tools: ${TOOLS.map((t) => t.name).join(", ")}`);
+  if (!isQuiet()) {
+    console.error(`ollanet mcp ${version} (stdio) — tools: ${TOOLS.map((t) => t.name).join(", ")}`);
+  }
 
   const rl = createInterface({ input: process.stdin, crlfDelay: Infinity });
 

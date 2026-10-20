@@ -23,6 +23,14 @@ describe("ollanet pull", () => {
     await sandbox.cleanup();
   });
 
+  it("-q keeps stderr empty and still prints the result", async () => {
+    const res = await runCli(["pull", "mockhost", "gemma3:12b", "-q"], { sandbox });
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /pulled gemma3:12b on mockhost/);
+    assert.equal(res.stderr, "");
+  });
+
   it("POSTs /api/pull with the model on the named machine", async () => {
     mock.requests.length = 0;
     const res = await runCli(["pull", "mockhost", "gemma3:12b"], { sandbox });

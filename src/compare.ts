@@ -21,6 +21,7 @@ import {
   consumeSettingsFlag,
   failUsage,
   isHelpFlag,
+  isQuiet,
   printHelp,
   showProgress,
   takeFlag,
@@ -83,7 +84,8 @@ Options:
   --think / --no-think
   --unload               Unload each model before the next (fairer tok/s)
   --no-save              Do not write compares/*
-  --json                 Emit the full record on stdout`;
+  --json                 Emit the full record on stdout
+  -q, --quiet            Table only; no notices or saved paths on stderr`;
 }
 
 function usage(): never {
@@ -396,6 +398,13 @@ export async function main(): Promise<void> {
   }
 
   const prompt = assemblePrompt({ argv: parsed.prompt, file: fileText, stdin: fromStdin });
+  const quiet = isQuiet();
+
+  if (!prompt && !quiet) {
+    process.stderr.write(
+      "Using default compare prompt (pass --prompt or --file to override).\n",
+    );
+  }
 
   const record = await runCompare({
     machine,
@@ -409,19 +418,13 @@ export async function main(): Promise<void> {
     config,
   });
 
-  if (record.default_prompt) {
-    process.stderr.write(
-      "Using default compare prompt (pass --prompt or --file to override).\n",
-    );
-  }
-
   if (parsed.json) {
     process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);
     return;
   }
 
   printSummary(record);
-  if (record.files) {
+  if (record.files && !quiet) {
     process.stderr.write(`saved ${record.files.md}\n`);
     process.stderr.write(`      ${record.files.json}\n`);
     process.stderr.write(`compares dir: ${comparesDir()}\n`);

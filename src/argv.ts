@@ -16,12 +16,33 @@ export function printHelp(text: string): never {
 }
 
 /**
+ * Quiet mode (`-q` / `--quiet` on any command, or OLLANET_QUIET=1): results on
+ * stdout only. stderr keeps real errors and warnings (and --think reasoning,
+ * which you asked for); saved paths, hints, notices, and progress are dropped.
+ */
+export function isQuiet(): boolean {
+  const flag = process.env.OLLANET_QUIET?.trim().toLowerCase();
+  return flag === "1" || flag === "true";
+}
+
+/**
+ * Remove `-q` / `--quiet` from a command's argv and switch quiet mode on.
+ * Done once in the CLI entry so every command accepts it in any position.
+ */
+export function takeQuietFlag(argv: string[]): string[] {
+  const rest = argv.filter((arg) => arg !== "-q" && arg !== "--quiet");
+  if (rest.length !== argv.length) process.env.OLLANET_QUIET = "1";
+  return rest;
+}
+
+/**
  * Decorative progress lines (`→ model (1/2)`) are for people watching a
  * terminal. Piped and agent runs skip them so stderr only carries results and
  * real errors (PowerShell 5 wraps every native stderr line in a red
  * NativeCommandError). OLLANET_PROGRESS=1 forces them on, 0 forces them off.
  */
 export function showProgress(): boolean {
+  if (isQuiet()) return false;
   const flag = process.env.OLLANET_PROGRESS?.trim().toLowerCase();
   if (flag === "1" || flag === "true") return true;
   if (flag === "0" || flag === "false") return false;

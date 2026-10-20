@@ -11,7 +11,7 @@ import type { AppConfig } from "./config.ts";
 import { expandMachineModel, loadConfig } from "./config.ts";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
 import { ollamaPull, type PullChunk } from "./ollama-chat.ts";
-import { failUsage, isHelpFlag, printHelp, takeFlag } from "./argv.ts";
+import { failUsage, isHelpFlag, isQuiet, printHelp, takeFlag } from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 
 /** Pull HTTP timeout (ms). 0 = none. Large models can take hours. */
@@ -40,7 +40,8 @@ Options:
   --model <name>     Model to pull (e.g. gemma3:12b)
   --insecure         Allow HTTP / self-signed model registries
   --no-stream        Wait for a single final response (no progress chunks)
-  --json             Emit result JSON on stdout`;
+  --json             Emit result JSON on stdout
+  -q, --quiet        Result line only; no progress or next-step hint on stderr`;
 }
 
 function usage(): never {
@@ -234,7 +235,7 @@ export async function main(): Promise<void> {
     insecure: parsed.insecure,
     stream: parsed.stream,
     writeStdout: true,
-    quiet: false,
+    quiet: isQuiet(),
     config,
   });
 
@@ -243,5 +244,5 @@ export async function main(): Promise<void> {
     return;
   }
   process.stdout.write(`pulled ${result.model} on ${result.machine}\n`);
-  process.stderr.write(`${result.next.hint}\n${result.next.site}\n`);
+  if (!isQuiet()) process.stderr.write(`${result.next.hint}\n${result.next.site}\n`);
 }

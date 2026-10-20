@@ -71,6 +71,16 @@ describe("prompt assembly", () => {
     assert.match(res.stderr, /No prompt provided/);
   });
 
+  it("-q prints only the reply (no host line, chat id, or stats)", async () => {
+    mock.requests.length = 0;
+    const res = await runCli(["prompt", "mockhost", "-q", "hello"], { sandbox });
+
+    assert.equal(res.code, 0, res.stderr);
+    assert.equal(res.stderr, "");
+    assert.match(res.stdout, /mock reply/);
+    assert.equal(mock.chats()[0].messages.at(-1).content, "hello");
+  });
+
   it("--stdin waits for a slow producer", async () => {
     mock.requests.length = 0;
     const res = await runCli(["prompt", "mockhost", "--stdin", "--no-save"], {

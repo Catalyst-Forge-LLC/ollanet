@@ -18,6 +18,27 @@ function mockConfig(port, extra = {}) {
 }
 
 describe("bench", () => {
+  it("-q prints the table on stdout and keeps stderr empty", async () => {
+    const mock = await startMock({
+      models: ["fake:1b"],
+      capabilities: { "fake:1b": ["completion"] },
+      reply: "OK",
+    });
+    const sandbox = await makeSandbox(mockConfig(mock.port));
+    try {
+      const res = await runCli(
+        ["bench", "mockhost", "fake:1b", "--runs", "1", "--no-warmup", "-q"],
+        { sandbox, env: { OLLAMA_BENCH_TIMEOUT_MS: "10000", OLLANET_PROGRESS: "1" } },
+      );
+      assert.equal(res.code, 0, res.stderr);
+      assert.equal(res.stderr, "");
+      assert.match(res.stdout, /fake:1b/);
+    } finally {
+      await mock.close();
+      await sandbox.cleanup();
+    }
+  });
+
   it("runs quick suite with per-run throughput attempts and saves JSON", async () => {
     const mock = await startMock({
       models: ["fake:1b"],
