@@ -44,6 +44,7 @@ interface ScanResult {
   ok: boolean;
   models: OllamaModel[];
   error?: string;
+  code?: ScanFailureCode;
   url: string;
 }
 
@@ -70,9 +71,19 @@ async function fetchModels(host: HostTarget): Promise<{ models: OllamaModel[]; u
       headers: { Accept: "application/json" },
     });
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      throw new ProbeError(
+        res.status === 404
+          ? "HTTP 404, no /api/tags (not Ollama?)"
+          : `HTTP ${res.status} ${res.statusText}`.trim(),
+        "http",
+      );
     }
-    const body = (await res.json()) as OllamaTagsResponse;
+    let body: OllamaTagsResponse;
+    try {
+      body = (await res.json()) as OllamaTagsResponse;
+    } catch {
+      throw new ProbeError("non-JSON reply (not Ollama?)", "not-ollama");
+    }
     return { models: body.models ?? [], url };
   } finally {
     clearTimeout(timer);
@@ -103,19 +114,93 @@ async function mapPool<T, R>(
 async function scanHost(host: HostTarget): Promise<ScanResult> {
   const url = `http://${host.ip}:${host.port}/api/tags`;
   if (!host.online && !host.isSelf && host.source === "tailscale") {
-    return { host, ok: false, models: [], error: "offline", url };
+    return { host, ok: false, models: [], error: "offline", code: "offline", url };
   }
   try {
     const { models } = await fetchModels(host);
     return { host, ok: true, models, url };
   } catch (err) {
-    const name = err instanceof Error ? err.name : "";
-    const message = err instanceof Error ? err.message : String(err);
-    const error =
-      name === "AbortError" || message.toLowerCase().includes("abort")
-        ? `timeout after ${scanTimeoutMs()}ms`
-        : message;
-    return { host, ok: false, models: [], error, url };
+    const { error, code } = describeProbeError(err, scanTimeoutMs());
+    return { host, ok: false, models: [], error, code, url };
+  }
+}
+
+/** Probe failure with a short reason code (see {@link ScanFailureCode}). */
+class ProbeError extends Error {
+  constructor(
+    message: string,
+    readonly code: ScanFailureCode,
+  ) {
+    super(message);
+  }
+}
+
+const SOCKET_CODES: Record<string, { code: ScanFailureCode; label: string }> = {
+  ECONNREFUSED: { code: "refused", label: "connection refused" },
+  ECONNRESET: { code: "reset", label: "connection reset" },
+  UND_ERR_SOCKET: { code: "reset", label: "connection closed" },
+  EHOSTUNREACH: { code: "unreachable", label: "host unreachable" },
+  ENETUNREACH: { code: "unreachable", label: "network unreachable" },
+  EHOSTDOWN: { code: "unreachable", label: "host down" },
+  ENOTFOUND: { code: "dns", label: "DNS lookup failed" },
+  EAI_AGAIN: { code: "dns", label: "DNS lookup failed" },
+  ETIMEDOUT: { code: "timeout", label: "connect timed out" },
+  UND_ERR_CONNECT_TIMEOUT: { code: "timeout", label: "connect timed out" },
+};
+
+/**
+ * Turn a failed /api/tags probe into a short reason. Node's fetch reports
+ * socket errors as a bare "fetch failed" with the real code on `cause`.
+ */
+export function describeProbeError(
+  err: unknown,
+  timeoutMs: number,
+): { error: string; code: ScanFailureCode } {
+  if (err instanceof ProbeError) return { error: err.message, code: err.code };
+  const name = err instanceof Error ? err.name : "";
+  const message = err instanceof Error ? err.message : String(err);
+  if (name === "AbortError" || name === "TimeoutError" || message.toLowerCase().includes("abort")) {
+    return { error: `timeout after ${timeoutMs}ms`, code: "timeout" };
+  }
+  const cause = err instanceof Error ? (err as Error & { cause?: unknown }).cause : undefined;
+  const sysCode = [cause, err]
+    .map((e) => (e && typeof e === "object" && "code" in e ? String((e as { code: unknown }).code) : ""))
+    .find(Boolean);
+  const known = sysCode ? SOCKET_CODES[sysCode] : undefined;
+  if (known && sysCode) return { error: `${known.label} (${sysCode})`, code: known.code };
+  const causeMessage = cause instanceof Error ? cause.message : "";
+  const detail = causeMessage && causeMessage !== message ? `${message}: ${causeMessage}` : message;
+  return { error: sysCode ? `${detail} (${sysCode})` : detail, code: "error" };
+}
+
+function failureLabel(f: ScanFailure, port: number): string {
+  const addr = f.port != null && f.port !== port ? `${f.ip}:${f.port}` : f.ip;
+  return f.name && f.name !== f.ip ? `${f.name} (${addr})` : addr;
+}
+
+/**
+ * Compact "who didn't answer" block. Offline Tailscale peers (only listed with
+ * --all, never probed) collapse to a count; the rest show name, address, reason.
+ */
+function printFailures(payload: ScanPayload): void {
+  const failures = payload.failures ?? [];
+  const offline = failures.filter((f) => f.error === "offline");
+  const probed = failures.filter((f) => f.error !== "offline");
+  const limit = 5;
+  if (probed.length === 1) {
+    const f = probed[0]!;
+    console.log(`No answer from 1 host: ${failureLabel(f, payload.port)}, ${f.error}`);
+  } else if (probed.length > 1) {
+    console.log(`No answer from ${probed.length} hosts:`);
+    for (const f of probed.slice(0, limit)) {
+      console.log(`  - ${failureLabel(f, payload.port)}: ${f.error}`);
+    }
+    if (probed.length > limit) {
+      console.log(`  … ${probed.length - limit} more (ollanet scan --json lists all)`);
+    }
+  }
+  if (offline.length > 0) {
+    console.log(`Offline Tailscale peers (not probed): ${offline.length}`);
   }
 }
 
@@ -140,12 +225,9 @@ function printPayload(payload: ScanPayload, cached?: StoredScan): void {
     console.log(
       "Tip: add hosts to config.json, set OLLANET_HOSTS, pass --lan, or prompt an IP directly.",
     );
-    const interesting = (payload.failures ?? []).filter((f) => f.error !== "offline");
-    if (interesting.length > 0) {
-      console.log("\nNon-timeout failures (first few):");
-      for (const f of interesting.slice(0, 5)) {
-        console.log(`  - ${f.name} (${f.ip}): ${f.error}`);
-      }
+    if ((payload.failures ?? []).length > 0) {
+      console.log("");
+      printFailures(payload);
     }
     return;
   }
@@ -176,6 +258,7 @@ function printPayload(payload: ScanPayload, cached?: StoredScan): void {
   console.log(
     `Found ${payload.servers.length} Ollama server(s) with ${payload.servers.reduce((n, s) => n + s.models.length, 0)} model entrie(s).`,
   );
+  printFailures(payload);
 }
 
 export interface ScanOptions {
@@ -217,10 +300,31 @@ export interface ScannedServer {
   }>;
 }
 
+/**
+ * Why a host did not answer as Ollama. `offline` = Tailscale peer marked
+ * offline (not probed); `http` / `not-ollama` = something answered, but not
+ * an Ollama API; `error` = anything else (see `error` text).
+ */
+export type ScanFailureCode =
+  | "timeout"
+  | "refused"
+  | "reset"
+  | "unreachable"
+  | "dns"
+  | "http"
+  | "not-ollama"
+  | "offline"
+  | "error";
+
 export interface ScanFailure {
   name: string;
   ip: string;
+  /** Human-readable reason, e.g. "timeout after 2500ms", "connection refused (ECONNREFUSED)". */
   error: string;
+  /** Port probed (added in 0.6.25; absent in older saved scans). */
+  port?: number;
+  /** Short machine-readable reason (added in 0.6.25; absent in older saved scans). */
+  code?: ScanFailureCode;
 }
 
 export interface ScanPayload {
@@ -270,6 +374,8 @@ function toPayload(
         name: shortName(r.host),
         ip: r.host.ip,
         error: r.error ?? "unknown",
+        port: r.host.port,
+        code: r.code ?? "error",
       })),
   };
 }

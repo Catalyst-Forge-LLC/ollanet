@@ -9,7 +9,13 @@
  */
 
 export { scanNetwork } from "./scan.ts";
-export type { ScanOptions, ScanPayload, ScannedServer, ScanFailure } from "./scan.ts";
+export type {
+  ScanOptions,
+  ScanPayload,
+  ScannedServer,
+  ScanFailure,
+  ScanFailureCode,
+} from "./scan.ts";
 export { lastScan, lastScanPath, loadLastScan } from "./scan-store.ts";
 export type { StoredScan } from "./scan-store.ts";
 

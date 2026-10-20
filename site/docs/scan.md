@@ -26,4 +26,6 @@ Deduped by `ip:port`, then folded when several addresses are this machine (loopb
 
 Last successful scan is saved for `--last` (`~/.ollanet/last-scan.json` when installed).
 
+Hosts that were probed but did not answer as Ollama are listed after the servers with a short reason, such as `timeout after 2500ms`, `connection refused (ECONNREFUSED)`, or `HTTP 404, no /api/tags (not Ollama?)`. Offline Tailscale peers (listed with `--all`) collapse to a count. `--json` keeps them under `failures`, each with `name`, `ip`, `port`, `error`, and a short `code`: `timeout`, `refused`, `reset`, `unreachable`, `dns`, `http`, `not-ollama`, `offline`, or `error`.
+
 Finetuna-style names (`*-ctx32k`, `*-flash`, `*finetuna*`) are marked `[tuned]` in scan output.

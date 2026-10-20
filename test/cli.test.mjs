@@ -6,6 +6,8 @@
  */
 import assert from "node:assert/strict";
 import { access, readFile, readdir } from "node:fs/promises";
+import http from "node:http";
+import net from "node:net";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 
@@ -428,6 +430,69 @@ describe("scan and chats", () => {
     const payload = JSON.parse(res.stdout);
     const list = Array.isArray(payload) ? payload : payload.chats;
     assert.ok(list.length > 0, "expected at least one saved chat");
+  });
+});
+
+describe("scan failures", () => {
+  let mock;
+  let notOllama;
+  let deadPort;
+  let sandbox;
+
+  before(async () => {
+    mock = await startMock({ models: ["fake:1b"] });
+    // Something answers on the port, but it is not Ollama.
+    notOllama = http.createServer((_req, res) => {
+      res.writeHead(404).end("nope");
+    });
+    await new Promise((resolve) => notOllama.listen(0, "127.0.0.1", resolve));
+    // A port that was free a moment ago: connect is refused.
+    const probe = net.createServer();
+    await new Promise((resolve) => probe.listen(0, "127.0.0.1", resolve));
+    deadPort = probe.address().port;
+    await new Promise((resolve) => probe.close(resolve));
+    sandbox = await makeSandbox({
+      discovery: { localhost: false, tailscale: false, lan: false },
+      hosts: [
+        { name: "mockhost", host: "127.0.0.1", port: mock.port },
+        { name: "deadhost", host: "127.0.0.1", port: deadPort },
+        { name: "webhost", host: "127.0.0.1", port: notOllama.address().port },
+      ],
+    });
+  });
+  after(async () => {
+    await mock.close();
+    await new Promise((resolve) => notOllama.close(resolve));
+    await sandbox.cleanup();
+  });
+
+  it("names hosts that did not answer and why", async () => {
+    const res = await runCli(["scan"], { sandbox });
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /Found 1 Ollama server/);
+    assert.match(res.stdout, /No answer from 2 hosts:/);
+    assert.match(res.stdout, new RegExp(`deadhost \\(127\\.0\\.0\\.1:${deadPort}\\): connection refused`));
+    assert.match(res.stdout, /webhost \(127\.0\.0\.1:\d+\): HTTP 404, no \/api\/tags \(not Ollama\?\)/);
+    assert.doesNotMatch(res.stdout, /fetch failed/);
+  });
+
+  it("keeps --json failures backward compatible and adds code + port", async () => {
+    const res = await runCli(["scan", "--json"], { sandbox });
+    const payload = JSON.parse(res.stdout);
+    assert.equal(payload.servers.length, 1);
+    const byName = Object.fromEntries(payload.failures.map((f) => [f.name, f]));
+    assert.equal(byName.deadhost.ip, "127.0.0.1");
+    assert.equal(byName.deadhost.port, deadPort);
+    assert.equal(byName.deadhost.code, "refused");
+    assert.match(byName.deadhost.error, /ECONNREFUSED/);
+    assert.equal(byName.webhost.code, "http");
+  });
+
+  it("replays failures from --last", async () => {
+    await runCli(["scan", "--json"], { sandbox });
+    const res = await runCli(["scan", "--last"], { sandbox });
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /No answer from 2 hosts:/);
   });
 });
 
