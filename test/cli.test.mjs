@@ -496,6 +496,32 @@ describe("scan failures", () => {
   });
 });
 
+describe("scan over IPv6", () => {
+  it("brackets IPv6 addresses in the endpoint", async (t) => {
+    let mock;
+    try {
+      mock = await startMock({ models: ["fake:1b"], listenHost: "::1" });
+    } catch {
+      t.skip("IPv6 loopback not available");
+      return;
+    }
+    const sandbox = await makeSandbox({
+      discovery: { localhost: false, tailscale: false, lan: false },
+      hosts: [{ name: "v6host", host: "::1", port: mock.port }],
+    });
+    try {
+      const res = await runCli(["scan", "--json"], { sandbox });
+      assert.equal(res.code, 0, res.stderr);
+      const payload = JSON.parse(res.stdout);
+      assert.equal(payload.servers.length, 1, res.stdout);
+      assert.equal(payload.servers[0].endpoint, `http://[::1]:${mock.port}`);
+    } finally {
+      await mock.close();
+      await sandbox.cleanup();
+    }
+  });
+});
+
 describe("command help", () => {
   it("prints the overview on ollanet help", async () => {
     const res = await runCli(["help"]);

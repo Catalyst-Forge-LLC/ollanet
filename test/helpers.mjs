@@ -31,6 +31,7 @@ export const CLI = path.join(TEST_DIR, "..", "dist", "cli.js");
  * @param {number}   [opts.evalDuration]
  * @param {number}   [opts.loadDuration] load_duration (ns) on chat responses.
  * @param {string}   [opts.version]     /api/version string.
+ * @param {string}   [opts.listenHost]  Bind address (default 127.0.0.1; "::1" for IPv6 tests).
  * @param {string[]} [opts.loaded]      Models already reported by /api/ps.
  * @param {number}   [opts.psSize]      /api/ps `size` (default same as size_vram).
  * @param {number}   [opts.psVram]      /api/ps `size_vram`.
@@ -273,13 +274,17 @@ export async function startMock(opts = {}) {
     });
   });
 
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const listenHost = opts.listenHost ?? "127.0.0.1";
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, listenHost, resolve);
+  });
   const { port } = /** @type {import("node:net").AddressInfo} */ (server.address());
 
   return {
     port,
     /** `127.0.0.1:PORT`, usable directly as an ollanet <machine> argument. */
-    address: `127.0.0.1:${port}`,
+    address: `${listenHost.includes(":") ? `[${listenHost}]` : listenHost}:${port}`,
     requests,
     loaded,
     /** Delay how many /api/ps polls still report a model after unload. */

@@ -8,6 +8,7 @@ import { configFromPartial, loadConfig, type AppConfig } from "./config.ts";
 import {
   discoverHosts,
   envInt,
+  ollamaBaseUrl,
   ollamaPort,
   shortName,
   type HostTarget,
@@ -61,7 +62,7 @@ function formatBytes(bytes: number | undefined): string {
 }
 
 async function fetchModels(host: HostTarget): Promise<{ models: OllamaModel[]; url: string }> {
-  const url = `http://${host.ip.includes(":") ? `[${host.ip}]` : host.ip}:${host.port}/api/tags`;
+  const url = `${ollamaBaseUrl(host)}/api/tags`;
   const timeoutMs = scanTimeoutMs();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -112,7 +113,7 @@ async function mapPool<T, R>(
 }
 
 async function scanHost(host: HostTarget): Promise<ScanResult> {
-  const url = `http://${host.ip}:${host.port}/api/tags`;
+  const url = `${ollamaBaseUrl(host)}/api/tags`;
   if (!host.online && !host.isSelf && host.source === "tailscale") {
     return { host, ok: false, models: [], error: "offline", code: "offline", url };
   }
@@ -174,7 +175,8 @@ export function describeProbeError(
 }
 
 function failureLabel(f: ScanFailure, port: number): string {
-  const addr = f.port != null && f.port !== port ? `${f.ip}:${f.port}` : f.ip;
+  const ip = f.ip.includes(":") ? `[${f.ip}]` : f.ip;
+  const addr = f.port != null && f.port !== port ? `${ip}:${f.port}` : f.ip;
   return f.name && f.name !== f.ip ? `${f.name} (${addr})` : addr;
 }
 
@@ -357,7 +359,7 @@ function toPayload(
         os: r.host.os,
         source: r.host.source,
         self: r.host.isSelf,
-        endpoint: `http://${r.host.ip}:${r.host.port}`,
+        endpoint: ollamaBaseUrl(r.host),
         models: r.models.map((m) => ({
           name: m.name,
           size: m.size,
