@@ -209,23 +209,24 @@ export interface CompareOptions {
   timeoutMs?: number;
 }
 
+/** Result table on stdout (like bench); notices and saved paths stay on stderr. */
 function printSummary(record: CompareRecord): void {
   const nameWidth = Math.max(8, ...record.results.map((r) => r.model.length));
-  process.stderr.write(
+  process.stdout.write(
     `Compare on ${record.machine}  ${record.results.length} models  ${record.prompt.length} char prompt\n`,
   );
-  process.stderr.write(
+  process.stdout.write(
     `${"model".padEnd(nameWidth)}  ${"tok/s".padStart(7)}  ${"tokens".padStart(6)}  ${"wall".padStart(7)}  done\n`,
   );
   for (const r of record.results) {
     if (r.error) {
-      process.stderr.write(`${r.model.padEnd(nameWidth)}  ERROR  ${r.error}\n`);
+      process.stdout.write(`${r.model.padEnd(nameWidth)}  ERROR  ${r.error}\n`);
       continue;
     }
     const toks = r.tok_s != null ? r.tok_s.toFixed(1) : "—";
     const tokens = r.eval_count != null ? String(r.eval_count) : "—";
     const wall = r.wall_ms != null ? `${(r.wall_ms / 1000).toFixed(2)}s` : "—";
-    process.stderr.write(
+    process.stdout.write(
       `${r.model.padEnd(nameWidth)}  ${toks.padStart(7)}  ${tokens.padStart(6)}  ${wall.padStart(7)}  ${r.done_reason ?? "—"}\n`,
     );
   }

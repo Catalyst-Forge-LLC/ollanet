@@ -34,8 +34,10 @@ describe("ollanet compare", () => {
     );
 
     assert.equal(res.code, 0, res.stderr);
-    assert.match(res.stderr, /fake:1b/);
-    assert.match(res.stderr, /qwen3:0.6b/);
+    // Result table on stdout (like bench); saved paths on stderr.
+    assert.match(res.stdout, /tok\/s/);
+    assert.match(res.stdout, /fake:1b/);
+    assert.match(res.stdout, /qwen3:0.6b/);
     assert.match(res.stderr, /saved /);
     const chats = mock.chats();
     assert.equal(chats.length, 2);
@@ -62,9 +64,10 @@ describe("ollanet compare", () => {
     );
     assert.equal(res.code, 0, res.stderr);
     assert.doesNotMatch(res.stderr, /→/);
+    assert.equal(res.stderr, "");
     // The result table still prints.
-    assert.match(res.stderr, /tok\/s/);
-    assert.match(res.stderr, /fake:1b/);
+    assert.match(res.stdout, /tok\/s/);
+    assert.match(res.stdout, /fake:1b/);
   });
 
   it("prints progress lines when OLLANET_PROGRESS=1", async () => {
