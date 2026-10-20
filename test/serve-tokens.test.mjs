@@ -122,3 +122,88 @@ describe("last_used tracking", () => {
     assert.ok(Date.parse(kept.last_used) > Date.now() - DAY / 2, "last_used never moves backwards");
   });
 });
+
+describe("token rm (interactive helpers)", () => {
+  it("parses picks", () => {
+    assert.deepEqual(mod.parseSelection("1,3", 3), [0, 2]);
+    assert.deepEqual(mod.parseSelection(" 3 1 1 ", 3), [0, 2]);
+    assert.deepEqual(mod.parseSelection("2-3", 3), [1, 2]);
+    assert.deepEqual(mod.parseSelection("all", 2), [0, 1]);
+    assert.deepEqual(mod.parseSelection("", 2), []);
+    assert.match(mod.parseSelection("4", 3), /Out of range/);
+    assert.match(mod.parseSelection("x", 3), /Not a number/);
+  });
+
+  it("lists, picks, and confirms", async () => {
+    const tokens = [tok("a"), tok("b"), tok("c")];
+    let shown = "";
+    const answers = ["1,3", "y"];
+    const names = await mod.chooseTokensToRemove(tokens, async () => answers.shift(), (t) => (shown += t));
+    assert.deepEqual(names, ["a", "c"]);
+    assert.match(shown, /^#\s+NAME\s+CREATED\s+EXPIRES\s+LAST USED/);
+    assert.match(shown, /\n1\s+a\s/);
+
+    const no = ["all", "n"];
+    assert.deepEqual(await mod.chooseTokensToRemove(tokens, async () => no.shift(), () => {}), []);
+    const cancel = [""];
+    assert.deepEqual(await mod.chooseTokensToRemove(tokens, async () => cancel.shift(), () => {}), []);
+    await assert.rejects(mod.chooseTokensToRemove(tokens, async () => "9", () => {}), /Out of range/);
+  });
+
+  it("errors without a name when not on a terminal, and never waits for input", async () => {
+    await writeStore(storeFile, [tok("a")]);
+    const started = Date.now();
+    const res = await runCli(["serve", "token", "rm"], { sandbox, env: env(), keepStdinOpen: true });
+    assert.equal(res.code, 1);
+    assert.match(res.stderr, /needs a name/);
+    assert.ok(Date.now() - started < 15_000);
+    assert.equal((await readStore(storeFile)).tokens.length, 1);
+  });
+
+  it("still removes by name", async () => {
+    await writeStore(storeFile, [tok("a"), tok("b")]);
+    const res = await runCli(["serve", "token", "rm", "a"], { sandbox, env: env() });
+    assert.equal(res.code, 0, res.stderr);
+    assert.deepEqual((await readStore(storeFile)).tokens.map((t) => t.name), ["b"]);
+  });
+});
+
+describe("token prune", () => {
+  const seed = () =>
+    writeStore(storeFile, [
+      tok("fresh", { created_at: iso(DAY) }),
+      tok("expired", { expires_at: iso(1000) }),
+      tok("stale", { last_used: iso(45 * DAY) }),
+      tok("recent", { last_used: iso(DAY) }),
+    ]);
+
+  it("needs a criterion", async () => {
+    const res = await runCli(["serve", "token", "prune", "--yes"], { sandbox, env: env() });
+    assert.equal(res.code, 1);
+    assert.match(res.stderr, /--expired and\/or --unused-days/);
+  });
+
+  it("refuses without --yes off a terminal and removes nothing", async () => {
+    await seed();
+    const res = await runCli(["serve", "token", "prune", "--expired"], { sandbox, env: env(), keepStdinOpen: true });
+    assert.equal(res.code, 1);
+    assert.match(res.stderr, /expired \(expired\)/);
+    assert.match(res.stderr, /without --yes/);
+    assert.equal((await readStore(storeFile)).tokens.length, 4);
+  });
+
+  it("--expired --yes removes only expired tokens", async () => {
+    await seed();
+    const res = await runCli(["serve", "token", "prune", "--expired", "--yes"], { sandbox, env: env() });
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stdout, /Removed expired/);
+    assert.deepEqual((await readStore(storeFile)).tokens.map((t) => t.name), ["fresh", "stale", "recent"]);
+  });
+
+  it("--unused-days counts from last use, else creation", async () => {
+    await seed();
+    const res = await runCli(["serve", "token", "prune", "--unused-days", "30", "--yes"], { sandbox, env: env() });
+    assert.equal(res.code, 0, res.stderr);
+    assert.deepEqual((await readStore(storeFile)).tokens.map((t) => t.name).sort(), ["fresh", "recent"]);
+  });
+});

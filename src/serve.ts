@@ -28,6 +28,8 @@ import {
   recordLastUsed,
   removeLabel,
   removeToken,
+  removeTokens,
+  lastActivity,
   serveStorePath,
   type ServeToken,
   setLabel,
@@ -45,7 +47,8 @@ export function helpText(): string {
   ollanet serve status [--json]
   ollanet serve token add <name> [--expires <duration>]
   ollanet serve token list [--json]
-  ollanet serve token rm <name>
+  ollanet serve token rm [name]           (no name: pick from a list in a terminal)
+  ollanet serve token prune [--expired] [--unused-days <n>] [--yes]
   ollanet serve label set <machine> <label>
   ollanet serve label rm <machine>
   ollanet serve label list
@@ -568,7 +571,9 @@ async function tokenCommand(args: string[]): Promise<void> {
     process.stdout.write(tokenTable(tokens));
     return;
   }
+  if (sub === "prune") return pruneCommand(args);
   if (sub === "rm" || sub === "remove" || sub === "delete") {
+    if (args.length === 0) return interactiveRemove();
     if (args.length !== 1) usage();
     if (!(await removeToken(args[0]!))) {
       console.error(`No serve token named "${args[0]}".`);
@@ -613,6 +618,157 @@ export function tokenTable(tokens: ServeToken[], opts: { numbered?: boolean; now
   );
   const widths = all[0]!.map((_, c) => Math.max(...all.map((r) => r[c]!.length)));
   return all.map((r) => `${r.map((cell, c) => cell.padEnd(widths[c]!)).join("  ").trimEnd()}\n`).join("");
+}
+
+/**
+ * Parse a pick like "1,3", "2-4", "1 3", or "all" against a list of `count`.
+ * Returns 0-based indices ([] for an empty answer = cancel), or an error string.
+ */
+export function parseSelection(input: string, count: number): number[] | string {
+  const text = input.trim().toLowerCase();
+  if (!text) return [];
+  if (text === "all" || text === "*") return Array.from({ length: count }, (_, i) => i);
+  const picked = new Set<number>();
+  for (const part of text.split(/[\s,]+/).filter(Boolean)) {
+    const m = /^(\d+)(?:-(\d+))?$/.exec(part);
+    if (!m) return `Not a number or range: "${part}"`;
+    const a = Number(m[1]);
+    const b = m[2] ? Number(m[2]) : a;
+    if (a < 1 || b > count || a > b) return `Out of range: "${part}" (1–${count})`;
+    for (let i = a; i <= b; i += 1) picked.add(i - 1);
+  }
+  return [...picked].sort((x, y) => x - y);
+}
+
+type Ask = (question: string) => Promise<string>;
+
+function isYes(answer: string): boolean {
+  return /^\s*y(es)?\s*$/i.test(answer);
+}
+
+/**
+ * Numbered pick + y/N confirm. Returns the names to remove ([] = nothing).
+ * Throws on an invalid pick. `ask` and `write` are injectable for tests.
+ */
+export async function chooseTokensToRemove(
+  tokens: ServeToken[],
+  ask: Ask,
+  write: (text: string) => void,
+): Promise<string[]> {
+  write(tokenTable(tokens, { numbered: true }));
+  const pick = parseSelection(await ask("Remove which? (e.g. 1,3 or all; Enter to cancel): "), tokens.length);
+  if (typeof pick === "string") throw new Error(pick);
+  if (pick.length === 0) return [];
+  const names = pick.map((i) => tokens[i]!.name);
+  return isYes(await ask(`Remove ${names.length} token(s): ${names.join(", ")}? [y/N] `)) ? names : [];
+}
+
+function canPrompt(): boolean {
+  return Boolean(process.stdin.isTTY && process.stderr.isTTY);
+}
+
+async function withPrompt<T>(fn: (ask: Ask) => Promise<T>): Promise<T> {
+  const { createInterface } = await import("node:readline/promises");
+  const rl = createInterface({ input: process.stdin, output: process.stderr });
+  try {
+    return await fn((q) => rl.question(q));
+  } finally {
+    rl.close();
+  }
+}
+
+async function interactiveRemove(): Promise<void> {
+  if (!canPrompt()) {
+    console.error("serve token rm needs a name when stdin/stderr are not a terminal.");
+    usage();
+  }
+  const { tokens } = await loadServeStore();
+  if (tokens.length === 0) {
+    process.stdout.write("No serve tokens.\n");
+    return;
+  }
+  const names = await withPrompt((ask) =>
+    chooseTokensToRemove(tokens, ask, (text) => process.stderr.write(text)),
+  );
+  if (names.length === 0) {
+    console.error("Nothing removed.");
+    return;
+  }
+  const removed = await removeTokens(names);
+  process.stdout.write(`Removed ${removed.join(", ")}\n`);
+}
+
+/** Tokens `prune` would remove, with a reason each. */
+export function pruneCandidates(
+  tokens: ServeToken[],
+  opts: { expired: boolean; unusedDays?: number },
+  now = Date.now(),
+): Array<{ token: ServeToken; reason: string }> {
+  const out: Array<{ token: ServeToken; reason: string }> = [];
+  for (const t of tokens) {
+    if (opts.expired && isExpired(t, now)) {
+      out.push({ token: t, reason: "expired" });
+      continue;
+    }
+    if (opts.unusedDays != null && now - lastActivity(t) >= opts.unusedDays * 86_400_000) {
+      out.push({ token: t, reason: t.last_used ? `unused ${relativeTime(t.last_used, now)}` : "never used" });
+    }
+  }
+  return out;
+}
+
+async function pruneCommand(args: string[]): Promise<void> {
+  let expired = false;
+  let yes = false;
+  let unusedDays: number | undefined;
+  while (args.length > 0) {
+    const arg = args.shift()!;
+    if (arg === "--expired") {
+      expired = true;
+      continue;
+    }
+    if (arg === "--yes" || arg === "-y") {
+      yes = true;
+      continue;
+    }
+    const days = takeFlag(arg, "--unused-days", args, usage);
+    if (days !== undefined) {
+      unusedDays = Number(days);
+      if (!Number.isFinite(unusedDays) || unusedDays < 0) {
+        console.error(`--unused-days must be a number of days (got "${days}")`);
+        usage();
+      }
+      continue;
+    }
+    console.error(`Unknown argument: ${arg}`);
+    usage();
+  }
+  if (!expired && unusedDays === undefined) {
+    console.error("serve token prune needs --expired and/or --unused-days <n>.");
+    usage();
+  }
+  const { tokens } = await loadServeStore();
+  const candidates = pruneCandidates(tokens, { expired, unusedDays });
+  if (candidates.length === 0) {
+    process.stdout.write("Nothing to prune.\n");
+    return;
+  }
+  const list = candidates.map((c) => `  ${c.token.name} (${c.reason})`).join("\n");
+  if (!yes) {
+    if (!canPrompt()) {
+      console.error(`Would remove:\n${list}\nRefusing without --yes (not a terminal).`);
+      process.exitCode = 1;
+      return;
+    }
+    process.stderr.write(`Will remove:\n${list}\n`);
+    const ok = await withPrompt(async (ask) => isYes(await ask(`Remove ${candidates.length} token(s)? [y/N] `)));
+    if (!ok) {
+      console.error("Nothing removed.");
+      return;
+    }
+  }
+  const removed = await removeTokens(candidates.map((c) => c.token.name));
+  process.stdout.write(`Removed ${removed.join(", ")}\n`);
 }
 
 async function labelCommand(args: string[]): Promise<void> {

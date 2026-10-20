@@ -55,7 +55,8 @@ The catalog starts from the last saved scan (`ollanet scan`) and re-scans every 
 ```bash
 ollanet serve token add <name> [--expires 30d]
 ollanet serve token list [--json]
-ollanet serve token rm <name>
+ollanet serve token rm [name]
+ollanet serve token prune [--expired] [--unused-days <n>] [--yes]
 ```
 
 The token is printed once. `~/.ollanet/serve.json` (override with `OLLANET_SERVE_FILE`) stores only its SHA-256 hash, plus creation, expiry, and last-use times. Tokens are checked with a constant-time compare, and expired tokens never match. Removing a token takes effect on the next request; no restart needed.
@@ -69,6 +70,10 @@ old-bot      2026-09-01 08:00Z  EXPIRED 2026-10-01 08:00Z  never
 ```
 
 `--json` gives `last_used` as an ISO time (or `null`) and `expired` as a boolean. A running `serve` records a token's first use right away, later uses at most once a minute, and anything pending when it stops. It re-reads `serve.json` and changes only `last_used`, under a short lock file, so `token add` and `token rm` from another terminal are never undone.
+
+`token rm` with no name, in a terminal, shows the same table numbered and asks which to remove (`1,3`, `2-4`, or `all`; Enter cancels), then confirms with `y/N`. Without a terminal it errors and asks for a name instead of waiting for input.
+
+`token prune --expired` removes expired tokens. `--unused-days <n>` removes tokens not used in `n` days, counting from creation for tokens never used. Both can be combined. `prune` lists what it would remove and asks to confirm; pass `--yes` to skip the prompt (required when not in a terminal).
 
 ## Tailscale Funnel
 
