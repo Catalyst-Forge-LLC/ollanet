@@ -17,7 +17,15 @@ import {
   type GenerateSettings,
 } from "./config.ts";
 import { envInt, ollamaBaseUrl, shortName } from "./hosts.ts";
-import { consumeSettingsFlag, failUsage, isHelpFlag, printHelp, takeFlag, takeValue } from "./argv.ts";
+import {
+  consumeSettingsFlag,
+  failUsage,
+  isHelpFlag,
+  printHelp,
+  showProgress,
+  takeFlag,
+  takeValue,
+} from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import {
   ollamaChat,
@@ -270,7 +278,7 @@ export async function runCompare(opts: CompareOptions): Promise<CompareRecord> {
     opts.settings,
   );
 
-  const quiet = opts.quiet === true || opts.writeStdout === false;
+  const quiet = opts.quiet === true || opts.writeStdout === false || !showProgress();
   const results: CompareModelResult[] = [];
 
   for (let i = 0; i < resolved.length; i += 1) {

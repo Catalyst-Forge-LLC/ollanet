@@ -15,6 +15,19 @@ export function printHelp(text: string): never {
   process.exit(0);
 }
 
+/**
+ * Decorative progress lines (`→ model (1/2)`) are for people watching a
+ * terminal. Piped and agent runs skip them so stderr only carries results and
+ * real errors (PowerShell 5 wraps every native stderr line in a red
+ * NativeCommandError). OLLANET_PROGRESS=1 forces them on, 0 forces them off.
+ */
+export function showProgress(): boolean {
+  const flag = process.env.OLLANET_PROGRESS?.trim().toLowerCase();
+  if (flag === "1" || flag === "true") return true;
+  if (flag === "0" || flag === "false") return false;
+  return Boolean(process.stderr.isTTY);
+}
+
 /** Usage error: stderr, exit 1. */
 export function failUsage(text: string): never {
   console.error(text);

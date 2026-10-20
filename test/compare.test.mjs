@@ -55,6 +55,28 @@ describe("ollanet compare", () => {
     assert.equal(json.prompt, "Explain MagicDNS");
   });
 
+  it("skips decorative progress lines when stderr is not a terminal", async () => {
+    const res = await runCli(
+      ["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--prompt", "hi", "--no-save"],
+      { sandbox },
+    );
+    assert.equal(res.code, 0, res.stderr);
+    assert.doesNotMatch(res.stderr, /→/);
+    // The result table still prints.
+    assert.match(res.stderr, /tok\/s/);
+    assert.match(res.stderr, /fake:1b/);
+  });
+
+  it("prints progress lines when OLLANET_PROGRESS=1", async () => {
+    const res = await runCli(
+      ["compare", "mockhost", "fake:1b", "qwen3:0.6b", "--prompt", "hi", "--no-save"],
+      { sandbox, env: { OLLANET_PROGRESS: "1" } },
+    );
+    assert.equal(res.code, 0, res.stderr);
+    assert.match(res.stderr, /→ fake:1b \(1\/2\)/);
+    assert.match(res.stderr, /→ qwen3:0.6b \(2\/2\)/);
+  });
+
   it("accepts a .md prompt file", async () => {
     const file = path.join(sandbox.dir, "task.md");
     await writeFile(file, "# Task\n\nWrite a haiku.\n");

@@ -22,7 +22,15 @@ import {
 import { benchmarksDir, newBenchId, saveBenchmark } from "./bench-store.ts";
 import { readFile } from "node:fs/promises";
 import { envInt, ollamaBaseUrl, shortName, type HostTarget } from "./hosts.ts";
-import { consumeSettingsFlag, failUsage, isHelpFlag, parseNumberFlag, printHelp, takeFlag } from "./argv.ts";
+import {
+  consumeSettingsFlag,
+  failUsage,
+  isHelpFlag,
+  parseNumberFlag,
+  printHelp,
+  showProgress,
+  takeFlag,
+} from "./argv.ts";
 import { resolveTarget } from "./target.ts";
 import { projectPath } from "./paths.ts";
 import {
@@ -862,7 +870,7 @@ export async function main(): Promise<void> {
     const caps = await fetchCapabilities(baseUrl, model);
     const selfJudge = Boolean(judgeModel && judgeModel === model);
 
-    if (!parsed.json) {
+    if (!parsed.json && showProgress()) {
       console.error(`\n→ ${model} (${mi + 1}/${selected.length})`);
     }
 
