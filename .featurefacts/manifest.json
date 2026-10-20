@@ -1,0 +1,1140 @@
+{
+  "schemaVersion": "0.2.0",
+  "scan_id": "scan-eba3c46b8457",
+  "tool": "featurefacts",
+  "tool_version": "0.2.0",
+  "generated_at": "2026-10-20T13:45:54.828Z",
+  "root": ".",
+  "status": "complete",
+  "scope": {
+    "include": [
+      "package.json",
+      "README.md",
+      "CHANGELOG.md",
+      "src/**",
+      "app/**",
+      "lib/**",
+      "bin/**",
+      "docs/**",
+      "tests/**",
+      "test/**"
+    ],
+    "exclude": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.git/**",
+      "**/.env",
+      "**/.env.*",
+      "**/*.pem",
+      "**/*.key",
+      ".featurefacts/**",
+      "FEATURE_FACTS.md",
+      "site/**",
+      "examples/**",
+      "skill/**",
+      "tests/fixtures/**",
+      "docs/featurefacts-spec-v0.2.0-with-review/**",
+      "docs/haulout-*.md"
+    ],
+    "supported_ecosystems": [
+      "typescript-node"
+    ],
+    "files": [
+      {
+        "path": "docs/bench-spec.md",
+        "sha256": "1e84f1c2c76466edb4aa6cec6659090dbbcc39a7ea0d4d7ffa4fc605e0023e50",
+        "bytes": 23186,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/compare-spec.md",
+        "sha256": "b317f2781da640d6127814b306237816f75ef8dd9ea1a6cee0e5cac19fb872ec",
+        "bytes": 1279,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/library-api-spec.md",
+        "sha256": "e37fd8875d9f1acb003a515c4d708e6ba1db4770d843c50d38a413bd90013646",
+        "bytes": 4276,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/models-spec.md",
+        "sha256": "0d81c5b7a62870b38eac04b22c0d98a29511365af94fd4d7acb7721e7f5b8a32",
+        "bytes": 1353,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/pull-spec.md",
+        "sha256": "c30355892e6e214d833969eddcc1f513ee2a603f64394fcdd5040401ebe35d13",
+        "bytes": 1874,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/trusted-publishing.md",
+        "sha256": "77a0fedfef812eb7217d3e4fa594e11e213595d34ac3439940171fe7c461a16b",
+        "bytes": 2749,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "package.json",
+        "sha256": "20566a514c728aee57af1842a54428b3bd701ef26f824d0ceaba376bdada7096",
+        "bytes": 2360,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "README.md",
+        "sha256": "76ea2b63360e9e05bdf572ed860341709a5208f7cba00ebe3f22475b9cc2f490",
+        "bytes": 6703,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "src/alias.ts",
+        "sha256": "0f1d2da48a344ecacd3c0012a4cbbd637fbbaf6a61eb1e24bbdf7fbb8413c53b",
+        "bytes": 4591,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/argv.ts",
+        "sha256": "8d7e54c733765bec12b65cbf657d73f259c1307976b2ad41e755488f4c58c0aa",
+        "bytes": 4601,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/bench-store.ts",
+        "sha256": "88099db0771509d75a991bd3be600ae1557a5f790979eb7794b718c6600190a4",
+        "bytes": 855,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/bench-suite.ts",
+        "sha256": "65d205c0b8120eaa847c64eb297083e3b5ee4df84e0a4724c80a7c9d7e296513",
+        "bytes": 6495,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/bench.ts",
+        "sha256": "6d17e2d9fae12f1a126033cf2e63954114911104ce5ff619762e41a8e34d9365",
+        "bytes": 32239,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/chat-store.ts",
+        "sha256": "2d7a84744f0b18ec5ebdbfe81ef372bd9c0fb03f564f97685f9cf3371d0fda35",
+        "bytes": 5056,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/chats.ts",
+        "sha256": "8cd09fe90bd8fda456d006734420cd28f7c99ba97d502bd340294b7c72a6bcd5",
+        "bytes": 4015,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/cli.ts",
+        "sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "bytes": 7163,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/compare-store.ts",
+        "sha256": "4fc254a459b7b224ec5b2e1622ac4a39670d39e448d9484144d45bae97593193",
+        "bytes": 2168,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/compare.ts",
+        "sha256": "fae9d9bb7fece0ec0872add94e9c696c78a0ff0010d40322768112a8d4e7f838",
+        "bytes": 12796,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/config.ts",
+        "sha256": "31c0206ce38b06e892f82634fcdbc8a5ccb367c53997e3c8d09e0f49c9feb234",
+        "bytes": 13182,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/funnel.ts",
+        "sha256": "5ed731c2bfc6f1c15b6589411fdefec9a5cc5c8fd19e6804b912e1c67cccdfd6",
+        "bytes": 9797,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/help.ts",
+        "sha256": "88f20b2a9f65642444b24a76a0afbf2831a6ebaf8fe0630b110bd11b647574e4",
+        "bytes": 1543,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/hosts.ts",
+        "sha256": "b133539011459822832083d4082d86c555fdb764144cd835075e90155c6d65a0",
+        "bytes": 18948,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/index.ts",
+        "sha256": "0cf5ec57186125d0c3a08bd37a630c667d489077182341ef9174cd9c0fd3e0df",
+        "bytes": 2178,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/mcp.ts",
+        "sha256": "33dacd3a132eecc4b02ba08472ea48f11700802419e8c6dccca5b235ac3c181a",
+        "bytes": 20152,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/ollama-chat.ts",
+        "sha256": "fba65de56cba35539e56dcfde843278d7d52cf00eb64ad5d4966f91efa731170",
+        "bytes": 16565,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/paths.ts",
+        "sha256": "742252622567f073acfb160b0f5eb8ce6868f2748eb2fa6fba3228686494f7bc",
+        "bytes": 1844,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/prompt-input.ts",
+        "sha256": "ed8603801c8a3d33283b46b3e0022fdf7083bd9b843f4947a3d5c0c6d3c6b3f0",
+        "bytes": 1337,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/prompt.ts",
+        "sha256": "34c39f3d4ff41a77ea3272b603ed6041f6d5bb3c38560ca1f4133ce6568290fd",
+        "bytes": 20144,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/ps.ts",
+        "sha256": "1677784a15afbb6ba597465baf45ae490e7e2793a105d7f7960190a86b4625d7",
+        "bytes": 6720,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/pull.ts",
+        "sha256": "c0535b3c15ba2c48c28126508efd697b4f5dfa8b845dbb2c967f339c9849d514",
+        "bytes": 7461,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/rm.ts",
+        "sha256": "ce9b10a59b311ec09973be861db7ba764f37a758cacdbf4788902fbbe13f7401",
+        "bytes": 4822,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/scan-store.ts",
+        "sha256": "12667520f287d2c5136b873462a2250156022b20426178fc3f9644bcc196eadf",
+        "bytes": 1650,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/scan.ts",
+        "sha256": "bf0e6f7f5967dc1e15427364b396c42ac940a561095c04a39d1058e28220fb08",
+        "bytes": 14998,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/serve-store.ts",
+        "sha256": "0d070dcbc2f5541425151f3bceb6e92d87dd2606ff348f34b6343152a7308597",
+        "bytes": 8635,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/serve.ts",
+        "sha256": "28d8c8d27b5bc1c5e7364ae073d8c47134f989d4778617b396637b230eab61c3",
+        "bytes": 32597,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/show.ts",
+        "sha256": "a7b1435e7490827936bbc5b29a05e77579b94cef0d4ff74fd437cf248843b387",
+        "bytes": 4963,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/target.ts",
+        "sha256": "efd10124890f0a2c9e5836050e446cc3bd1d5fee5d8abb834d08ade68eca2934",
+        "bytes": 1036,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/tuned.ts",
+        "sha256": "ecbc1f2ab01cb175332ce1a20d1ece519bf8f7c318f2e9023eb627f0ccfb18ce",
+        "bytes": 614,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "test/alias.test.mjs",
+        "sha256": "5177ed1083649ba3d777f781fbcd2d59ef466fd8eccedf101d4bd375e0d50198",
+        "bytes": 4150,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/bench-suite.test.mjs",
+        "sha256": "dda23058f7dfc3b4533b6cac5b3d8fb74516431916ece0e8c055ff1ef6fa8a37",
+        "bytes": 2524,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/bench.test.mjs",
+        "sha256": "7c61109300236303f1aa5226bcec1d0af9d857407018805b18ddfefab426a421",
+        "bytes": 17960,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/cli.test.mjs",
+        "sha256": "f84f5aade08d0b95e625464b84f0cb360108c3f5e7b4b59073993007dbb0df3e",
+        "bytes": 22301,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/compare.test.mjs",
+        "sha256": "83dd633bff9a9cb773275f37780e88e9878987f084e48c7619642813b282acb9",
+        "bytes": 8684,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/fixtures/fake-tailscale.mjs",
+        "sha256": "7c1568c0781dcb340660f41f177019b9482aa5187e806687f4b0f1919df60044",
+        "bytes": 1588,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "test/funnel.test.mjs",
+        "sha256": "d79e0e73e54ada07d18263205cf90ff1749ffd64b2cdb4799e230dc3074c4a76",
+        "bytes": 10539,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/helpers.mjs",
+        "sha256": "0cf6bb7c1a147003452ffba0a924db4d3849c117610b06268ae3e074ff78616a",
+        "bytes": 13728,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "test/library.test.mjs",
+        "sha256": "707556f2561ecaf10d7cac781975d630582d6f8e0c9f8aee65075c874c23e17b",
+        "bytes": 7543,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/manage.test.mjs",
+        "sha256": "cda7929812180bea2f82f31d7a52e4fe957a6f5bd0ad4a3bea7ab0e9a186d76f",
+        "bytes": 6129,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/mcp.test.mjs",
+        "sha256": "ccb720db1a8901dbd2ff37acb126e6f725be427f8489f0a5aa7451b5643818aa",
+        "bytes": 8368,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/publish-gate.test.mjs",
+        "sha256": "d0482a3898f9cdb925569060b491ed49d3c59fff40d39ff045da679fbeba3cac",
+        "bytes": 2071,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/pull.test.mjs",
+        "sha256": "d23140f53620e41efa540e6fdd666d83f31dad09c03f5c0866c0cf3206c85acf",
+        "bytes": 3715,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/serve-tokens.test.mjs",
+        "sha256": "9b8daae4756f61f17bfd7a62f5c0aa2272727bacb2dbc4487bda901b625c2e99",
+        "bytes": 10373,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/serve.test.mjs",
+        "sha256": "ab6cd2f508f0c6b0844f5157dce37f4bd19f970fefb0c5d2a6c1344b6f158d1f",
+        "bytes": 9212,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "test/unit.test.mjs",
+        "sha256": "cffe8fbb32dae5cc2acb6e79c9d23ffba3db59f24f846b3c8c27082945d8d4f7",
+        "bytes": 13658,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      }
+    ],
+    "exclusions": [
+      {
+        "path": ".featurefacts",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": ".git",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "dist",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "FEATURE_FACTS.md",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "node_modules",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "site",
+        "reason": "exclude-pattern"
+      }
+    ]
+  },
+  "adapters": [
+    {
+      "id": "typescript-tree",
+      "version": "0.2.0",
+      "kind": "tree",
+      "state": "completed",
+      "eligible_files": [
+        "docs/bench-spec.md",
+        "docs/compare-spec.md",
+        "docs/library-api-spec.md",
+        "docs/models-spec.md",
+        "docs/pull-spec.md",
+        "docs/trusted-publishing.md",
+        "package.json",
+        "README.md",
+        "src/alias.ts",
+        "src/argv.ts",
+        "src/bench-store.ts",
+        "src/bench-suite.ts",
+        "src/bench.ts",
+        "src/chat-store.ts",
+        "src/chats.ts",
+        "src/cli.ts",
+        "src/compare-store.ts",
+        "src/compare.ts",
+        "src/config.ts",
+        "src/funnel.ts",
+        "src/help.ts",
+        "src/hosts.ts",
+        "src/index.ts",
+        "src/mcp.ts",
+        "src/ollama-chat.ts",
+        "src/paths.ts",
+        "src/prompt-input.ts",
+        "src/prompt.ts",
+        "src/ps.ts",
+        "src/pull.ts",
+        "src/rm.ts",
+        "src/scan-store.ts",
+        "src/scan.ts",
+        "src/serve-store.ts",
+        "src/serve.ts",
+        "src/show.ts",
+        "src/target.ts",
+        "src/tuned.ts",
+        "test/alias.test.mjs",
+        "test/bench-suite.test.mjs",
+        "test/bench.test.mjs",
+        "test/cli.test.mjs",
+        "test/compare.test.mjs",
+        "test/fixtures/fake-tailscale.mjs",
+        "test/funnel.test.mjs",
+        "test/helpers.mjs",
+        "test/library.test.mjs",
+        "test/manage.test.mjs",
+        "test/mcp.test.mjs",
+        "test/publish-gate.test.mjs",
+        "test/pull.test.mjs",
+        "test/serve-tokens.test.mjs",
+        "test/serve.test.mjs",
+        "test/unit.test.mjs"
+      ],
+      "inspected_files": [
+        "docs/bench-spec.md",
+        "docs/compare-spec.md",
+        "docs/library-api-spec.md",
+        "docs/models-spec.md",
+        "docs/pull-spec.md",
+        "docs/trusted-publishing.md",
+        "package.json",
+        "README.md",
+        "src/alias.ts",
+        "src/argv.ts",
+        "src/bench-store.ts",
+        "src/bench-suite.ts",
+        "src/bench.ts",
+        "src/chat-store.ts",
+        "src/chats.ts",
+        "src/cli.ts",
+        "src/compare-store.ts",
+        "src/compare.ts",
+        "src/config.ts",
+        "src/funnel.ts",
+        "src/help.ts",
+        "src/hosts.ts",
+        "src/index.ts",
+        "src/mcp.ts",
+        "src/ollama-chat.ts",
+        "src/paths.ts",
+        "src/prompt-input.ts",
+        "src/prompt.ts",
+        "src/ps.ts",
+        "src/pull.ts",
+        "src/rm.ts",
+        "src/scan-store.ts",
+        "src/scan.ts",
+        "src/serve-store.ts",
+        "src/serve.ts",
+        "src/show.ts",
+        "src/target.ts",
+        "src/tuned.ts",
+        "test/alias.test.mjs",
+        "test/bench-suite.test.mjs",
+        "test/bench.test.mjs",
+        "test/cli.test.mjs",
+        "test/compare.test.mjs",
+        "test/fixtures/fake-tailscale.mjs",
+        "test/funnel.test.mjs",
+        "test/helpers.mjs",
+        "test/library.test.mjs",
+        "test/manage.test.mjs",
+        "test/mcp.test.mjs",
+        "test/publish-gate.test.mjs",
+        "test/pull.test.mjs",
+        "test/serve-tokens.test.mjs",
+        "test/serve.test.mjs",
+        "test/unit.test.mjs"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "typescript-node-surface",
+      "version": "0.2.1",
+      "kind": "surface",
+      "state": "completed",
+      "eligible_files": [
+        "package.json",
+        "src/alias.ts",
+        "src/argv.ts",
+        "src/bench-store.ts",
+        "src/bench-suite.ts",
+        "src/bench.ts",
+        "src/chat-store.ts",
+        "src/chats.ts",
+        "src/cli.ts",
+        "src/compare-store.ts",
+        "src/compare.ts",
+        "src/config.ts",
+        "src/funnel.ts",
+        "src/help.ts",
+        "src/hosts.ts",
+        "src/index.ts",
+        "src/mcp.ts",
+        "src/ollama-chat.ts",
+        "src/paths.ts",
+        "src/prompt-input.ts",
+        "src/prompt.ts",
+        "src/ps.ts",
+        "src/pull.ts",
+        "src/rm.ts",
+        "src/scan-store.ts",
+        "src/scan.ts",
+        "src/serve-store.ts",
+        "src/serve.ts",
+        "src/show.ts",
+        "src/target.ts",
+        "src/tuned.ts",
+        "test/alias.test.mjs",
+        "test/bench-suite.test.mjs",
+        "test/bench.test.mjs",
+        "test/cli.test.mjs",
+        "test/compare.test.mjs",
+        "test/fixtures/fake-tailscale.mjs",
+        "test/funnel.test.mjs",
+        "test/helpers.mjs",
+        "test/library.test.mjs",
+        "test/manage.test.mjs",
+        "test/mcp.test.mjs",
+        "test/publish-gate.test.mjs",
+        "test/pull.test.mjs",
+        "test/serve-tokens.test.mjs",
+        "test/serve.test.mjs",
+        "test/unit.test.mjs"
+      ],
+      "inspected_files": [
+        "package.json",
+        "src/alias.ts",
+        "src/argv.ts",
+        "src/bench-store.ts",
+        "src/bench-suite.ts",
+        "src/bench.ts",
+        "src/chat-store.ts",
+        "src/chats.ts",
+        "src/cli.ts",
+        "src/compare-store.ts",
+        "src/compare.ts",
+        "src/config.ts",
+        "src/funnel.ts",
+        "src/help.ts",
+        "src/hosts.ts",
+        "src/index.ts",
+        "src/mcp.ts",
+        "src/ollama-chat.ts",
+        "src/paths.ts",
+        "src/prompt-input.ts",
+        "src/prompt.ts",
+        "src/ps.ts",
+        "src/pull.ts",
+        "src/rm.ts",
+        "src/scan-store.ts",
+        "src/scan.ts",
+        "src/serve-store.ts",
+        "src/serve.ts",
+        "src/show.ts",
+        "src/target.ts",
+        "src/tuned.ts",
+        "test/alias.test.mjs",
+        "test/bench-suite.test.mjs",
+        "test/bench.test.mjs",
+        "test/cli.test.mjs",
+        "test/compare.test.mjs",
+        "test/fixtures/fake-tailscale.mjs",
+        "test/funnel.test.mjs",
+        "test/helpers.mjs",
+        "test/library.test.mjs",
+        "test/manage.test.mjs",
+        "test/mcp.test.mjs",
+        "test/publish-gate.test.mjs",
+        "test/pull.test.mjs",
+        "test/serve-tokens.test.mjs",
+        "test/serve.test.mjs",
+        "test/unit.test.mjs"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "markdown-document",
+      "version": "0.2.0",
+      "kind": "document",
+      "state": "completed",
+      "eligible_files": [
+        "docs/bench-spec.md",
+        "docs/compare-spec.md",
+        "docs/library-api-spec.md",
+        "docs/models-spec.md",
+        "docs/pull-spec.md",
+        "docs/trusted-publishing.md",
+        "README.md"
+      ],
+      "inspected_files": [
+        "docs/bench-spec.md",
+        "docs/compare-spec.md",
+        "docs/library-api-spec.md",
+        "docs/models-spec.md",
+        "docs/pull-spec.md",
+        "docs/trusted-publishing.md",
+        "README.md"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "typescript-test",
+      "version": "0.2.0",
+      "kind": "test",
+      "state": "completed",
+      "eligible_files": [
+        "test/alias.test.mjs",
+        "test/bench-suite.test.mjs",
+        "test/bench.test.mjs",
+        "test/cli.test.mjs",
+        "test/compare.test.mjs",
+        "test/funnel.test.mjs",
+        "test/library.test.mjs",
+        "test/manage.test.mjs",
+        "test/mcp.test.mjs",
+        "test/publish-gate.test.mjs",
+        "test/pull.test.mjs",
+        "test/serve-tokens.test.mjs",
+        "test/serve.test.mjs",
+        "test/unit.test.mjs"
+      ],
+      "inspected_files": [
+        "test/alias.test.mjs",
+        "test/bench-suite.test.mjs",
+        "test/bench.test.mjs",
+        "test/cli.test.mjs",
+        "test/compare.test.mjs",
+        "test/funnel.test.mjs",
+        "test/library.test.mjs",
+        "test/manage.test.mjs",
+        "test/mcp.test.mjs",
+        "test/publish-gate.test.mjs",
+        "test/pull.test.mjs",
+        "test/serve-tokens.test.mjs",
+        "test/serve.test.mjs",
+        "test/unit.test.mjs"
+      ],
+      "diagnostics": []
+    }
+  ],
+  "rules_version": "featurefacts-core@0.2.0",
+  "fingerprints": {
+    "source": "e60dd2363a252c706ef348851435d222843cf8ff7967eae7cca5e9d997d80592",
+    "config": "0778aff434cfcbd601f90006830e8eda97bd08acd9ccb215b657aadd1520a3ed",
+    "adapters": "4abbb8741b08bcd3aa308ef9c93d4a55fd7feb6d4a98f89297831ab85b15b1eb",
+    "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
+    "registry": "879c7cd6c9eafdd8baaa9f6dfd959fb574e5ed51328dd3b61f32c2ea7322071e",
+    "projection": "6110fde333675976f64481a0476d178a8059ea5976fcf07ad6cfd4c8331af005"
+  },
+  "artifacts": [
+    {
+      "path": ".featurefacts/config.yaml",
+      "sha256": "21df1e278e2978750e3fb5592657968bd170e7bb4989f664efdc7fdb5be89c05"
+    },
+    {
+      "path": ".featurefacts/docs-index.json",
+      "sha256": "ffa45c56f4eafc360ea3115900670fee3042005188cb48b563cdff543493cd39"
+    },
+    {
+      "path": ".featurefacts/features.json",
+      "sha256": "449f79936b4c9d7149d2bdb55d09335602449a279bad69faab0712c1e770f501"
+    },
+    {
+      "path": ".featurefacts/FEATURES.md",
+      "sha256": "7a65164fc8a51e929dc29845cd61fd92cb0b10cca1015dcd52e179fa581b42d1"
+    },
+    {
+      "path": ".featurefacts/features.yaml",
+      "sha256": "ed642a0c9f03b549a483c643ad8a48d8294c21feed839da19c2778a8d12ac4e6"
+    },
+    {
+      "path": ".featurefacts/gaps.yaml",
+      "sha256": "ed7c73edcb6e3fa0d2a8e95cc149fd102743c6b7eecc318dbdf325c0f94b8f36"
+    },
+    {
+      "path": ".featurefacts/surfaces.json",
+      "sha256": "939575b4f99e0ab68fc20913f94842965eff8befb7d3a4d9323c46a2a68d8343"
+    },
+    {
+      "path": ".featurefacts/test-index.json",
+      "sha256": "24794f910e27c9762a254e5f34878285d14aa573ebe9506c11d8c886a8a48aea"
+    },
+    {
+      "path": "FEATURE_FACTS.md",
+      "sha256": "46cf0a78004b05ffe6deea0f31cb1cce07a146875666ae0d630cb9f66641da31"
+    }
+  ],
+  "diagnostics": []
+}

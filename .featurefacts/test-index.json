@@ -1,6 +1,395 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-init",
+  "scan_id": "scan-eba3c46b8457",
   "kind": "tests",
-  "assessments": []
+  "assessments": [
+    {
+      "feature_id": "cmd-alias",
+      "assessment": {
+        "state": "partial",
+        "result": "linked-evidence",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [
+          {
+            "surface_id": "test-test-alias-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "cmd-aliases",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-ask",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-bench",
+      "assessment": {
+        "state": "partial",
+        "result": "linked-evidence",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [
+          {
+            "surface_id": "test-test-bench-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "cmd-benchmark",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-chat",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-chats",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-compare",
+      "assessment": {
+        "state": "partial",
+        "result": "linked-evidence",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [
+          {
+            "surface_id": "test-test-compare-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "cmd-delete",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-download",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-h2h",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-help",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-history",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-initialize",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-inspect",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-loaded",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-ls",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-ls-servers",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-mcp",
+      "assessment": {
+        "state": "partial",
+        "result": "linked-evidence",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [
+          {
+            "surface_id": "test-test-mcp-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "cmd-ping",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-prompt",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-ps",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-pull",
+      "assessment": {
+        "state": "partial",
+        "result": "linked-evidence",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [
+          {
+            "surface_id": "test-test-pull-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "cmd-rm",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-scan",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-serve",
+      "assessment": {
+        "state": "partial",
+        "result": "linked-evidence",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [
+          {
+            "surface_id": "test-test-serve-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "cmd-show",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-version",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "cmd-vs",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "ollanet",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [],
+        "links": [],
+        "reason": "Tests were not assessed."
+      }
+    }
+  ]
 }

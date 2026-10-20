@@ -1,5 +1,961 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-init",
-  "surfaces": []
+  "scan_id": "scan-eba3c46b8457",
+  "surfaces": [
+    {
+      "id": "cmd-alias",
+      "kind": "command",
+      "ref": "alias",
+      "title": "alias",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 209,
+        "end_line": 209,
+        "symbol": "alias"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-aliases",
+      "kind": "command",
+      "ref": "aliases",
+      "title": "aliases",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 210,
+        "end_line": 210,
+        "symbol": "aliases"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ask",
+      "kind": "command",
+      "ref": "ask",
+      "title": "ask",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 149,
+        "end_line": 149,
+        "symbol": "ask"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-bench",
+      "kind": "command",
+      "ref": "bench",
+      "title": "bench",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 193,
+        "end_line": 193,
+        "symbol": "bench"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-benchmark",
+      "kind": "command",
+      "ref": "benchmark",
+      "title": "benchmark",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 194,
+        "end_line": 194,
+        "symbol": "benchmark"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-chat",
+      "kind": "command",
+      "ref": "chat",
+      "title": "chat",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 150,
+        "end_line": 150,
+        "symbol": "chat"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-chats",
+      "kind": "command",
+      "ref": "chats",
+      "title": "chats",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 155,
+        "end_line": 155,
+        "symbol": "chats"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-compare",
+      "kind": "command",
+      "ref": "compare",
+      "title": "compare",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 186,
+        "end_line": 186,
+        "symbol": "compare"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-delete",
+      "kind": "command",
+      "ref": "delete",
+      "title": "delete",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 175,
+        "end_line": 175,
+        "symbol": "delete"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-download",
+      "kind": "command",
+      "ref": "download",
+      "title": "download",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 163,
+        "end_line": 163,
+        "symbol": "download"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-h2h",
+      "kind": "command",
+      "ref": "h2h",
+      "title": "h2h",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 188,
+        "end_line": 188,
+        "symbol": "h2h"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-help",
+      "kind": "command",
+      "ref": "help",
+      "title": "help",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 94,
+        "end_line": 94,
+        "symbol": "help"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-history",
+      "kind": "command",
+      "ref": "history",
+      "title": "history",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 157,
+        "end_line": 157,
+        "symbol": "history"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-initialize",
+      "kind": "command",
+      "ref": "initialize",
+      "title": "initialize",
+      "locator": {
+        "path": "src/mcp.ts",
+        "content_sha256": "33dacd3a132eecc4b02ba08472ea48f11700802419e8c6dccca5b235ac3c181a",
+        "start_line": 525,
+        "end_line": 525,
+        "symbol": "initialize"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-inspect",
+      "kind": "command",
+      "ref": "inspect",
+      "title": "inspect",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 169,
+        "end_line": 169,
+        "symbol": "inspect"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-loaded",
+      "kind": "command",
+      "ref": "loaded",
+      "title": "loaded",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 181,
+        "end_line": 181,
+        "symbol": "loaded"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ls",
+      "kind": "command",
+      "ref": "ls",
+      "title": "ls",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 156,
+        "end_line": 156,
+        "symbol": "ls"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ls-servers",
+      "kind": "command",
+      "ref": "ls-servers",
+      "title": "ls-servers",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 143,
+        "end_line": 143,
+        "symbol": "ls-servers"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-mcp",
+      "kind": "command",
+      "ref": "mcp",
+      "title": "mcp",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 199,
+        "end_line": 199,
+        "symbol": "mcp"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ollanet",
+      "kind": "command",
+      "ref": "bin ollanet",
+      "title": "ollanet",
+      "locator": {
+        "path": "package.json",
+        "content_sha256": "20566a514c728aee57af1842a54428b3bd701ef26f824d0ceaba376bdada7096",
+        "symbol": "bin.ollanet"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "package-json-bin"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ping",
+      "kind": "command",
+      "ref": "ping",
+      "title": "ping",
+      "locator": {
+        "path": "src/mcp.ts",
+        "content_sha256": "33dacd3a132eecc4b02ba08472ea48f11700802419e8c6dccca5b235ac3c181a",
+        "start_line": 532,
+        "end_line": 532,
+        "symbol": "ping"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-prompt",
+      "kind": "command",
+      "ref": "prompt",
+      "title": "prompt",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 148,
+        "end_line": 148,
+        "symbol": "prompt"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ps",
+      "kind": "command",
+      "ref": "ps",
+      "title": "ps",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 180,
+        "end_line": 180,
+        "symbol": "ps"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-pull",
+      "kind": "command",
+      "ref": "pull",
+      "title": "pull",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 162,
+        "end_line": 162,
+        "symbol": "pull"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-rm",
+      "kind": "command",
+      "ref": "rm",
+      "title": "rm",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 174,
+        "end_line": 174,
+        "symbol": "rm"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-scan",
+      "kind": "command",
+      "ref": "scan",
+      "title": "scan",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 142,
+        "end_line": 142,
+        "symbol": "scan"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-serve",
+      "kind": "command",
+      "ref": "serve",
+      "title": "serve",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 204,
+        "end_line": 204,
+        "symbol": "serve"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-show",
+      "kind": "command",
+      "ref": "show",
+      "title": "show",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 168,
+        "end_line": 168,
+        "symbol": "show"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-version",
+      "kind": "command",
+      "ref": "version",
+      "title": "version",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 122,
+        "end_line": 122,
+        "symbol": "version"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-vs",
+      "kind": "command",
+      "ref": "vs",
+      "title": "vs",
+      "locator": {
+        "path": "src/cli.ts",
+        "content_sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
+        "start_line": 187,
+        "end_line": 187,
+        "symbol": "vs"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-bench-spec",
+      "kind": "document",
+      "ref": "docs/bench-spec.md",
+      "title": "docs/bench-spec.md",
+      "locator": {
+        "path": "docs/bench-spec.md",
+        "content_sha256": "1e84f1c2c76466edb4aa6cec6659090dbbcc39a7ea0d4d7ffa4fc605e0023e50"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-compare-spec",
+      "kind": "document",
+      "ref": "docs/compare-spec.md",
+      "title": "docs/compare-spec.md",
+      "locator": {
+        "path": "docs/compare-spec.md",
+        "content_sha256": "b317f2781da640d6127814b306237816f75ef8dd9ea1a6cee0e5cac19fb872ec"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-library-api-spec",
+      "kind": "document",
+      "ref": "docs/library-api-spec.md",
+      "title": "docs/library-api-spec.md",
+      "locator": {
+        "path": "docs/library-api-spec.md",
+        "content_sha256": "e37fd8875d9f1acb003a515c4d708e6ba1db4770d843c50d38a413bd90013646"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-models-spec",
+      "kind": "document",
+      "ref": "docs/models-spec.md",
+      "title": "docs/models-spec.md",
+      "locator": {
+        "path": "docs/models-spec.md",
+        "content_sha256": "0d81c5b7a62870b38eac04b22c0d98a29511365af94fd4d7acb7721e7f5b8a32"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-pull-spec",
+      "kind": "document",
+      "ref": "docs/pull-spec.md",
+      "title": "docs/pull-spec.md",
+      "locator": {
+        "path": "docs/pull-spec.md",
+        "content_sha256": "c30355892e6e214d833969eddcc1f513ee2a603f64394fcdd5040401ebe35d13"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-trusted-publishing",
+      "kind": "document",
+      "ref": "docs/trusted-publishing.md",
+      "title": "docs/trusted-publishing.md",
+      "locator": {
+        "path": "docs/trusted-publishing.md",
+        "content_sha256": "77a0fedfef812eb7217d3e4fa594e11e213595d34ac3439940171fe7c461a16b"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-readme",
+      "kind": "document",
+      "ref": "README.md",
+      "title": "README.md",
+      "locator": {
+        "path": "README.md",
+        "content_sha256": "76ea2b63360e9e05bdf572ed860341709a5208f7cba00ebe3f22475b9cc2f490"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-alias-test",
+      "kind": "test",
+      "ref": "test/alias.test.mjs",
+      "title": "test/alias.test.mjs",
+      "locator": {
+        "path": "test/alias.test.mjs",
+        "content_sha256": "5177ed1083649ba3d777f781fbcd2d59ef466fd8eccedf101d4bd375e0d50198"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-bench-suite-test",
+      "kind": "test",
+      "ref": "test/bench-suite.test.mjs",
+      "title": "test/bench-suite.test.mjs",
+      "locator": {
+        "path": "test/bench-suite.test.mjs",
+        "content_sha256": "dda23058f7dfc3b4533b6cac5b3d8fb74516431916ece0e8c055ff1ef6fa8a37"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-bench-test",
+      "kind": "test",
+      "ref": "test/bench.test.mjs",
+      "title": "test/bench.test.mjs",
+      "locator": {
+        "path": "test/bench.test.mjs",
+        "content_sha256": "7c61109300236303f1aa5226bcec1d0af9d857407018805b18ddfefab426a421"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-cli-test",
+      "kind": "test",
+      "ref": "test/cli.test.mjs",
+      "title": "test/cli.test.mjs",
+      "locator": {
+        "path": "test/cli.test.mjs",
+        "content_sha256": "f84f5aade08d0b95e625464b84f0cb360108c3f5e7b4b59073993007dbb0df3e"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-compare-test",
+      "kind": "test",
+      "ref": "test/compare.test.mjs",
+      "title": "test/compare.test.mjs",
+      "locator": {
+        "path": "test/compare.test.mjs",
+        "content_sha256": "83dd633bff9a9cb773275f37780e88e9878987f084e48c7619642813b282acb9"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-funnel-test",
+      "kind": "test",
+      "ref": "test/funnel.test.mjs",
+      "title": "test/funnel.test.mjs",
+      "locator": {
+        "path": "test/funnel.test.mjs",
+        "content_sha256": "d79e0e73e54ada07d18263205cf90ff1749ffd64b2cdb4799e230dc3074c4a76"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-library-test",
+      "kind": "test",
+      "ref": "test/library.test.mjs",
+      "title": "test/library.test.mjs",
+      "locator": {
+        "path": "test/library.test.mjs",
+        "content_sha256": "707556f2561ecaf10d7cac781975d630582d6f8e0c9f8aee65075c874c23e17b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-manage-test",
+      "kind": "test",
+      "ref": "test/manage.test.mjs",
+      "title": "test/manage.test.mjs",
+      "locator": {
+        "path": "test/manage.test.mjs",
+        "content_sha256": "cda7929812180bea2f82f31d7a52e4fe957a6f5bd0ad4a3bea7ab0e9a186d76f"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-mcp-test",
+      "kind": "test",
+      "ref": "test/mcp.test.mjs",
+      "title": "test/mcp.test.mjs",
+      "locator": {
+        "path": "test/mcp.test.mjs",
+        "content_sha256": "ccb720db1a8901dbd2ff37acb126e6f725be427f8489f0a5aa7451b5643818aa"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-publish-gate-test",
+      "kind": "test",
+      "ref": "test/publish-gate.test.mjs",
+      "title": "test/publish-gate.test.mjs",
+      "locator": {
+        "path": "test/publish-gate.test.mjs",
+        "content_sha256": "d0482a3898f9cdb925569060b491ed49d3c59fff40d39ff045da679fbeba3cac"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-pull-test",
+      "kind": "test",
+      "ref": "test/pull.test.mjs",
+      "title": "test/pull.test.mjs",
+      "locator": {
+        "path": "test/pull.test.mjs",
+        "content_sha256": "d23140f53620e41efa540e6fdd666d83f31dad09c03f5c0866c0cf3206c85acf"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-serve-test",
+      "kind": "test",
+      "ref": "test/serve.test.mjs",
+      "title": "test/serve.test.mjs",
+      "locator": {
+        "path": "test/serve.test.mjs",
+        "content_sha256": "ab6cd2f508f0c6b0844f5157dce37f4bd19f970fefb0c5d2a6c1344b6f158d1f"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-serve-tokens-test",
+      "kind": "test",
+      "ref": "test/serve-tokens.test.mjs",
+      "title": "test/serve-tokens.test.mjs",
+      "locator": {
+        "path": "test/serve-tokens.test.mjs",
+        "content_sha256": "9b8daae4756f61f17bfd7a62f5c0aa2272727bacb2dbc4487bda901b625c2e99"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-test-unit-test",
+      "kind": "test",
+      "ref": "test/unit.test.mjs",
+      "title": "test/unit.test.mjs",
+      "locator": {
+        "path": "test/unit.test.mjs",
+        "content_sha256": "cffe8fbb32dae5cc2acb6e79c9d23ffba3db59f24f846b3c8c27082945d8d4f7"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    }
+  ]
 }

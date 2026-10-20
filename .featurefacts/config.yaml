@@ -42,8 +42,24 @@ adapters:
     enabled: true
 externals: []
 curation:
-  selected_ids: []
+  selected_ids:
+    - cmd-scan
+    - cmd-prompt
+    - cmd-compare
+    - cmd-bench
+    - cmd-pull
+    - cmd-show
+    - cmd-rm
+    - cmd-ps
+    - cmd-chats
+    - cmd-alias
+    - cmd-mcp
+    - cmd-serve
   overrides: {}
+  approval:
+    actor: acmegeek
+    source: LocalHelm FeatureFacts review
+    recorded_at: 2026-10-20T13:44:45.224Z
 publication:
   target: internal
   include_counts: true

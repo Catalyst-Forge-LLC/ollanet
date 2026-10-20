@@ -3,42 +3,149 @@ feature_facts_version: 0.2.0
 mode: map-backed
 audience: internal
 name: ollanet
-type: unknown
-status: unknown
-selection_state: not-curated
-empty_reason: Curation has not been approved. The scanner does not select rows.
-features: []
+type: typescript-node
+status: active
+selection_state: curated
+features:
+  - id: cmd-scan
+    name: Scan
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: unknown
+    evidence_state: current
+  - id: cmd-prompt
+    name: Prompt
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: unknown
+    evidence_state: current
+  - id: cmd-compare
+    name: Compare
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: partial
+    evidence_state: current
+  - id: cmd-bench
+    name: Bench
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: partial
+    evidence_state: current
+  - id: cmd-pull
+    name: Pull
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: partial
+    evidence_state: current
+  - id: cmd-show
+    name: Show
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: unknown
+    evidence_state: current
+  - id: cmd-rm
+    name: Rm
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: unknown
+    tests: unknown
+    evidence_state: current
+  - id: cmd-ps
+    name: Ps
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: unknown
+    tests: unknown
+    evidence_state: current
+  - id: cmd-chats
+    name: Chats
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: unknown
+    evidence_state: current
+  - id: cmd-alias
+    name: Alias
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: partial
+    evidence_state: current
+  - id: cmd-mcp
+    name: Mcp
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: unknown
+    tests: partial
+    evidence_state: current
+  - id: cmd-serve
+    name: Serve
+    lifecycle: implemented
+    availability: unknown
+    conditions: []
+    maturity: unknown
+    documentation: partial
+    tests: partial
+    evidence_state: current
 basis:
   kind: registry
   summary: Curated capabilities within the declared survey and publication scope.
 map: .featurefacts/FEATURES.md
 generated:
-  date: 2026-09-25
+  date: 2026-10-20
   generator: featurefacts
   generator_version: 0.2.0
-  projection_fingerprint: c740f1658ebd6960c915fb63d1d0352636ec80fffac140070600b11400d42bde
+  projection_fingerprint: 6110fde333675976f64481a0476d178a8059ea5976fcf07ad6cfd4c8331af005
 counts:
   scope: eligible-confirmed-active
-  registered: 0
-  selected: 0
+  registered: 12
+  selected: 12
   unlabeled: 0
 assessments:
   docs:
-    eligible: 0
+    eligible: 12
     assessed: 0
     with_links: 0
     without_links: 0
-    partial: 0
-    unassessed: 0
+    partial: 9
+    unassessed: 3
     not_applicable: 0
     undisclosed: 0
   tests:
-    eligible: 0
+    eligible: 12
     assessed: 0
     with_links: 0
     without_links: 0
-    partial: 0
-    unassessed: 0
+    partial: 6
+    unassessed: 6
     not_applicable: 0
     undisclosed: 0
 ---
@@ -47,13 +154,25 @@ assessments:
 
 What can this product do?
 
-Curation has not been approved. The scanner does not select rows.
+| Feature | Lifecycle | Availability | Maturity | Documentation | Tests | Evidence |
+|---|---|---|---|---|---|---|
+| Scan | implemented | unknown | unknown | partial | unknown | current |
+| Prompt | implemented | unknown | unknown | partial | unknown | current |
+| Compare | implemented | unknown | unknown | partial | partial | current |
+| Bench | implemented | unknown | unknown | partial | partial | current |
+| Pull | implemented | unknown | unknown | partial | partial | current |
+| Show | implemented | unknown | unknown | partial | unknown | current |
+| Rm | implemented | unknown | unknown | unknown | unknown | current |
+| Ps | implemented | unknown | unknown | unknown | unknown | current |
+| Chats | implemented | unknown | unknown | partial | unknown | current |
+| Alias | implemented | unknown | unknown | partial | partial | current |
+| Mcp | implemented | unknown | unknown | unknown | partial | current |
+| Serve | implemented | unknown | unknown | partial | partial | current |
 
-Zero rows is a valid label. Candidates are not confirmed capabilities.
-Within the eligible confirmed scope: 0 registered, 0 selected, and 0 not selected.
+Within the eligible confirmed scope: 12 registered, 12 selected, and 0 not selected.
 
-Docs: 0 of 0 assessed capabilities have linked evidence. Of 0 eligible capabilities, 0 are partially assessed, 0 unassessed, 0 not applicable, and 0 undisclosed.
-Tests: 0 of 0 assessed capabilities have linked evidence. Of 0 eligible capabilities, 0 are partially assessed, 0 unassessed, 0 not applicable, and 0 undisclosed.
+Docs: 0 of 0 assessed capabilities have linked evidence. Of 12 eligible capabilities, 9 are partially assessed, 3 unassessed, 0 not applicable, and 0 undisclosed.
+Tests: 0 of 0 assessed capabilities have linked evidence. Of 12 eligible capabilities, 6 are partially assessed, 6 unassessed, 0 not applicable, and 0 undisclosed.
 
 Linked evidence is not a claim that tests pass or documentation is adequate.
 
