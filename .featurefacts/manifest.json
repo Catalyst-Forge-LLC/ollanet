@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-1f46561b97b9",
+  "scan_id": "scan-c8f3bcfae2b5",
   "tool": "featurefacts",
   "tool_version": "0.2.6",
-  "generated_at": "2026-10-21T23:44:28.620-04:00",
+  "generated_at": "2026-10-22T08:54:55.709-04:00",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -889,7 +889,7 @@
     },
     {
       "id": "typescript-node-surface",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "kind": "surface",
       "state": "completed",
       "eligible_files": [
@@ -1029,9 +1029,9 @@
   "fingerprints": {
     "source": "193944bc43e79d24ea20bb84b692993caa2a80b2430c6a0464381e17fda7e087",
     "config": "0778aff434cfcbd601f90006830e8eda97bd08acd9ccb215b657aadd1520a3ed",
-    "adapters": "61f890ea77d8a825fa0992ca875025aceb7ced0af5aa4563bb34ced176a6e35c",
+    "adapters": "04d451e412ce42b8c594b784923933b2dba060dfc0acaafcafd74c212714058d",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "5ef755a07e2cb7a6b29e956c127a8e716da77930bb432de3fe1961e7e7fb5a5b",
+    "registry": "d1d5e5973495ff2b94fc8271813819927b3e6359ac87eba79323a7927a00352a",
     "projection": "6110fde333675976f64481a0476d178a8059ea5976fcf07ad6cfd4c8331af005"
   },
   "artifacts": [
@@ -1041,31 +1041,31 @@
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "1362652f96dd07f7e253ea613582796a82e8923177081395a882ff3711c5f641"
+      "sha256": "02bf10d82d8a0fe52b0c961e2545fc49b57d514627fcdd44260b32e46190e205"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "1d0910b5d374a0dc65b33b73bb575c599ecc4715f1c871dda283849b70e1ac6f"
+      "sha256": "93fa7f3990e097aa068aa5abdf525d3e53bcd42d9ae15a10580b7e6f8e361094"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "1837eec3c8fdc37fd8ddf34fe59908f5da1792df26eded6064b57f05dbd92ed1"
+      "sha256": "d4486ee654a59dc15d17672fa8ca32d2fab08c0f3cf5e8b80133d3cd15d92fbe"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "bfcb8fd09c840e5a80ff2d4ab815cd95f3a6590389aefdc7b8e0e2ed6b4da919"
+      "sha256": "cc0077e6c907daf1029436d54e2b20298e2d77dc83d69a0fe6d18e8a650fa4d4"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "31bddb3413a0fa8bd9af9db00b6c0948aadd34ee3e108d6cb8eb7afc2db676d8"
+      "sha256": "1b338dedd84eb4f7aeb068a08dcd3e1f991fabe8f4cd7e4ca872efaf9fce5f48"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "b93d35e023ce17365b8dd8f9bb2eb128a7c658302566870825287960234aec5c"
+      "sha256": "d747e8c4ea1ba36171782248b79343afab7350f1d7e414996d2593e36471cf22"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "a8dac2446e8a5f1a42df00249d5d29878caf095025ceedd6f9530472ac6a6950"
+      "sha256": "04676a92a1a22fe229a512bff96a3b6cd996b44469b19444d872424fe88f2239"
     },
     {
       "path": "FEATURE_FACTS.md",

@@ -1,6 +1,6 @@
 # Feature register: ollanet
 
-Scan `scan-1f46561b97b9`. Candidates are not confirmed capabilities.
+Scan `scan-c8f3bcfae2b5`. Candidates are not confirmed capabilities.
 
 | ID | Name | Recognition | Lifecycle | Availability | Docs | Tests | Observation |
 |---|---|---|---|---|---|---|---|
@@ -9,9 +9,7 @@ Scan `scan-1f46561b97b9`. Candidates are not confirmed capabilities.
 | `cmd-chats` | Chats | confirmed | implemented | unknown | linked-evidence | unknown | current |
 | `cmd-compare` | Compare | confirmed | implemented | unknown | linked-evidence | linked-evidence | current |
 | `cmd-help` | Help | candidate | unknown | unknown | unknown | unknown | current |
-| `cmd-initialize` | Initialize | candidate | unknown | unknown | unknown | unknown | stale |
 | `cmd-mcp` | Mcp | confirmed | implemented | unknown | unknown | linked-evidence | current |
-| `cmd-ping` | Ping | candidate | unknown | unknown | linked-evidence | unknown | stale |
 | `cmd-prompt` | Prompt | confirmed | implemented | unknown | linked-evidence | unknown | current |
 | `cmd-ps` | Ps | confirmed | implemented | unknown | unknown | unknown | current |
 | `cmd-pull` | Pull | confirmed | implemented | unknown | linked-evidence | linked-evidence | current |

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-1f46561b97b9",
+  "scan_id": "scan-c8f3bcfae2b5",
   "kind": "docs",
   "assessments": [
     {
@@ -96,18 +96,6 @@
       }
     },
     {
-      "feature_id": "cmd-initialize",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
       "feature_id": "cmd-mcp",
       "assessment": {
         "state": "unassessed",
@@ -117,23 +105,6 @@
         ],
         "links": [],
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-ping",
-      "assessment": {
-        "state": "partial",
-        "result": "linked-evidence",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [
-          {
-            "surface_id": "doc-docs-bench-spec",
-            "association": "static-reference"
-          }
-        ],
-        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
