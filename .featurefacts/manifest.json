@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-c8f3bcfae2b5",
+  "scan_id": "scan-80a4cf91aabb",
   "tool": "featurefacts",
   "tool_version": "0.2.6",
-  "generated_at": "2026-10-22T08:54:55.709-04:00",
+  "generated_at": "2026-10-22T13:48:18.037-04:00",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -134,8 +134,8 @@
       },
       {
         "path": "README.md",
-        "sha256": "76ea2b63360e9e05bdf572ed860341709a5208f7cba00ebe3f22475b9cc2f490",
-        "bytes": 6703,
+        "sha256": "108977513010bbdc2887c034bd141988da4520c22d004a16b2692a41594de781",
+        "bytes": 6696,
         "eligible_adapter_ids": [
           "typescript-tree",
           "markdown-document"
@@ -238,8 +238,8 @@
       },
       {
         "path": "src/cli.ts",
-        "sha256": "3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e",
-        "bytes": 7163,
+        "sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
+        "bytes": 6319,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -576,8 +576,8 @@
       },
       {
         "path": "test/cli.test.mjs",
-        "sha256": "f84f5aade08d0b95e625464b84f0cb360108c3f5e7b4b59073993007dbb0df3e",
-        "bytes": 22301,
+        "sha256": "56cff4990b6103bb7a840b90f5f924c0553c707d8f82630238556825d398b7bc",
+        "bytes": 22747,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-test"
@@ -889,7 +889,7 @@
     },
     {
       "id": "typescript-node-surface",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "kind": "surface",
       "state": "completed",
       "eligible_files": [
@@ -1027,11 +1027,11 @@
   ],
   "rules_version": "featurefacts-core@0.2.0",
   "fingerprints": {
-    "source": "193944bc43e79d24ea20bb84b692993caa2a80b2430c6a0464381e17fda7e087",
+    "source": "3b5a2510222bd2163bf04e597d7040a7bf7aea7740b6c2454c542842d991f439",
     "config": "0778aff434cfcbd601f90006830e8eda97bd08acd9ccb215b657aadd1520a3ed",
-    "adapters": "04d451e412ce42b8c594b784923933b2dba060dfc0acaafcafd74c212714058d",
+    "adapters": "bfa59a2c62e4f45e5bade6f848e11727f03db8c185a16f19beaa6f857876c223",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "d1d5e5973495ff2b94fc8271813819927b3e6359ac87eba79323a7927a00352a",
+    "registry": "f9c46cb109149d2671e4317450f426a996f6a9d7919810c63f166be78f4272d4",
     "projection": "6110fde333675976f64481a0476d178a8059ea5976fcf07ad6cfd4c8331af005"
   },
   "artifacts": [
@@ -1041,31 +1041,31 @@
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "02bf10d82d8a0fe52b0c961e2545fc49b57d514627fcdd44260b32e46190e205"
+      "sha256": "4de14fed218f1d4742cb135c6a732216a338b357cd73f0973e730437cf6cfa9b"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "93fa7f3990e097aa068aa5abdf525d3e53bcd42d9ae15a10580b7e6f8e361094"
+      "sha256": "b9146fed9cba628107654799a5eae7ae9e541381c6f1fa7c97770fd57e157545"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "d4486ee654a59dc15d17672fa8ca32d2fab08c0f3cf5e8b80133d3cd15d92fbe"
+      "sha256": "e50c5a2da9ba7c450fc0dd28730c07441fb0189b3ae456b067f02a535c0beef8"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "cc0077e6c907daf1029436d54e2b20298e2d77dc83d69a0fe6d18e8a650fa4d4"
+      "sha256": "3b26aafff3a3e1292628183407524699663d3ffafcf45aa9448c9a8e4b60cc5e"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "1b338dedd84eb4f7aeb068a08dcd3e1f991fabe8f4cd7e4ca872efaf9fce5f48"
+      "sha256": "e19b3f4e87cd089f121cb673ef41f9e4ae28ea54096c5e3da2765d9b51bcda04"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "d747e8c4ea1ba36171782248b79343afab7350f1d7e414996d2593e36471cf22"
+      "sha256": "e65b80e2779429113310bcda3913046862e248135bf556ec382e9d53b49146de"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "04676a92a1a22fe229a512bff96a3b6cd996b44469b19444d872424fe88f2239"
+      "sha256": "e7ffef3eb84d3ba962942d90710840407d079079295cf145fe675ee80a823619"
     },
     {
       "path": "FEATURE_FACTS.md",
