@@ -16,9 +16,6 @@
  */
 
 const HELP = `ollanet: find, manage, and use Ollama on hosts you choose
-
-Discover hosts, manage models, prompt and compare, bench tok/s, and continue
-chats by hash. CLI for humans, MCP for agents, Node for apps.
 A reachable host is not a trusted host. pull and rm change the remote host.
 
 Usage:
@@ -44,29 +41,15 @@ Usage:
 
 Examples:
   ollanet scan
-  ollanet scan --lan
-  ollanet scan --last            # print the last saved scan (no network)
-  ollanet prompt localhost "What is MagicDNS?"
-  ollanet prompt localhost --file ./notes.md
-  git diff | ollanet prompt desk "Review this" --stdin -q
-  ollanet compare studio gemma3:12b llama3.2:3b
-  ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
-  ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
-  ollanet pull studio gemma3:12b
-  ollanet show studio gemma4-ctx32k
-  ollanet rm studio llama3.2:1b --yes
-  ollanet ps studio
-  ollanet chats
   ollanet alias add desk studio gemma3:12b
-  ollanet prompt desk "hello"  # expands machine + model
-  ollanet bench localhost --all
+  ollanet prompt desk "What is MagicDNS?"   # desk = studio + gemma3:12b
+  git diff | ollanet prompt desk "Review this" --stdin -q
+  ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
+  ollanet compare studio gemma3:12b llama3.2:3b
+  ollanet pull studio gemma3:12b
   ollanet bench localhost llama3.2:1b --runs 3
-  ollanet bench localhost gemma3:12b --hot --runs 5
-  ollanet help bench           # flags for one command (also: ollanet bench help)
-  ollanet mcp                  # stdio MCP server for agents
-  ollanet serve token add cloud-agent --expires 30d
-  ollanet serve --funnel       # catalog on https://<device>.<tailnet>.ts.net/
-  ollanet serve token prune    # expired, or unused 30+ days (asks first)
+
+Every flag and more examples: ollanet help <command>  (or ollanet <command> --help)
 
 Quiet:  -q / --quiet on any command (or OLLANET_QUIET=1): results on stdout,
         stderr only for errors and warnings

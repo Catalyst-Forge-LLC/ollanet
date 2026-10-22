@@ -593,6 +593,16 @@ describe("command help", () => {
     assert.equal(res.code, 0, res.stderr);
     assert.match(res.stdout, /ollanet help \[command\]/);
     assert.match(res.stdout, /ollanet bench/);
+    assert.match(res.stdout, /ollanet help <command>/);
+  });
+
+  it("has its own help for every command the overview points to", async () => {
+    const { commandNames } = await import("../dist/help.js");
+    for (const name of commandNames()) {
+      const res = await runCli(["help", name]);
+      assert.equal(res.code, 0, `help ${name}\n${res.stderr}`);
+      assert.match(res.stdout, new RegExp(`ollanet ${name}\\b`), `help ${name}`);
+    }
   });
 
   it("prints bench flags on help bench, bench help, and bench --help", async () => {
