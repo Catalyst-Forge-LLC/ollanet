@@ -4,9 +4,7 @@
 
 # ollanet
 
-Find, manage, and use Ollama models on the hosts you choose.
-
-**CLI** for humans · **MCP** for agents · **Node** for apps.
+Find, manage, and use Ollama models on the hosts you choose, from a CLI, an MCP server for agents, or a Node library.
 
 Discover hosts, give models convenient aliases, and prompt or compare them. A reachable host is not a trusted host. LAN scan is opt-in. Node 20+, zero runtime deps.
 
