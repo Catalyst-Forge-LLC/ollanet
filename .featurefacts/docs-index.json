@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-f40020c51e81",
+  "scan_id": "scan-1f46561b97b9",
   "kind": "docs",
   "assessments": [
     {
@@ -18,30 +18,6 @@
           }
         ],
         "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
-      }
-    },
-    {
-      "feature_id": "cmd-aliases",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-ask",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       }
     },
     {
@@ -71,30 +47,6 @@
           }
         ],
         "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
-      }
-    },
-    {
-      "feature_id": "cmd-benchmark",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-chat",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       }
     },
     {
@@ -132,42 +84,6 @@
       }
     },
     {
-      "feature_id": "cmd-delete",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-download",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-h2h",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
       "feature_id": "cmd-help",
       "assessment": {
         "state": "unassessed",
@@ -180,67 +96,7 @@
       }
     },
     {
-      "feature_id": "cmd-history",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
       "feature_id": "cmd-initialize",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-inspect",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-loaded",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-ls",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "cmd-ls-servers",
       "assessment": {
         "state": "unassessed",
         "result": "unknown",
@@ -444,28 +300,6 @@
           }
         ],
         "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
-      }
-    },
-    {
-      "feature_id": "cmd-vs",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [
-          "markdown-document"
-        ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
-      }
-    },
-    {
-      "feature_id": "ollanet",
-      "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
-        "adapter_ids": [],
-        "links": [],
-        "reason": "Documentation was not assessed."
       }
     }
   ]

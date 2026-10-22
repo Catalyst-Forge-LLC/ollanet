@@ -1,5 +1,5 @@
 schemaVersion: 0.2.0
-scan_id: scan-f40020c51e81
+scan_id: scan-1f46561b97b9
 product:
   name: ollanet
   type: typescript-node
@@ -28,6 +28,7 @@ features:
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
       - cmd-alias
+      - cmd-aliases
     implements: []
     dependencies: []
     docs:
@@ -50,7 +51,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-alias-capability
@@ -68,7 +69,7 @@ features:
           symbol: alias
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-alias-recognition
@@ -95,7 +96,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-aliases
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -103,152 +105,6 @@ features:
     id: cmd-alias
     name: Alias
     description: "Observed implementation surfaces: cmd-alias. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-aliases
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-aliases-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-aliases. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 210
-          end_line: 210
-          symbol: aliases
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-aliases
-    name: Aliases
-    description: "Observed implementation surfaces: cmd-aliases. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-ask
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-ask-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-ask. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 149
-          end_line: 149
-          symbol: ask
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-ask
-    name: Ask
-    description: "Observed implementation surfaces: cmd-ask. Candidate only until a maintainer confirms the product meaning."
   - type: feature
     recognition: confirmed
     lifecycle: implemented
@@ -272,6 +128,7 @@ features:
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
       - cmd-bench
+      - cmd-benchmark
     implements: []
     dependencies: []
     docs:
@@ -300,7 +157,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-bench-capability
@@ -318,7 +175,7 @@ features:
           symbol: bench
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-bench-recognition
@@ -345,7 +202,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-benchmark
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -353,152 +211,6 @@ features:
     id: cmd-bench
     name: Bench
     description: "Observed implementation surfaces: cmd-bench. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-benchmark
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-benchmark-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-benchmark. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 194
-          end_line: 194
-          symbol: benchmark
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-benchmark
-    name: Benchmark
-    description: "Observed implementation surfaces: cmd-benchmark. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-chat
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-chat-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-chat. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 150
-          end_line: 150
-          symbol: chat
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-chat
-    name: Chat
-    description: "Observed implementation surfaces: cmd-chat. Candidate only until a maintainer confirms the product meaning."
   - type: feature
     recognition: confirmed
     lifecycle: implemented
@@ -522,6 +234,8 @@ features:
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
       - cmd-chats
+      - cmd-history
+      - cmd-ls
     implements: []
     dependencies: []
     docs:
@@ -542,7 +256,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-chats-capability
@@ -560,7 +274,7 @@ features:
           symbol: chats
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-chats-recognition
@@ -587,7 +301,9 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-history
+        - cmd-ls
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -618,6 +334,8 @@ features:
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
       - cmd-compare
+      - cmd-h2h
+      - cmd-vs
     implements: []
     dependencies: []
     docs:
@@ -640,7 +358,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-compare-capability
@@ -658,7 +376,7 @@ features:
           symbol: compare
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-compare-recognition
@@ -685,7 +403,9 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-h2h
+        - cmd-vs
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -693,225 +413,6 @@ features:
     id: cmd-compare
     name: Compare
     description: "Observed implementation surfaces: cmd-compare. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-delete
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-delete-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-delete. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 175
-          end_line: 175
-          symbol: delete
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-delete
-    name: Delete
-    description: "Observed implementation surfaces: cmd-delete. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-download
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-download-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-download. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 163
-          end_line: 163
-          symbol: download
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-download
-    name: Download
-    description: "Observed implementation surfaces: cmd-download. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-h2h
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-h2h-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-h2h. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 188
-          end_line: 188
-          symbol: h2h
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-h2h
-    name: H2h
-    description: "Observed implementation surfaces: cmd-h2h. Candidate only until a maintainer confirms the product meaning."
   - type: surface-cluster
     recognition: candidate
     lifecycle: unknown
@@ -953,7 +454,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-help-capability
@@ -971,7 +472,7 @@ features:
           symbol: help
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -985,79 +486,6 @@ features:
     id: cmd-help
     name: Help
     description: "Observed implementation surfaces: cmd-help. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-history
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-history-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-history. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 157
-          end_line: 157
-          symbol: history
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-history
-    name: History
-    description: "Observed implementation surfaces: cmd-history. Candidate only until a maintainer confirms the product meaning."
   - type: surface-cluster
     recognition: candidate
     lifecycle: unknown
@@ -1131,298 +559,6 @@ features:
     id: cmd-initialize
     name: Initialize
     description: "Observed implementation surfaces: cmd-initialize. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-inspect
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-inspect-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-inspect. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 169
-          end_line: 169
-          symbol: inspect
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-inspect
-    name: Inspect
-    description: "Observed implementation surfaces: cmd-inspect. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-loaded
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-loaded-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-loaded. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 181
-          end_line: 181
-          symbol: loaded
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-loaded
-    name: Loaded
-    description: "Observed implementation surfaces: cmd-loaded. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-ls
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-ls-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-ls. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 156
-          end_line: 156
-          symbol: ls
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-ls
-    name: Ls
-    description: "Observed implementation surfaces: cmd-ls. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-ls-servers
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-ls-servers-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-ls-servers. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 143
-          end_line: 143
-          symbol: ls-servers
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-ls-servers
-    name: Ls Servers
-    description: "Observed implementation surfaces: cmd-ls-servers. Candidate only until a maintainer confirms the product meaning."
   - type: feature
     recognition: confirmed
     lifecycle: implemented
@@ -1466,7 +602,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-mcp-capability
@@ -1484,7 +620,7 @@ features:
           symbol: mcp
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-mcp-recognition
@@ -1616,6 +752,8 @@ features:
       scope: internal
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
+      - cmd-ask
+      - cmd-chat
       - cmd-prompt
     implements: []
     dependencies: []
@@ -1643,7 +781,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-prompt-capability
@@ -1656,12 +794,12 @@ features:
         locator:
           path: src/cli.ts
           content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 148
-          end_line: 148
+          start_line: 149
+          end_line: 149
           symbol: prompt
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-prompt-recognition
@@ -1688,7 +826,9 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-ask
+        - cmd-chat
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -1718,6 +858,7 @@ features:
       scope: internal
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
+      - cmd-loaded
       - cmd-ps
     implements: []
     dependencies: []
@@ -1737,7 +878,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-ps-capability
@@ -1750,12 +891,12 @@ features:
         locator:
           path: src/cli.ts
           content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 180
-          end_line: 180
+          start_line: 181
+          end_line: 181
           symbol: ps
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-ps-recognition
@@ -1782,7 +923,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-loaded
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -1812,6 +954,7 @@ features:
       scope: internal
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
+      - cmd-download
       - cmd-pull
     implements: []
     dependencies: []
@@ -1839,7 +982,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-pull-capability
@@ -1852,12 +995,12 @@ features:
         locator:
           path: src/cli.ts
           content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 162
-          end_line: 162
+          start_line: 163
+          end_line: 163
           symbol: pull
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-pull-recognition
@@ -1884,7 +1027,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-download
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -1914,6 +1058,7 @@ features:
       scope: internal
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
+      - cmd-delete
       - cmd-rm
     implements: []
     dependencies: []
@@ -1933,7 +1078,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-rm-capability
@@ -1946,12 +1091,12 @@ features:
         locator:
           path: src/cli.ts
           content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 174
-          end_line: 174
+          start_line: 175
+          end_line: 175
           symbol: rm
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-rm-recognition
@@ -1978,7 +1123,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-delete
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -2008,6 +1154,7 @@ features:
       scope: internal
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
+      - cmd-ls-servers
       - cmd-scan
     implements: []
     dependencies: []
@@ -2035,7 +1182,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-scan-capability
@@ -2048,12 +1195,12 @@ features:
         locator:
           path: src/cli.ts
           content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 142
-          end_line: 142
+          start_line: 143
+          end_line: 143
           symbol: scan
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-scan-recognition
@@ -2080,7 +1227,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-ls-servers
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -2133,7 +1281,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-serve-capability
@@ -2151,7 +1299,7 @@ features:
           symbol: serve
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-serve-recognition
@@ -2208,6 +1356,7 @@ features:
       scope: internal
       reason: Internal is the conservative default. Public permission requires an attributed declaration.
     entry_points:
+      - cmd-inspect
       - cmd-show
     implements: []
     dependencies: []
@@ -2233,7 +1382,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-show-capability
@@ -2246,12 +1395,12 @@ features:
         locator:
           path: src/cli.ts
           content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 168
-          end_line: 168
+          start_line: 169
+          end_line: 169
           symbol: show
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
       - id: cmd-show-recognition
@@ -2278,7 +1427,8 @@ features:
           recorded_at: 2026-10-20T13:44:45.224Z
     editorial:
       locked: []
-      aliases: []
+      aliases:
+        - cmd-inspect
       notes: ""
     uncertainty_reasons:
       maturity: No attributed maturity declaration.
@@ -2329,7 +1479,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-f40020c51e81
+      last_seen_scan_id: scan-1f46561b97b9
       reason: Current source evidence is available.
     evidence:
       - id: cmd-version-capability
@@ -2347,7 +1497,7 @@ features:
           symbol: version
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
+          adapter_version: 0.2.3
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2361,140 +1511,4 @@ features:
     id: cmd-version
     name: Version
     description: "Observed implementation surfaces: cmd-version. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability is a declaration. Source presence is not a deployment check.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: Discovery surfaces were not assessed beyond extracted entry points.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: Internal is the conservative default. Public permission requires an attributed declaration.
-    entry_points:
-      - cmd-vs
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - markdown-document
-      links: []
-      reason: No explicit documentation association. Filename resemblance is not an accepted link.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids:
-        - typescript-test
-      links: []
-      reason: No explicit test association. A similar test filename is only a proposal.
-    observation:
-      state: current
-      last_seen_scan_id: scan-f40020c51e81
-      reason: Current source evidence is available.
-    evidence:
-      - id: cmd-vs-capability
-        kind: observed
-        state: current
-        assertion:
-          field: capability
-          value: "Observed implementation surfaces: cmd-vs. Candidate only until a maintainer confirms the product meaning."
-          claim: Static extraction found implementation surfaces. This is not confirmation.
-        locator:
-          path: src/cli.ts
-          content_sha256: 3c6d4f64338e95ae7fae64e1bdcfe62e3069784fe512950cbc021009b8c87f3e
-          start_line: 187
-          end_line: 187
-          symbol: vs
-        provenance:
-          adapter_id: typescript-node-surface
-          adapter_version: 0.2.2
-          origin: deterministic
-          method: surface-cluster
-    editorial:
-      locked: []
-      aliases: []
-      notes: ""
-    uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
-      maturity: No attributed maturity declaration.
-      intent: Discovery intent was not declared.
-    id: cmd-vs
-    name: Vs
-    description: "Observed implementation surfaces: cmd-vs. Candidate only until a maintainer confirms the product meaning."
-  - id: ollanet
-    name: ollanet
-    description: Find, manage, and use Ollama models on the hosts you choose. CLI for humans, MCP for agents, Node for apps
-    type: feature
-    recognition: candidate
-    lifecycle: unknown
-    availability:
-      state: unknown
-      conditions: []
-      reason: Availability was not declared.
-    maturity: unknown
-    audiences:
-      state: unknown
-      values: []
-      reason: Audience was not declared.
-    discovery:
-      state: unassessed
-      surfaces: []
-      adapter_ids: []
-      reason: No command surface was extracted.
-    intent: unknown
-    publication:
-      scope: internal
-      reason: A scan candidate stays internal until a maintainer publishes it.
-    entry_points: []
-    implements: []
-    dependencies: []
-    docs:
-      state: unassessed
-      result: unknown
-      adapter_ids: []
-      links: []
-      reason: Documentation was not assessed.
-    tests:
-      state: unassessed
-      result: unknown
-      adapter_ids: []
-      links: []
-      reason: Tests were not assessed.
-    observation:
-      state: stale
-      last_seen_scan_id: scan-add
-      reason: Previous locators were not observed in this scan. The record is retained; it is not retired.
-    evidence:
-      - id: ev-package
-        kind: declared
-        state: stale
-        assertion:
-          field: capability
-          value: Find, manage, and use Ollama models on the hosts you choose. CLI for humans, MCP for agents, Node for apps
-          claim: package.json names this package. This is not a confirmed capability list.
-        declaration:
-          actor: xfacts-add-labels
-          source: package.json
-          recorded_at: 2026-09-29T19:42:06.182Z
-    editorial:
-      locked: []
-      aliases: []
-      notes: Candidate only. FeatureFacts scan found no capability to confirm.
-    uncertainty_reasons:
-      lifecycle: package.json does not establish release status.
-      maturity: No maturity was declared.
-      intent: Discovery intent was not declared.
 redirects: []
