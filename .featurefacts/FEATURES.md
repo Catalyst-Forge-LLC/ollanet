@@ -1,6 +1,6 @@
 # Feature register: ollanet
 
-Scan `scan-eba3c46b8457`. Candidates are not confirmed capabilities.
+Scan `scan-f40020c51e81`. Candidates are not confirmed capabilities.
 
 | ID | Name | Recognition | Lifecycle | Availability | Docs | Tests | Observation |
 |---|---|---|---|---|---|---|---|
@@ -17,13 +17,13 @@ Scan `scan-eba3c46b8457`. Candidates are not confirmed capabilities.
 | `cmd-h2h` | H2h | candidate | unknown | unknown | unknown | unknown | current |
 | `cmd-help` | Help | candidate | unknown | unknown | unknown | unknown | current |
 | `cmd-history` | History | candidate | unknown | unknown | unknown | unknown | current |
-| `cmd-initialize` | Initialize | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-initialize` | Initialize | candidate | unknown | unknown | unknown | unknown | stale |
 | `cmd-inspect` | Inspect | candidate | unknown | unknown | unknown | unknown | current |
 | `cmd-loaded` | Loaded | candidate | unknown | unknown | unknown | unknown | current |
 | `cmd-ls` | Ls | candidate | unknown | unknown | unknown | unknown | current |
 | `cmd-ls-servers` | Ls Servers | candidate | unknown | unknown | unknown | unknown | current |
 | `cmd-mcp` | Mcp | confirmed | implemented | unknown | unknown | linked-evidence | current |
-| `cmd-ping` | Ping | candidate | unknown | unknown | linked-evidence | unknown | current |
+| `cmd-ping` | Ping | candidate | unknown | unknown | linked-evidence | unknown | stale |
 | `cmd-prompt` | Prompt | confirmed | implemented | unknown | linked-evidence | unknown | current |
 | `cmd-ps` | Ps | confirmed | implemented | unknown | unknown | unknown | current |
 | `cmd-pull` | Pull | confirmed | implemented | unknown | linked-evidence | linked-evidence | current |

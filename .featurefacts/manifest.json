@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-eba3c46b8457",
+  "scan_id": "scan-f40020c51e81",
   "tool": "featurefacts",
-  "tool_version": "0.2.0",
-  "generated_at": "2026-10-20T13:45:54.828Z",
+  "tool_version": "0.2.6",
+  "generated_at": "2026-10-22T03:15:37.390Z",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -541,12 +541,10 @@
         "bytes": 4150,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -556,12 +554,10 @@
         "bytes": 2524,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -571,12 +567,10 @@
         "bytes": 17960,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -586,12 +580,10 @@
         "bytes": 22301,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -601,12 +593,10 @@
         "bytes": 8684,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -615,12 +605,10 @@
         "sha256": "7c1568c0781dcb340660f41f177019b9482aa5187e806687f4b0f1919df60044",
         "bytes": 1588,
         "eligible_adapter_ids": [
-          "typescript-tree",
-          "typescript-node-surface"
+          "typescript-tree"
         ],
         "inspected_by": [
-          "typescript-tree",
-          "typescript-node-surface"
+          "typescript-tree"
         ]
       },
       {
@@ -629,12 +617,10 @@
         "bytes": 10539,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -643,12 +629,10 @@
         "sha256": "0cf6bb7c1a147003452ffba0a924db4d3849c117610b06268ae3e074ff78616a",
         "bytes": 13728,
         "eligible_adapter_ids": [
-          "typescript-tree",
-          "typescript-node-surface"
+          "typescript-tree"
         ],
         "inspected_by": [
-          "typescript-tree",
-          "typescript-node-surface"
+          "typescript-tree"
         ]
       },
       {
@@ -657,12 +641,10 @@
         "bytes": 7543,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -672,12 +654,10 @@
         "bytes": 6129,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -687,12 +667,10 @@
         "bytes": 8368,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -702,12 +680,10 @@
         "bytes": 2071,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -717,12 +693,10 @@
         "bytes": 3715,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -732,12 +706,10 @@
         "bytes": 10373,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -747,12 +719,10 @@
         "bytes": 9212,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -762,12 +732,10 @@
         "bytes": 13658,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       }
@@ -921,7 +889,7 @@
     },
     {
       "id": "typescript-node-surface",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "kind": "surface",
       "state": "completed",
       "eligible_files": [
@@ -955,23 +923,7 @@
         "src/serve.ts",
         "src/show.ts",
         "src/target.ts",
-        "src/tuned.ts",
-        "test/alias.test.mjs",
-        "test/bench-suite.test.mjs",
-        "test/bench.test.mjs",
-        "test/cli.test.mjs",
-        "test/compare.test.mjs",
-        "test/fixtures/fake-tailscale.mjs",
-        "test/funnel.test.mjs",
-        "test/helpers.mjs",
-        "test/library.test.mjs",
-        "test/manage.test.mjs",
-        "test/mcp.test.mjs",
-        "test/publish-gate.test.mjs",
-        "test/pull.test.mjs",
-        "test/serve-tokens.test.mjs",
-        "test/serve.test.mjs",
-        "test/unit.test.mjs"
+        "src/tuned.ts"
       ],
       "inspected_files": [
         "package.json",
@@ -1004,23 +956,7 @@
         "src/serve.ts",
         "src/show.ts",
         "src/target.ts",
-        "src/tuned.ts",
-        "test/alias.test.mjs",
-        "test/bench-suite.test.mjs",
-        "test/bench.test.mjs",
-        "test/cli.test.mjs",
-        "test/compare.test.mjs",
-        "test/fixtures/fake-tailscale.mjs",
-        "test/funnel.test.mjs",
-        "test/helpers.mjs",
-        "test/library.test.mjs",
-        "test/manage.test.mjs",
-        "test/mcp.test.mjs",
-        "test/publish-gate.test.mjs",
-        "test/pull.test.mjs",
-        "test/serve-tokens.test.mjs",
-        "test/serve.test.mjs",
-        "test/unit.test.mjs"
+        "src/tuned.ts"
       ],
       "diagnostics": []
     },
@@ -1091,11 +1027,11 @@
   ],
   "rules_version": "featurefacts-core@0.2.0",
   "fingerprints": {
-    "source": "e60dd2363a252c706ef348851435d222843cf8ff7967eae7cca5e9d997d80592",
+    "source": "193944bc43e79d24ea20bb84b692993caa2a80b2430c6a0464381e17fda7e087",
     "config": "0778aff434cfcbd601f90006830e8eda97bd08acd9ccb215b657aadd1520a3ed",
-    "adapters": "4abbb8741b08bcd3aa308ef9c93d4a55fd7feb6d4a98f89297831ab85b15b1eb",
+    "adapters": "9a62745dc3fd15d7c60f9f44d5f62ca8329b8c59dbe3360efbdd40c289da135e",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "879c7cd6c9eafdd8baaa9f6dfd959fb574e5ed51328dd3b61f32c2ea7322071e",
+    "registry": "33b01d2afbe7e7d92f2da7a137f234d9f0d06eadf13aaa2d2403f08920079bf9",
     "projection": "6110fde333675976f64481a0476d178a8059ea5976fcf07ad6cfd4c8331af005"
   },
   "artifacts": [
@@ -1105,31 +1041,31 @@
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "ffa45c56f4eafc360ea3115900670fee3042005188cb48b563cdff543493cd39"
+      "sha256": "eec70716ba57b535c3cb8715929c49c2200affb83c25687cb8213a8b691aeca8"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "449f79936b4c9d7149d2bdb55d09335602449a279bad69faab0712c1e770f501"
+      "sha256": "9e3756e93dce89da661a8935aa71eb66ae07ea818c0c5eb3d8772be32784653e"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "7a65164fc8a51e929dc29845cd61fd92cb0b10cca1015dcd52e179fa581b42d1"
+      "sha256": "b37dd687b10786ac704fd4c5e6c86505b9839ec6258c67e7d8859c53c2f664da"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "ed642a0c9f03b549a483c643ad8a48d8294c21feed839da19c2778a8d12ac4e6"
+      "sha256": "57eef8261be3053003fc84feaeb3c862f92b5c2ce5f2a791aa88ea2d5f41c773"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "ed7c73edcb6e3fa0d2a8e95cc149fd102743c6b7eecc318dbdf325c0f94b8f36"
+      "sha256": "34010f4d2855caab1dfdc598528cc97d596248b75917f73cebffb91b931561f8"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "939575b4f99e0ab68fc20913f94842965eff8befb7d3a4d9323c46a2a68d8343"
+      "sha256": "02a033a1b0f19d5952a64962461bfdae44c8d0d5aac5e855763b93b493613ce8"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "24794f910e27c9762a254e5f34878285d14aa573ebe9506c11d8c886a8a48aea"
+      "sha256": "112ff94ca1f9839adbcd36de1ec472dd4fdcb538073dda1ca2daa442808a2b5f"
     },
     {
       "path": "FEATURE_FACTS.md",
