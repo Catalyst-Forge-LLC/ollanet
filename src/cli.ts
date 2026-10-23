@@ -40,14 +40,43 @@ Usage:
   ollanet help [command]
 
 Examples:
-  ollanet scan
-  ollanet alias add desk studio gemma3:12b
-  ollanet prompt desk "What is MagicDNS?"   # desk = studio + gemma3:12b
-  git diff | ollanet prompt desk "Review this" --stdin -q
-  ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
-  ollanet compare studio gemma3:12b llama3.2:3b
-  ollanet pull studio gemma3:12b
-  ollanet bench localhost llama3.2:1b --runs 3
+  Find hosts
+    ollanet scan
+    ollanet scan --lan                # also sweep your subnet on port 11434 (opt-in)
+    ollanet scan --last               # print the last saved scan (no network)
+
+  Prompt and chat
+    ollanet prompt localhost "What is MagicDNS?"
+    ollanet prompt localhost --file ./notes.md
+    ollanet alias add desk studio gemma3:12b
+    ollanet prompt desk "hello"       # expands machine + model
+    git diff | ollanet prompt desk "Review this" --stdin -q
+    ollanet prompt --chat a1b2c3d4e5f6 "Tell me more"
+    ollanet chats
+
+  Compare and bench
+    ollanet compare studio gemma3:12b llama3.2:3b
+    ollanet compare studio gemma3:12b llama3.2:3b --prompt "Explain MagicDNS"
+    ollanet bench localhost --all
+    ollanet bench localhost llama3.2:1b --runs 3
+    ollanet bench localhost gemma3:12b --hot --runs 5
+
+  Manage models (pull and rm change the remote host)
+    ollanet pull studio gemma3:12b
+    ollanet show studio gemma4-ctx32k
+    ollanet rm studio llama3.2:1b --yes
+    ollanet ps studio
+
+  Share a read-only catalog
+    ollanet serve token add cloud-agent --expires 30d
+    ollanet serve --funnel            # catalog on https://<device>.<tailnet>.ts.net/
+    ollanet serve status              # local and Funnel URLs of the running server
+    ollanet serve label set studio gpu-box   # agents see gpu-box, not the host name
+    ollanet serve token prune         # expired, or unused 30+ days (asks first)
+
+  Agents and scripts
+    ollanet mcp                       # stdio MCP server for agents
+    ollanet scan --json -q            # machine-readable hosts and models
 
 Every flag and more examples: ollanet help <command>  (or ollanet <command> --help)
 

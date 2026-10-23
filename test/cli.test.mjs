@@ -594,6 +594,9 @@ describe("command help", () => {
     assert.match(res.stdout, /ollanet help \[command\]/);
     assert.match(res.stdout, /ollanet bench/);
     assert.match(res.stdout, /ollanet help <command>/);
+    for (const group of ["Find hosts", "Prompt and chat", "Compare and bench", "Manage models", "Share a read-only catalog", "Agents and scripts"]) {
+      assert.match(res.stdout, new RegExp(`^  ${group}`, "m"), group);
+    }
   });
 
   it("has its own help for every command the overview points to", async () => {
