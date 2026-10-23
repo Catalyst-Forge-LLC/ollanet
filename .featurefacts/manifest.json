@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-80a4cf91aabb",
+  "scan_id": "scan-026ac8aa71c1",
   "tool": "featurefacts",
   "tool_version": "0.2.6",
-  "generated_at": "2026-10-22T13:48:18.037-04:00",
+  "generated_at": "2026-10-23T10:41:09.104-04:00",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -238,8 +238,8 @@
       },
       {
         "path": "src/cli.ts",
-        "sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "bytes": 6319,
+        "sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "bytes": 7652,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -576,8 +576,8 @@
       },
       {
         "path": "test/cli.test.mjs",
-        "sha256": "56cff4990b6103bb7a840b90f5f924c0553c707d8f82630238556825d398b7bc",
-        "bytes": 22747,
+        "sha256": "0b5c4da0dbf250850f0ce95ac9da2ade5fed62409e78a4aa3ccf183fbb73645a",
+        "bytes": 23038,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-test"
@@ -1027,11 +1027,11 @@
   ],
   "rules_version": "featurefacts-core@0.2.0",
   "fingerprints": {
-    "source": "3b5a2510222bd2163bf04e597d7040a7bf7aea7740b6c2454c542842d991f439",
+    "source": "c1bc9b08015275a630f3286a5715e61c7bda7c371547e93058653fef3c5711f0",
     "config": "0778aff434cfcbd601f90006830e8eda97bd08acd9ccb215b657aadd1520a3ed",
     "adapters": "bfa59a2c62e4f45e5bade6f848e11727f03db8c185a16f19beaa6f857876c223",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "f9c46cb109149d2671e4317450f426a996f6a9d7919810c63f166be78f4272d4",
+    "registry": "f438aa1ee743f7b6cdb34d67e03282852ffb1d48fe7bc6a735ca2e7fc7fe92cd",
     "projection": "6110fde333675976f64481a0476d178a8059ea5976fcf07ad6cfd4c8331af005"
   },
   "artifacts": [
@@ -1041,31 +1041,31 @@
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "4de14fed218f1d4742cb135c6a732216a338b357cd73f0973e730437cf6cfa9b"
+      "sha256": "27ff335fd30010d34b4df498761b0169da5a6b7c6cf480fb69c7f097c3aeba55"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "b9146fed9cba628107654799a5eae7ae9e541381c6f1fa7c97770fd57e157545"
+      "sha256": "3446090b1be6fd9881f84f78672e5af7203c5ea071efdc3165f2a87f9eea131f"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "e50c5a2da9ba7c450fc0dd28730c07441fb0189b3ae456b067f02a535c0beef8"
+      "sha256": "ef00b16b663c954e8bf385f6214f321ee1db0485be7498e3192ec36684a34f87"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "3b26aafff3a3e1292628183407524699663d3ffafcf45aa9448c9a8e4b60cc5e"
+      "sha256": "2b94dcf14f1510aacb1198f4bbf809e35d5ac5728b6e4f5fbd08e1e3d11f54a2"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "e19b3f4e87cd089f121cb673ef41f9e4ae28ea54096c5e3da2765d9b51bcda04"
+      "sha256": "b619c283b7043863f78d993de0ea2f171930c27b11137a13f865f22c0ecdf2d4"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "e65b80e2779429113310bcda3913046862e248135bf556ec382e9d53b49146de"
+      "sha256": "934b2e96106e97e7c53bb7544c6ec073c0f2659e2ec9cb938c6c4150782c2373"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "e7ffef3eb84d3ba962942d90710840407d079079295cf145fe675ee80a823619"
+      "sha256": "ac1fd6146194e07e3d10cd928adda7794e3fee5497e26b35c3ef07771d798c57"
     },
     {
       "path": "FEATURE_FACTS.md",

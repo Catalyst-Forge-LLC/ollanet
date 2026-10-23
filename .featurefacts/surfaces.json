@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-80a4cf91aabb",
+  "scan_id": "scan-026ac8aa71c1",
   "surfaces": [
     {
       "id": "cmd-alias",
@@ -9,9 +9,9 @@
       "title": "alias",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 192,
-        "end_line": 192,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 222,
+        "end_line": 222,
         "symbol": "alias"
       },
       "provenance": {
@@ -29,9 +29,9 @@
       "title": "aliases",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 193,
-        "end_line": 193,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 223,
+        "end_line": 223,
         "symbol": "alias"
       },
       "provenance": {
@@ -49,9 +49,9 @@
       "title": "ask",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 132,
-        "end_line": 132,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 162,
+        "end_line": 162,
         "symbol": "prompt"
       },
       "provenance": {
@@ -69,9 +69,9 @@
       "title": "bench",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 176,
-        "end_line": 176,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 206,
+        "end_line": 206,
         "symbol": "bench"
       },
       "provenance": {
@@ -89,9 +89,9 @@
       "title": "benchmark",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 177,
-        "end_line": 177,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 207,
+        "end_line": 207,
         "symbol": "bench"
       },
       "provenance": {
@@ -109,9 +109,9 @@
       "title": "chat",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 133,
-        "end_line": 133,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 163,
+        "end_line": 163,
         "symbol": "prompt"
       },
       "provenance": {
@@ -129,9 +129,9 @@
       "title": "chats",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 138,
-        "end_line": 138,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 168,
+        "end_line": 168,
         "symbol": "chats"
       },
       "provenance": {
@@ -149,9 +149,9 @@
       "title": "compare",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 169,
-        "end_line": 169,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 199,
+        "end_line": 199,
         "symbol": "compare"
       },
       "provenance": {
@@ -169,9 +169,9 @@
       "title": "delete",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 158,
-        "end_line": 158,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 188,
+        "end_line": 188,
         "symbol": "rm"
       },
       "provenance": {
@@ -189,9 +189,9 @@
       "title": "download",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 146,
-        "end_line": 146,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 176,
+        "end_line": 176,
         "symbol": "pull"
       },
       "provenance": {
@@ -209,9 +209,9 @@
       "title": "h2h",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 171,
-        "end_line": 171,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 201,
+        "end_line": 201,
         "symbol": "compare"
       },
       "provenance": {
@@ -229,9 +229,9 @@
       "title": "help",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 77,
-        "end_line": 77,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 107,
+        "end_line": 107,
         "symbol": "help"
       },
       "provenance": {
@@ -249,9 +249,9 @@
       "title": "history",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 140,
-        "end_line": 140,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 170,
+        "end_line": 170,
         "symbol": "chats"
       },
       "provenance": {
@@ -269,9 +269,9 @@
       "title": "inspect",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 152,
-        "end_line": 152,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 182,
+        "end_line": 182,
         "symbol": "show"
       },
       "provenance": {
@@ -289,9 +289,9 @@
       "title": "loaded",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 164,
-        "end_line": 164,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 194,
+        "end_line": 194,
         "symbol": "ps"
       },
       "provenance": {
@@ -309,9 +309,9 @@
       "title": "ls",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 139,
-        "end_line": 139,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 169,
+        "end_line": 169,
         "symbol": "chats"
       },
       "provenance": {
@@ -329,9 +329,9 @@
       "title": "ls-servers",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 126,
-        "end_line": 126,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 156,
+        "end_line": 156,
         "symbol": "scan"
       },
       "provenance": {
@@ -349,9 +349,9 @@
       "title": "mcp",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 182,
-        "end_line": 182,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 212,
+        "end_line": 212,
         "symbol": "mcp"
       },
       "provenance": {
@@ -387,9 +387,9 @@
       "title": "prompt",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 131,
-        "end_line": 131,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 161,
+        "end_line": 161,
         "symbol": "prompt"
       },
       "provenance": {
@@ -407,9 +407,9 @@
       "title": "ps",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 163,
-        "end_line": 163,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 193,
+        "end_line": 193,
         "symbol": "ps"
       },
       "provenance": {
@@ -427,9 +427,9 @@
       "title": "pull",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 145,
-        "end_line": 145,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 175,
+        "end_line": 175,
         "symbol": "pull"
       },
       "provenance": {
@@ -447,9 +447,9 @@
       "title": "rm",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 157,
-        "end_line": 157,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 187,
+        "end_line": 187,
         "symbol": "rm"
       },
       "provenance": {
@@ -467,9 +467,9 @@
       "title": "scan",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 125,
-        "end_line": 125,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 155,
+        "end_line": 155,
         "symbol": "scan"
       },
       "provenance": {
@@ -487,9 +487,9 @@
       "title": "serve",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 187,
-        "end_line": 187,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 217,
+        "end_line": 217,
         "symbol": "serve"
       },
       "provenance": {
@@ -507,9 +507,9 @@
       "title": "show",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 151,
-        "end_line": 151,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 181,
+        "end_line": 181,
         "symbol": "show"
       },
       "provenance": {
@@ -527,9 +527,9 @@
       "title": "version",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 105,
-        "end_line": 105,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 135,
+        "end_line": 135,
         "symbol": "version"
       },
       "provenance": {
@@ -547,9 +547,9 @@
       "title": "vs",
       "locator": {
         "path": "src/cli.ts",
-        "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-        "start_line": 170,
-        "end_line": 170,
+        "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+        "start_line": 200,
+        "end_line": 200,
         "symbol": "compare"
       },
       "provenance": {
@@ -737,7 +737,7 @@
       "title": "test/cli.test.mjs",
       "locator": {
         "path": "test/cli.test.mjs",
-        "content_sha256": "56cff4990b6103bb7a840b90f5f924c0553c707d8f82630238556825d398b7bc"
+        "content_sha256": "0b5c4da0dbf250850f0ce95ac9da2ade5fed62409e78a4aa3ccf183fbb73645a"
       },
       "provenance": {
         "adapter_id": "typescript-test",

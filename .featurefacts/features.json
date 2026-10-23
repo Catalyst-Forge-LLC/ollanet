@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-80a4cf91aabb",
+  "scan_id": "scan-026ac8aa71c1",
   "product": {
     "name": "ollanet",
     "type": "typescript-node",
@@ -69,7 +69,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -84,9 +84,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 192,
-            "end_line": 192,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 222,
+            "end_line": 222,
             "symbol": "alias"
           },
           "provenance": {
@@ -216,7 +216,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -231,9 +231,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 176,
-            "end_line": 176,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 206,
+            "end_line": 206,
             "symbol": "bench"
           },
           "provenance": {
@@ -347,7 +347,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -362,9 +362,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 138,
-            "end_line": 138,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 168,
+            "end_line": 168,
             "symbol": "chats"
           },
           "provenance": {
@@ -484,7 +484,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -499,9 +499,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 169,
-            "end_line": 169,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 199,
+            "end_line": 199,
             "symbol": "compare"
           },
           "provenance": {
@@ -609,7 +609,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -624,9 +624,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 77,
-            "end_line": 77,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 107,
+            "end_line": 107,
             "symbol": "help"
           },
           "provenance": {
@@ -707,7 +707,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -722,9 +722,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 182,
-            "end_line": 182,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 212,
+            "end_line": 212,
             "symbol": "mcp"
           },
           "provenance": {
@@ -848,7 +848,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -863,9 +863,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 132,
-            "end_line": 132,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 162,
+            "end_line": 162,
             "symbol": "prompt"
           },
           "provenance": {
@@ -974,7 +974,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -989,9 +989,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 164,
-            "end_line": 164,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 194,
+            "end_line": 194,
             "symbol": "ps"
           },
           "provenance": {
@@ -1117,7 +1117,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1132,9 +1132,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 146,
-            "end_line": 146,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 176,
+            "end_line": 176,
             "symbol": "pull"
           },
           "provenance": {
@@ -1242,7 +1242,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1257,9 +1257,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 158,
-            "end_line": 158,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 188,
+            "end_line": 188,
             "symbol": "rm"
           },
           "provenance": {
@@ -1384,7 +1384,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1399,9 +1399,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 126,
-            "end_line": 126,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 156,
+            "end_line": 156,
             "symbol": "scan"
           },
           "provenance": {
@@ -1518,7 +1518,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1533,9 +1533,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 187,
-            "end_line": 187,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 217,
+            "end_line": 217,
             "symbol": "serve"
           },
           "provenance": {
@@ -1654,7 +1654,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1669,9 +1669,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 152,
-            "end_line": 152,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 182,
+            "end_line": 182,
             "symbol": "show"
           },
           "provenance": {
@@ -1783,7 +1783,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-80a4cf91aabb",
+        "last_seen_scan_id": "scan-026ac8aa71c1",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1798,9 +1798,9 @@
           },
           "locator": {
             "path": "src/cli.ts",
-            "content_sha256": "5097110c9c702f392819729f92ab9c56e3b07eb77f6866a754e350efe2815956",
-            "start_line": 105,
-            "end_line": 105,
+            "content_sha256": "6cd4d998074d7250f8edca0560309b359ffd3f381947d9158a8bfdba132d52b7",
+            "start_line": 135,
+            "end_line": 135,
             "symbol": "version"
           },
           "provenance": {

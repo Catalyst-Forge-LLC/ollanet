@@ -1,6 +1,6 @@
 # Feature register: ollanet
 
-Scan `scan-80a4cf91aabb`. Candidates are not confirmed capabilities.
+Scan `scan-026ac8aa71c1`. Candidates are not confirmed capabilities.
 
 | ID | Name | Recognition | Lifecycle | Availability | Docs | Tests | Observation |
 |---|---|---|---|---|---|---|---|
