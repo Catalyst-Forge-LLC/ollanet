@@ -594,6 +594,7 @@ describe("command help", () => {
     assert.match(res.stdout, /ollanet help \[command\]/);
     assert.match(res.stdout, /ollanet bench/);
     assert.match(res.stdout, /ollanet help <command>/);
+    assert.match(res.stdout, /MCP for agents \(ollanet mcp\)/);
     for (const group of ["Find hosts", "Prompt and chat", "Compare and bench", "Manage models", "Share a read-only catalog", "Agents and scripts"]) {
       assert.match(res.stdout, new RegExp(`^  ${group}`, "m"), group);
     }

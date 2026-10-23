@@ -16,6 +16,7 @@
  */
 
 const HELP = `ollanet: find, manage, and use Ollama on hosts you choose
+CLI for people, MCP for agents (ollanet mcp), Node library for apps (import from "ollanet").
 A reachable host is not a trusted host. pull and rm change the remote host.
 
 Usage:
