@@ -2,7 +2,7 @@ import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
 	title: 'ollanet',
-	description: "Ollama on a laptop, a studio box, and a spare PC? ollanet discovers your selected hosts, manages their models, and gives people, agents, and apps one way to prompt them.",
+	description: "Discover your Ollama hosts, give models short names, manage their installation, and prompt or compare them from one place. ollanet provides a CLI, an MCP server for agents, and a Node library for applications.",
 	tagline: 'The models on your machines, from one place.',
 	lede: "CLI, MCP server, and Node library for Ollama",
 	url: 'https://ollanet.dev',
